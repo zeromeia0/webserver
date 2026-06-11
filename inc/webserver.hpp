@@ -6,7 +6,7 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 05:12:41 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/11 05:31:54 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/11 05:41:50 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,22 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+typedef struct s_config
+{
+    int serverFd;
+    int clientFd;
+    sockaddr_in address;    
+}   t_config;
+
 class Server
 {
     public:
         Server();
         ~Server() {};
-        void start(int serverFd, sockaddr_in address, char **argv);
+        void start(t_config *conf, char **argv);
         
 };
+
+void initStuff(t_config *conf);
 
 #endif

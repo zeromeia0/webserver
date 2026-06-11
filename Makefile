@@ -6,7 +6,7 @@
 #    By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/04/01 01:25:21 by vvazzs            #+#    #+#              #
-#    Updated: 2026/06/11 05:18:49 by vvazzs           ###   ########.fr        #
+#    Updated: 2026/06/11 05:36:29 by vvazzs           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,7 +18,8 @@ NAME = webserver
 OBJ_DIR = obj
 
 SRC =	src/main.cpp \
-		src/Server.cpp
+		src/Server.cpp \
+		src/init.cpp
 
 OBJ = $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 
