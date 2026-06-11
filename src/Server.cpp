@@ -6,12 +6,11 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 05:16:03 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/11 05:41:57 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/11 06:49:29 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/webserver.hpp"
-
 
 void log(std::string category, std::string msg)
 {
@@ -23,7 +22,7 @@ void log(std::string category, std::string msg)
 
 Server::Server() {};
 
-void Server::start(t_config *conf, char **argv)
+void Server::start(t_serverInfo *conf, char **argv)
 {
     log("START", "Server starting...");
     log("CONFIG", argv[1]);
