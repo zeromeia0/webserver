@@ -6,24 +6,28 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 16:10:17 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/09 16:28:25 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/11 05:31:14 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
-#include <iomanip>
-#include <vector>
-#include <map>
-#include <list>
-#include <algorithm>
-#include <exception>
-#include <stack>
-#include <cstring>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
+#include "../inc/webserver.hpp"
 
-void log(std::string category, std::string msg)
+typedef struct s_config
+{
+    int serverFd;
+    sockaddr_in address;    
+}   t_config;
+
+void initStuff(t_config *conf)
+{
+    conf->serverFd = socket(AF_INET, SOCK_STREAM, 0);
+    std::memset(&conf->address, 0, sizeof(conf->address));
+    conf->address.sin_family = AF_INET;
+    conf->address.sin_port = htons(8089);
+    conf->address.sin_addr.s_addr = INADDR_ANY;
+}
+
+void log2(std::string category, std::string msg)
 {
     std::cout
         << "[" << category << "] "
@@ -39,33 +43,18 @@ int main(int argc, char **argv)
         std::cout << "Usage: ./webserv config.conf" << std::endl;
         return (1);
     }
+    t_config *conf = new t_config;
+    Server server;
+    initStuff(conf);
+    server.start(conf->serverFd, conf->address, argv);
     
-    log("START", "Server starting...");
-    log("CONFIG", argv[1]);
-    
-    log("SOCKET", "Creating socket...");
-    int serverFd = socket(AF_INET, SOCK_STREAM, 0);
-    std::cout << "[SOCKET] fd: " << serverFd << std::endl;
-    
-    sockaddr_in address;
-    std::memset(&address, 0, sizeof(address));
-    address.sin_family = AF_INET;
-    address.sin_port = htons(8089);
-    address.sin_addr.s_addr = INADDR_ANY;
-    
-    log("BIND", "Binding to port 8089...");
-    bind(serverFd, (sockaddr *)&address, sizeof(address));
-    
-    log ("LITEN", "Listening...");
-    listen(serverFd, 10); // maybe here is where we accept a ton of requests
-    
-    log ("ACCEPT", "Waiting for browser...");
-    int clientFd = accept(serverFd, NULL, NULL);
+    log2 ("ACCEPT", "Waiting for browser...");
+    int clientFd = accept(conf->serverFd, NULL, NULL);
     std::cout << "[ACCEPT] client fd: " << clientFd << std::endl;
     
     
     char buffer[4096];
-    log("RECEIVE", "Waiting for request...");
+    log2("RECEIVE", "Waiting for request...");
     int bytes = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
     buffer[bytes] = '\0';
     std::cout << "==== REQUEST ====\n" << buffer << "=================" << std::endl;
@@ -77,11 +66,12 @@ int main(int argc, char **argv)
         "<h1>Hello Webserv</h1>"
         "</body></html>";
 
-        log("SEND", "Sending response...");
-        send(clientFd, response, std::strlen(response), 0);
-        close(clientFd);
-        close(serverFd);
-        log("END", "Server finished...");
+    log2("SEND", "Sending response...");
+    send(clientFd, response, std::strlen(response), 0);
+    close(clientFd);
+    close(conf->serverFd);
+    delete (conf);
+    log2("END", "Server finished...");
         return (0);
     
 }
