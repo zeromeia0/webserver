@@ -6,7 +6,7 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 05:12:41 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/12 20:58:48 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/12 21:04:02 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,5 +82,20 @@ void            confAssignValue(Server::serverConfig *server, Server::routeConfi
 std::vector<std::string> tokenize(const std::string& file); //TRY TO POLYMORPHISM THIS SHIT
 
 // TRYING OUT NOW
+void validateSemantics(const std::vector<std::string> &tokens);
+void checkDirectiveArguments(const std::vector<std::string> &tokens);
+void checkListen(const Server::serverConfig *conf);
+void checkMethods(const Server::serverConfig *conf);
+void checkRoutes(const Server::serverConfig *conf);
+void checkCgi(const Server::serverConfig *conf);
+
+void validateSyntax(const std::vector<std::string> &tokens);
+void checkBraces(const std::vector<std::string> &tokens);
+void checkServerBlock(const std::vector<std::string> &tokens);
+void checkUnknownDirectives(const std::vector<std::string> &tokens);
+void checkDirectiveContext(const std::vector<std::string> &tokens);
+void checkDirectiveArguments(const std::vector<std::string> &tokens);
+void checkSemicolons(const std::vector<std::string> &tokens);
+void checkValues(const std::vector<std::string> &tokens);
 
 #endif

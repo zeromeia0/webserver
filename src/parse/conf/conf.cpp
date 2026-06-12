@@ -6,7 +6,7 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/12 20:45:19 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/12 20:53:04 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/12 21:07:17 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,22 @@ std::string validateFile(char **argv)
     return (fileContent);
 }
 
+// void checkBraces(const std::vector<std::string> &tokens)
+// {
+//     int braces = 0;
+
+//     for (size_t i = 0; i < tokens.size(); i++)
+//     {
+//         if (tokens[i] == "{")
+//             braces++;
+//         if (tokens[i] == "}")
+//             braces--;
+//         if (braces < 0)
+//             throw (std::runtime_error("Extra closing brace"));
+//     }
+//     if (braces != 0)
+//         throw (std::runtime_error("Missing closing brace"));
+// }
 void validateContent(char **argv)
 {
     (void)argv;
