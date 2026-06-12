@@ -6,7 +6,7 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 06:54:37 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/12 12:20:21 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/12 12:25:39 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ std::vector<std::string> tokenize(const std::string& file)
     for (size_t i = 0; i < file.size(); i++)
     {
         char c = file[i];
-
         if (std::isspace(c))
         {
             if (!current.empty())
@@ -50,19 +49,14 @@ std::vector<std::string> tokenize(const std::string& file)
                 tokens.push_back(current);
                 current.clear();
             }
-
             tokens.push_back(std::string(1, c));
         }
         else
-        {
             current += c;
-        }
     }
-
     if (!current.empty())
         tokens.push_back(current);
-
-    return tokens;
+    return (tokens);
 }
 
 void getInfo(t_serverConfig *conf, char **argv)
@@ -128,47 +122,9 @@ void assignValue(t_serverConfig &server, t_routeConfig *&currentRoute, const std
 void parse(t_serverConfig *conf, char **argv)
 {
     getInfo(conf, argv);
-
     t_routeConfig *currentRoute = NULL;
-
     for (size_t i = 0; i < conf->confFile.size(); i++)
         assignValue(*conf, currentRoute, conf->confFile, i);
-
-    std::cout << "========== PRINTING SERVER CONFIG VALUES ==========" << std::endl;
-    std::cout << "[Listen]: " << conf->listenPort << std::endl;
-    std::cout << "[Server name]: " << conf->serverName << std::endl;
-    std::cout << "[Host]: " << conf->host << std::endl;
-    std::cout << "[Client Max Body Size]: " << conf->clientMaxBodySize << std::endl;
-
-    std::cout << "[Error Pages]:" << std::endl;
-    for (std::map<int, std::string>::iterator it = conf->errorPages.begin(); it != conf->errorPages.end(); ++it)
-        std::cout << it->first << " -> " << it->second << std::endl;
-
-    std::cout << "[Locations Count]: " << conf->router.size() << std::endl;
-
-    for (size_t i = 0; i < conf->router.size(); i++)
-    {
-        std::cout << "\n[Location][" << i + 1 << "]: " << conf->router[i].path << std::endl;
-        std::cout << "[Root]: " << conf->router[i].root << std::endl;
-        std::cout << "[Index]: " << conf->router[i].index << std::endl;
-        std::cout << "[Autoindex]: " << conf->router[i].autoindex << std::endl;
-        std::cout << "[Upload Enabled]: " << conf->router[i].uploadEnabled << std::endl;
-        std::cout << "[Upload Store]: " << conf->router[i].uploadPath << std::endl;
-        std::cout << "[Redirect]: " << conf->router[i].redirect << std::endl;
-
-        std::cout << "[Methods]: ";
-        for (size_t j = 0; j < conf->router[i].methods.size(); j++)
-            std::cout << conf->router[i].methods[j] << " ";
-        std::cout << std::endl;
-
-        if (!conf->router[i].cgi.empty())
-        {
-            std::cout << "[CGI]:" << std::endl;
-            for (std::map<std::string, std::string>::iterator it = conf->router[i].cgi.begin(); it != conf->router[i].cgi.end(); ++it)
-                std::cout << it->first << " -> " << it->second << std::endl;
-        }
-    }
-
-    std::cout << "========== FINISHED PRINTING SERVER CONFIG VALUES ==========" << std::endl;
+    debbuger(conf);
 }
 

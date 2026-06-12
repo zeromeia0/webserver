@@ -6,7 +6,7 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 05:12:41 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/12 12:13:25 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/12 12:24:35 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,5 +77,6 @@ void assignValue(t_serverConfig &server, const std::vector<std::string> &tokens,
 void getInfo(t_serverConfig *conf, char **argv);
 void parse(t_serverConfig *conf, char **argv);
 void initRouter(t_routeConfig *conf);
+void debbuger(t_serverConfig *conf);
 
 #endif
