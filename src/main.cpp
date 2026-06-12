@@ -6,7 +6,7 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 16:10:17 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/12 12:13:30 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/12 14:41:39 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,11 +21,12 @@ int main(int argc, char **argv)
         return (1);
     }
     try{
-        t_serverInfo *info = new t_serverInfo;
-        t_serverConfig *conf = new t_serverConfig;
-        t_routeConfig *router = new t_routeConfig;
+        
         Server server;
-        // getInfo(conf, argv);
+        Server::serverInfo *info = new Server::serverInfo;
+        Server::serverConfig *conf = new Server::serverConfig;        
+        Server::routeConfig *router = new Server::routeConfig;       
+        
         initServer(info);
         initRouter(router);
         parse(conf, argv);

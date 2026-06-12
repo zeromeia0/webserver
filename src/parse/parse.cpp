@@ -6,7 +6,7 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 06:54:37 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/12 12:25:39 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/12 14:40:42 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ std::vector<std::string> tokenize(const std::string& file)
     return (tokens);
 }
 
-void getInfo(t_serverConfig *conf, char **argv)
+void getInfo(Server::serverConfig *conf, char **argv)
 {
     std::string file = validateFile(argv);
     // std::cout << "==== PRINTING CONF FILE ====\n";
@@ -72,24 +72,24 @@ void getInfo(t_serverConfig *conf, char **argv)
     // std::cout << "========================\n";
 }
 
-void assignValue(t_serverConfig &server, t_routeConfig *&currentRoute, const std::vector<std::string> &tokens, size_t i)
+void assignValue(Server::serverConfig *server, Server::routeConfig *&currentRoute, const std::vector<std::string> &tokens, size_t i)
 {
     if (tokens[i] == "listen")
-        server.listenPort = atoi(tokens[i + 1].c_str());
+        server->listenPort = atoi(tokens[i + 1].c_str());
     else if (tokens[i] == "host")
-        server.host = tokens[i + 1];
+        server->host = tokens[i + 1];
     else if (tokens[i] == "server_name")
-        server.serverName = tokens[i + 1];
+        server->serverName = tokens[i + 1];
     else if (tokens[i] == "client_max_body_size")
-        server.clientMaxBodySize = atoi(tokens[i + 1].c_str());
+        server->clientMaxBodySize = atoi(tokens[i + 1].c_str());
     else if (tokens[i] == "error_page")
-        server.errorPages[atoi(tokens[i + 1].c_str())] = tokens[i + 2];
+        server->errorPages[atoi(tokens[i + 1].c_str())] = tokens[i + 2];
     else if (tokens[i] == "location")
     {
-        t_routeConfig route;
+        Server::routeConfig route;
         route.path = tokens[i + 1];
-        server.router.push_back(route);
-        currentRoute = &server.router.back();
+        server->router.push_back(route);
+        currentRoute = &server->router.back();
     }
     else if (currentRoute)
     {
@@ -119,12 +119,11 @@ void assignValue(t_serverConfig &server, t_routeConfig *&currentRoute, const std
     }
 }
 
-void parse(t_serverConfig *conf, char **argv)
+void parse(Server::serverConfig *conf, char **argv)
 {
     getInfo(conf, argv);
-    t_routeConfig *currentRoute = NULL;
+    Server::routeConfig *currentRoute = NULL;
     for (size_t i = 0; i < conf->confFile.size(); i++)
-        assignValue(*conf, currentRoute, conf->confFile, i);
+        assignValue(conf, currentRoute, conf->confFile, i);
     debbuger(conf);
 }
-

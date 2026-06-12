@@ -6,7 +6,7 @@
 #    By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/04/01 01:25:21 by vvazzs            #+#    #+#              #
-#    Updated: 2026/06/11 06:55:02 by vvazzs           ###   ########.fr        #
+#    Updated: 2026/06/12 14:42:21 by vvazzs           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,7 +20,8 @@ OBJ_DIR = obj
 SRC =	src/main.cpp \
 		src/Server.cpp \
 		src/init.cpp \
-		src/parse/parse.cpp
+		src/parse/parse.cpp \
+		src/parse/debugger.cpp
 
 OBJ = $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 

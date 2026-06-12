@@ -6,13 +6,13 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/12 12:24:17 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/12 12:24:51 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/12 14:40:48 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/webserver.hpp"
 
-void debbuger(t_serverConfig *conf)
+void debbuger(Server::serverConfig *conf)
 {
 std::cout << "========== PRINTING SERVER CONFIG VALUES ==========" << std::endl;
     std::cout << "[Listen]: " << conf->listenPort << std::endl;
@@ -48,6 +48,5 @@ std::cout << "========== PRINTING SERVER CONFIG VALUES ==========" << std::endl;
                 std::cout << it->first << " -> " << it->second << std::endl;
         }
     }
-
     std::cout << "========== FINISHED PRINTING SERVER CONFIG VALUES ==========" << std::endl;
 }

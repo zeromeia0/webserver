@@ -6,7 +6,7 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 05:16:03 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/12 12:11:06 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/12 14:42:01 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void log(std::string category, std::string msg)
 
 Server::Server() {};
 
-void Server::start(t_serverInfo *conf, char **argv)
+void Server::start(serverInfo *conf, char **argv)
 {
     log("START", "Server starting...");
     log("CONFIG", argv[1]);
