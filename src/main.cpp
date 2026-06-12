@@ -6,7 +6,7 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 16:10:17 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/11 07:02:21 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/12 12:13:30 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,10 +23,12 @@ int main(int argc, char **argv)
     try{
         t_serverInfo *info = new t_serverInfo;
         t_serverConfig *conf = new t_serverConfig;
+        t_routeConfig *router = new t_routeConfig;
         Server server;
         // getInfo(conf, argv);
+        initServer(info);
+        initRouter(router);
         parse(conf, argv);
-        initStuff(info);
         server.start(info, argv);
         
         log("RECEIVE", "Waiting for request...");

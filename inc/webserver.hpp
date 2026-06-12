@@ -6,7 +6,7 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 05:12:41 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/11 07:02:04 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/12 12:13:25 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,11 @@ typedef struct s_serverInfo
 
 typedef struct s_routeConfig
 {
+	s_routeConfig():
+		autoindex(false),
+		uploadEnabled(false)
+		{
+		}
 	std::string                         path;
 	std::string                         root;
 	std::string                         index;
@@ -55,7 +60,6 @@ typedef struct s_serverConfig
 	size_t		clientMaxBodySize;
 	std::map<int, std::string> errorPages;
 	std::vector<t_routeConfig> router;
-
 	std::vector<std::string> confFile;
 }				t_serverConfig;
 
@@ -67,10 +71,11 @@ class Server
 	void start(t_serverInfo *conf, char **argv);
 };
 
-void			initStuff(t_serverInfo *conf);
+void			initServer(t_serverInfo *conf);
 void			log(std::string category, std::string msg);
 void assignValue(t_serverConfig &server, const std::vector<std::string> &tokens, size_t i);
 void getInfo(t_serverConfig *conf, char **argv);
 void parse(t_serverConfig *conf, char **argv);
+void initRouter(t_routeConfig *conf);
 
 #endif
