@@ -6,7 +6,7 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 05:34:18 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/12 14:40:26 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/12 20:50:38 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,4 +35,10 @@ void initRouter(Server::routeConfig *conf)
     conf->root.clear();
     conf->uploadEnabled = false;
     conf->uploadPath.clear();
+}
+
+void initStuff(Server::serverInfo *conf, Server::routeConfig *route)
+{
+    initServer(conf);
+    initRouter(route);
 }

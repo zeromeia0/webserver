@@ -6,7 +6,7 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 05:12:41 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/12 15:37:06 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/12 20:58:48 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,11 +70,17 @@ public:
 
 void			initServer(Server::serverInfo *conf);
 void			log(std::string category, std::string msg);
-void 			confAssignValue(Server::serverConfig &server, const std::vector<std::string> &tokens, size_t i);
-void 			getInfo(Server::serverConfig *conf, char **argv);
 void 			parse(Server::serverConfig *conf, char **argv);
 void 			initRouter(Server::routeConfig *conf);
+void initStuff(Server::serverInfo *conf, Server::routeConfig *route);
+
+// PARSING .CONF SHIT
+std::string validateFile(char **argv);
+void 			getInfo(Server::serverConfig *conf, char **argv);
 void 			confDebbuger(Server::serverConfig *conf);
-// void httpRequestDebbuger(httpRequest::request *req, Server::serverInfo *info);
+void            confAssignValue(Server::serverConfig *server, Server::routeConfig *&currentRoute, const std::vector<std::string> &tokens, size_t i);
+std::vector<std::string> tokenize(const std::string& file); //TRY TO POLYMORPHISM THIS SHIT
+
+// TRYING OUT NOW
 
 #endif
