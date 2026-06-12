@@ -6,7 +6,7 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 06:54:37 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/12 14:40:42 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/12 15:18:13 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ void getInfo(Server::serverConfig *conf, char **argv)
     // std::cout << "========================\n";
 }
 
-void assignValue(Server::serverConfig *server, Server::routeConfig *&currentRoute, const std::vector<std::string> &tokens, size_t i)
+void confAssignValue(Server::serverConfig *server, Server::routeConfig *&currentRoute, const std::vector<std::string> &tokens, size_t i)
 {
     if (tokens[i] == "listen")
         server->listenPort = atoi(tokens[i + 1].c_str());
@@ -124,6 +124,6 @@ void parse(Server::serverConfig *conf, char **argv)
     getInfo(conf, argv);
     Server::routeConfig *currentRoute = NULL;
     for (size_t i = 0; i < conf->confFile.size(); i++)
-        assignValue(conf, currentRoute, conf->confFile, i);
-    debbuger(conf);
+        confAssignValue(conf, currentRoute, conf->confFile, i);
+    confDebbuger(conf);
 }

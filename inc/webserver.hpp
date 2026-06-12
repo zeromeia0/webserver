@@ -6,7 +6,7 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 05:12:41 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/12 14:39:12 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/12 15:37:06 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@
 # include <sys/socket.h>
 # include <unistd.h>
 # include <vector>
+#include "httpRequest.hpp"
 
 class Server
 {
@@ -40,7 +41,6 @@ public:
     struct routeConfig
     {
         routeConfig() : autoindex(false), uploadEnabled(false) {}
-
         std::string path;
         std::string root;
         std::string index;
@@ -70,10 +70,11 @@ public:
 
 void			initServer(Server::serverInfo *conf);
 void			log(std::string category, std::string msg);
-void assignValue(Server::serverConfig &server, const std::vector<std::string> &tokens, size_t i);
-void getInfo(Server::serverConfig *conf, char **argv);
-void parse(Server::serverConfig *conf, char **argv);
-void initRouter(Server::routeConfig *conf);
-void debbuger(Server::serverConfig *conf);
+void 			confAssignValue(Server::serverConfig &server, const std::vector<std::string> &tokens, size_t i);
+void 			getInfo(Server::serverConfig *conf, char **argv);
+void 			parse(Server::serverConfig *conf, char **argv);
+void 			initRouter(Server::routeConfig *conf);
+void 			confDebbuger(Server::serverConfig *conf);
+// void httpRequestDebbuger(httpRequest::request *req, Server::serverInfo *info);
 
 #endif

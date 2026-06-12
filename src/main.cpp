@@ -6,7 +6,7 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 16:10:17 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/12 14:41:39 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/12 15:39:35 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,17 +26,20 @@ int main(int argc, char **argv)
         Server::serverInfo *info = new Server::serverInfo;
         Server::serverConfig *conf = new Server::serverConfig;        
         Server::routeConfig *router = new Server::routeConfig;       
+        httpRequest req;
+        httpRequest::request *htreq = new httpRequest::request;
         
         initServer(info);
         initRouter(router);
         parse(conf, argv);
         server.start(info, argv);
-        
-        log("RECEIVE", "Waiting for request...");
-        char buffer[4096];
-        int bytes = recv(info->clientFd, buffer, sizeof(buffer) - 1, 0);
-        buffer[bytes] = '\0';
-        std::cout << "==== REQUEST ====\n" << buffer << "=================" << std::endl;
+        req.httpRequestDebbuger(htreq, info->clientFd);
+        // log("RECEIVE", "Waiting for request...");
+        // char buffer[4096];
+        // int bytes = recv(info->clientFd, buffer, sizeof(buffer) - 1, 0);
+        // buffer[bytes] = '\0';
+        // std::cout << "==== REQUEST ====\n" << buffer << "=================" << std::endl;
+
         
         const char *response = "HTTP/1.1 200 OK\r\n"
             "Content-Type: text/html\r\n"

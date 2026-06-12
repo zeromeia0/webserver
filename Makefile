@@ -6,7 +6,7 @@
 #    By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/04/01 01:25:21 by vvazzs            #+#    #+#              #
-#    Updated: 2026/06/12 14:42:21 by vvazzs           ###   ########.fr        #
+#    Updated: 2026/06/12 15:35:43 by vvazzs           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,14 +14,15 @@ CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -g -std=c++98
 
 NAME = webserver
-
+PARSE_DIR = ./src/parse
 OBJ_DIR = obj
 
 SRC =	src/main.cpp \
 		src/Server.cpp \
 		src/init.cpp \
-		src/parse/parse.cpp \
-		src/parse/debugger.cpp
+		$(PARSE_DIR)/parse.cpp \
+		$(PARSE_DIR)/debugger.cpp \
+		$(PARSE_DIR)/http_request.cpp
 
 OBJ = $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 

@@ -6,7 +6,7 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 05:16:03 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/12 14:42:01 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/12 15:07:49 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ void Server::start(serverInfo *conf, char **argv)
     log("BIND", "Binding to port 8089...");
     bind(conf->serverFd, (sockaddr *)&conf->address, sizeof(conf->address));
     
-    log ("LITEN", "Listening...");
+    log ("LISTEN", "Listening...");
     listen(conf->serverFd, 10); // maybe here is where we accept a ton of requests
 
     log ("ACCEPT", "Waiting for browser...");
