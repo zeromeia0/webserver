@@ -6,7 +6,7 @@
 #    By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/04/01 01:25:21 by vvazzs            #+#    #+#              #
-#    Updated: 2026/06/12 21:06:47 by vvazzs           ###   ########.fr        #
+#    Updated: 2026/06/17 08:22:05 by vvazzs           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,8 @@ SRC =	src/main.cpp \
 		$(PARSE_DIR)/debugger.cpp \
 		$(PARSE_DIR)/http_request.cpp \
 		$(PARSE_DIR)/conf/conf.cpp \
-		$(PARSE_DIR)/conf/conf_validation.cpp
+		$(PARSE_DIR)/conf/conf_validation.cpp \
+		$(PARSE_DIR)/conf/helpers.cpp
 
 
 OBJ = $(SRC:%.cpp=$(OBJ_DIR)/%.o)

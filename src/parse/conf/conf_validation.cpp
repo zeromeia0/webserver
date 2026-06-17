@@ -6,66 +6,11 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/12 21:00:00 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/12 21:04:29 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/17 08:21:18 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../inc/webserver.hpp"
-
-static bool isDirective(const std::string &token)
-{
-    return (token == "server" || token == "listen" || token == "host" || token == "server_name" ||
-            token == "client_max_body_size" || token == "error_page" || token == "location" ||
-            token == "root" || token == "index" || token == "autoindex" || token == "allowed_methods" ||
-            token == "upload_enabled" || token == "upload_store" || token == "redirect" || token == "cgi");
-}
-
-static bool isSymbol(const std::string &token)
-{
-    return (token == "{" || token == "}" || token == ";");
-}
-
-static bool isNumber(const std::string &token)
-{
-    if (token.empty())
-        return (false);
-    for (size_t i = 0; i < token.size(); i++)
-    {
-        if (!std::isdigit(static_cast<unsigned char>(token[i])))
-            return (false);
-    }
-    return (true);
-}
-
-static bool isMethod(const std::string &token)
-{
-    return (token == "GET" || token == "POST" || token == "DELETE");
-}
-
-static size_t findSemicolon(const std::vector<std::string> &tokens, size_t start)
-{
-    size_t i = start;
-    while (i < tokens.size() && tokens[i] != ";" && tokens[i] != "{" && tokens[i] != "}")
-        i++;
-    if (i >= tokens.size() || tokens[i] != ";")
-        throw std::runtime_error("Missing semicolon after directive: " + tokens[start]);
-    return (i);
-}
-
-static size_t countArgsUntilSemicolon(const std::vector<std::string> &tokens, size_t start)
-{
-    size_t end = findSemicolon(tokens, start);
-    if (end <= start)
-        return (0);
-    return (end - start - 1);
-}
-
-static void expectArgs(const std::vector<std::string> &tokens, size_t i, size_t expected)
-{
-    size_t count = countArgsUntilSemicolon(tokens, i);
-    if (count != expected)
-        throw std::runtime_error("Invalid number of arguments in directive: " + tokens[i]);
-}
 
 void checkBraces(const std::vector<std::string> &tokens)
 {
@@ -77,10 +22,10 @@ void checkBraces(const std::vector<std::string> &tokens)
         else if (tokens[i] == "}")
             depth--;
         if (depth < 0)
-            throw std::runtime_error("Extra closing brace");
+            throw (std::runtime_error("Extra closing brace"));
     }
     if (depth != 0)
-        throw std::runtime_error("Missing closing brace");
+        throw (std::runtime_error("Missing closing brace"));
 }
 
 void checkServerBlock(const std::vector<std::string> &tokens)
@@ -92,24 +37,108 @@ void checkServerBlock(const std::vector<std::string> &tokens)
         {
             foundServer = true;
             if (i + 1 >= tokens.size() || tokens[i + 1] != "{")
-                throw std::runtime_error("server block must be followed by '{'");
+                throw (std::runtime_error("server block must be followed by '{'"));
         }
     }
     if (!foundServer)
-        throw std::runtime_error("Missing server block");
+        throw (std::runtime_error("Missing server block"));
 }
 
-void checkUnknownDirectives(const std::vector<std::string> &tokens)
+void checkUnknownDirectives(const std::vector<std::string>& tokens)
 {
-    for (size_t i = 0; i < tokens.size(); i++)
+    for (size_t i = 0; i < tokens.size(); )
     {
-        if (isSymbol(tokens[i]) || isDirective(tokens[i]))
+        if (tokens[i] == "{" || tokens[i] == "}" || tokens[i] == ";")
+        {
+            ++i;
             continue;
-        if (i > 0 && isDirective(tokens[i - 1]))
+        }
+        if (tokens[i] == "server")
+        {
+            i += 2;
             continue;
-        if (i > 1 && isDirective(tokens[i - 2]))
+        }
+        if (tokens[i] == "location")
+        {
+            i += 3;
             continue;
-        throw std::runtime_error("Unknown directive or trash token: " + tokens[i]);
+        }
+        if (!isDirective(tokens[i]))
+            throw (std::runtime_error("Unknown directive: " + tokens[i]));
+        ++i;
+        while (i < tokens.size() && tokens[i] != ";")
+            ++i;
+        if (i < tokens.size())
+            ++i;
+    }
+}
+
+void checkDuplicates(const std::vector<std::string>& tokens)
+{
+    std::set<std::string> serverDirectives;
+    std::set<std::string> locationDirectives;
+    std::set<std::string> locationPaths;
+    bool inServer = false;
+    bool inLocation = false;
+    int depth = 0;
+
+    for (size_t i = 0; i < tokens.size(); ++i)
+    {
+        if (tokens[i] == "server")
+        {
+            serverDirectives.clear();
+            locationPaths.clear();
+            inServer = true;
+        }
+        else if (tokens[i] == "{")
+            ++depth;
+        else if (tokens[i] == "}")
+        {
+            if (inLocation && depth == 2)
+            {
+                inLocation = false;
+                locationDirectives.clear();
+            }
+            --depth;
+            if (depth == 0)
+                inServer = false;
+        }
+        else if (tokens[i] == "location")
+        {
+            std::string path = tokens[i + 1];
+            if (locationPaths.count(path))
+                throw (std::runtime_error("Duplicate location: " + path));
+            locationPaths.insert(path);
+            locationDirectives.clear();
+            inLocation = true;
+        }
+        else if (inServer && !inLocation)
+        {
+            if (tokens[i] == "listen" ||
+                tokens[i] == "host" ||
+                tokens[i] == "server_name" ||
+                tokens[i] == "client_max_body_size")
+            {
+                if (serverDirectives.count(tokens[i]))
+                    throw (std::runtime_error("Duplicate directive: " + tokens[i]));
+                serverDirectives.insert(tokens[i]);
+            }
+        }
+        else if (inLocation)
+        {
+            if (tokens[i] == "root" ||
+                tokens[i] == "index" ||
+                tokens[i] == "autoindex" ||
+                tokens[i] == "allowed_methods" ||
+                tokens[i] == "upload_enabled" ||
+                tokens[i] == "upload_store" ||
+                tokens[i] == "redirect")
+            {
+                if (locationDirectives.count(tokens[i]))
+                    throw (std::runtime_error("Duplicate directive in location: " + tokens[i]));
+                locationDirectives.insert(tokens[i]);
+            }
+        }
     }
 }
 
@@ -191,7 +220,6 @@ void checkSemicolons(const std::vector<std::string> &tokens)
 void checkValues(const std::vector<std::string> &tokens)
 {
     bool hasListen = false;
-
     for (size_t i = 0; i < tokens.size(); i++)
     {
         if (tokens[i] == "listen")
@@ -251,7 +279,6 @@ void checkValues(const std::vector<std::string> &tokens)
                 throw std::runtime_error("CGI extension must start with '.'");
         }
     }
-
     if (!hasListen)
         throw std::runtime_error("Missing listen directive");
 }
@@ -261,7 +288,9 @@ void validateSyntax(const std::vector<std::string> &tokens)
     if (tokens.empty())
         throw std::runtime_error("Empty configuration file");
     checkBraces(tokens);
+    checkUnknownDirectives(tokens);
     checkServerBlock(tokens);
+    checkDuplicates(tokens);
     checkSemicolons(tokens);
     checkDirectiveContext(tokens);
     checkDirectiveArguments(tokens);

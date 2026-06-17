@@ -1,4 +1,4 @@
-/* ************************************************************************** */
+ /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   webserver.hpp                                      :+:      :+:    :+:   */
@@ -26,6 +26,7 @@
 # include <sys/socket.h>
 # include <unistd.h>
 # include <vector>
+# include <set>
 #include "httpRequest.hpp"
 
 class Server
@@ -97,5 +98,23 @@ void checkDirectiveContext(const std::vector<std::string> &tokens);
 void checkDirectiveArguments(const std::vector<std::string> &tokens);
 void checkSemicolons(const std::vector<std::string> &tokens);
 void checkValues(const std::vector<std::string> &tokens);
+
+bool isDirective(const std::string &token);
+bool isNumber(const std::string &token);
+bool isMethod(const std::string &token);
+
+size_t findSemicolon(const std::vector<std::string> &tokens, size_t start);
+size_t countArgsUntilSemicolon(const std::vector<std::string> &tokens, size_t start);
+void expectArgs(const std::vector<std::string> &tokens, size_t i, size_t expected);
+void checkBraces(const std::vector<std::string> &tokens);
+void checkServerBlock(const std::vector<std::string> &tokens);
+void checkDirectiveContext(const std::vector<std::string> &tokens);
+void checkDirectiveArguments(const std::vector<std::string> &tokens);
+void checkSemicolons(const std::vector<std::string> &tokens);
+void checkValues(const std::vector<std::string> &tokens);
+void validateSyntax(const std::vector<std::string> &tokens);
+void checkDuplicates(const std::vector<std::string>& tokens);
+
+
 
 #endif
