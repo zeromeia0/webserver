@@ -6,7 +6,7 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 16:10:17 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/12 20:51:03 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/17 08:40:22 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ int main(int argc, char **argv)
         httpRequest req;
         httpRequest::request *htreq = new httpRequest::request;
         
-        initStuff(info, router);
+        initStuff(info, router, htreq);
         parse(conf, argv);
         server.start(info, argv);
         req.httpRequestDebbuger(htreq, info->clientFd);

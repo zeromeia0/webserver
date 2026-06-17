@@ -27,6 +27,7 @@
 # include <unistd.h>
 # include <vector>
 # include <set>
+#include <sstream>
 #include "httpRequest.hpp"
 
 class Server
@@ -73,7 +74,7 @@ void			initServer(Server::serverInfo *conf);
 void			log(std::string category, std::string msg);
 void 			parse(Server::serverConfig *conf, char **argv);
 void 			initRouter(Server::routeConfig *conf);
-void initStuff(Server::serverInfo *conf, Server::routeConfig *route);
+void initStuff(Server::serverInfo *conf, Server::routeConfig *route, httpRequest::request *req);
 
 // PARSING .CONF SHIT
 std::string validateFile(char **argv);
