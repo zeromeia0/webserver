@@ -6,7 +6,7 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 16:10:17 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/17 08:40:22 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/18 08:26:54 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ int main(int argc, char **argv)
         initStuff(info, router, htreq);
         parse(conf, argv);
         server.start(info, argv);
-        req.httpRequestDebbuger(htreq, info->clientFd);
+        req.parse(htreq, conf, info->clientFd);
 
         
         const char *response = "HTTP/1.1 200 OK\r\n"

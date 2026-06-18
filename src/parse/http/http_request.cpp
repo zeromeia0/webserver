@@ -6,7 +6,7 @@
 /*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/12 15:16:53 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/17 08:44:04 by vvazzs           ###   ########.fr       */
+/*   Updated: 2026/06/18 08:40:07 by vvazzs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,4 +76,48 @@ void httpRequest::httpRequestDebbuger(httpRequest::request *req, int clientFd)
         std::cout << req->body << std::endl;
     }
     std::cout << "==========================\n";
+}
+
+void checkHost(httpRequest::request *req, std::string *hostname, int port)
+{
+    std::map<std::string, std::string>::iterator it = req->headers.find("Host");
+    if (it == req->headers.end())
+        throw (std::runtime_error("400 Bad Request"));
+    std::string host = it->second, hostname;
+    size_t pos = host.find(':');
+    std::map<std::string, std::string>::iterator it = req->headers.find("Host");
+    if (it == req->headers.end())
+        throw (std::runtime_error("400 Bad Request"));
+    std::string host = it->second, hostname;
+    int port;
+    size_t pos = host.find(':');
+    if (pos == std::string::npos)
+    {
+        *hostname = host;
+        port = 80;
+    }
+    else
+    {
+        *hostname = host.substr(0, pos);
+        port = atoi(host.substr(pos + 1).c_str());
+    }
+}
+
+void httpRequest::parse(httpRequest::request *req, Server::serverConfig *conf, int clientFd)
+{
+    httpRequestDebbuger(req, clientFd);
+    std::string hostname;
+    int port;
+
+    if (req->method != "GET" && req->method != "POST" && req->method != "DELETE")
+        throw (std::runtime_error("501 Not Implemented"));
+    if (req->version != "HTTP/1.1")
+        throw (std::runtime_error("505 HTTP Version Not Supported"));
+    checkHost(req, &hostname, port);
+    if (hostname != conf->host)
+        throw (std::runtime_error("Host does not match configuration"));
+    if (port != conf->listenPort)
+        throw (std::runtime_error("Port does not match configuration"));
+    if (!req->body.empty() && req->body.size() > conf->clientMaxBodySize)
+        throw (std::runtime_error("413 Payload Too Large"));
 }
