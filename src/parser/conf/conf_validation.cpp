@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../../inc/webserver.hpp"
+#include "../../main.hpp"
 
 void checkBraces(const std::vector<std::string> &tokens)
 {
@@ -114,8 +114,7 @@ void checkDuplicates(const std::vector<std::string>& tokens)
         }
         else if (inServer && !inLocation)
         {
-            if (tokens[i] == "listen" ||
-                tokens[i] == "host" ||
+            if (tokens[i] == "host" ||
                 tokens[i] == "server_name" ||
                 tokens[i] == "client_max_body_size")
             {

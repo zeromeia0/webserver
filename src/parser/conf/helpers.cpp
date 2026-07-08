@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../../inc/webserver.hpp"
+#include "../../main.hpp"
 
 bool isDirective(const std::string &token)
 {

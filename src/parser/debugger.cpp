@@ -10,12 +10,13 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../inc/webserver.hpp"
+#include "../main.hpp"
 
 void confDebbuger(Server::serverConfig *conf)
 {
 std::cout << "========== PRINTING SERVER CONFIG VALUES ==========" << std::endl;
-    std::cout << "[Listen]: " << conf->listenPort << std::endl;
+    for (size_t i = 0; i < conf->listenPorts.size(); i++)
+        std::cout << "[Listen]: " << conf->listenPorts[i] << std::endl;
     std::cout << "[Server name]: " << conf->serverName << std::endl;
     std::cout << "[Host]: " << conf->host << std::endl;
     std::cout << "[Client Max Body Size]: " << conf->clientMaxBodySize << std::endl;

@@ -10,11 +10,11 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../../inc/webserver.hpp"
+#include "../../main.hpp"
 
-std::string validateFile(char **argv)
+std::string validateFile(char *fileName)
 {
-    int fd = open(argv[1], O_RDONLY);
+    int fd = open(fileName, O_RDONLY);
     if (fd < 0)
         throw (std::runtime_error("Can't open file"));
     char buffer[2048];
@@ -59,12 +59,11 @@ std::vector<std::string> tokenize(const std::string& file)
     return (tokens);
 }
 
-void getInfo(Server::serverConfig *conf, char **argv)
+void getInfo(Server::serverConfig *conf)
 {
     // std::cout << "==== PRINTING CONF FILE ====\n";
     // std::cout << file << std::endl;
     // std::cout << "============================\n";
-    (void)argv;
     std::cout << "==== TOKENIZED FILE ====\n";
     for (size_t i = 0; i < conf->confFile.size(); i++)
         std::cout << "[" << conf->confFile[i] << "]" << std::endl;
@@ -74,7 +73,7 @@ void getInfo(Server::serverConfig *conf, char **argv)
 void confAssignValue(Server::serverConfig *server, Server::routeConfig *&currentRoute, const std::vector<std::string> &tokens, size_t i)
 {
     if (tokens[i] == "listen")
-        server->listenPort = atoi(tokens[i + 1].c_str());
+        server->listenPorts.push_back(atoi(tokens[i + 1].c_str()));
     else if (tokens[i] == "host")
         server->host = tokens[i + 1];
     else if (tokens[i] == "server_name")

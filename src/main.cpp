@@ -1,58 +1,25 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/09 16:10:17 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/12 20:51:03 by vvazzs           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+#include "main.hpp"
 
-#include "../inc/webserver.hpp"
+MODE mode = DEV;
+// MODE mode = PROD;
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
+
+    // CHECK INPUTS
     if (argc != 2)
     {
         std::cerr << "Error: Invalid Argument" << std::endl;
         std::cout << "Usage: ./webserv config.info" << std::endl;
         return (1);
     }
-    try{
-        
-        Server server;
-        Server::serverInfo *info = new Server::serverInfo;
-        Server::serverConfig *conf = new Server::serverConfig;        
-        Server::routeConfig *router = new Server::routeConfig;       
-        httpRequest req;
-        httpRequest::request *htreq = new httpRequest::request;
-        
-        initStuff(info, router);
-        parse(conf, argv);
-        server.start(info, argv);
-        req.httpRequestDebbuger(htreq, info->clientFd);
 
-        
-        const char *response = "HTTP/1.1 200 OK\r\n"
-            "Content-Type: text/html\r\n"
-            "\r\n"
-            "<html><body>"
-            "<h1>Hello Webserv</h1>"
-            "</body></html>";
-        
-        log("SEND", "Sending response...");
-        send(info->clientFd, response, std::strlen(response), 0);
-        close(info->clientFd);
-        close(info->serverFd);
-        delete (info);
-        log("END", "Server finished...");
-    }
-    catch (std::exception& e)
-    {
+    // START SERVER
+    try {
+        Server S(argv[1]);
+        S.start();
+    } catch (std::exception &e) {
         std::cout << e.what() << std::endl;
     }
-        return (0);
-    
+
+    return (0);
 }

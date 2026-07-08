@@ -10,14 +10,16 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../inc/webserver.hpp"
+#include "../main.hpp"
 
-void parse(Server::serverConfig *conf, char **argv)
+void parse(Server::serverConfig *conf, char *fileName)
 {
-    std::string file = validateFile(argv);
+    std::string file = validateFile(fileName);
     conf->confFile = tokenize(file);
+    for (size_t i = 0; i < conf->confFile.size(); i++)
+        LOG("DEBUG", conf->confFile[i]);
     validateSyntax(conf->confFile);
-    getInfo(conf, argv);
+    getInfo(conf);
     Server::routeConfig *currentRoute = NULL;
     for (size_t i = 0; i < conf->confFile.size(); i++)
         confAssignValue(conf, currentRoute, conf->confFile, i);

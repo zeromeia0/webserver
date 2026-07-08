@@ -28,42 +28,42 @@ NO LISTEN DIRECTIVE
 NO LOCATION BLOCK
 ROUTE MATCHING SANITY (STARTS WITH /)
 
-2. Create/start server [EXECUTION]
-    - socket()
-    - bind()
-    - listen()
-    - Initialize poll/select
-3. Accept client connection [EXECUTION]
-    - accept()
-    - Store client socket
-4. Receive HTTP request [EXECUTION]
-    - recv()
-    - Read raw request bytes
-5. Parse HTTP request [PARSING]
+2.  ✅ Create/start server [EXECUTION]
+    - ✅ socket()
+    - ✅ bind()
+    - ✅ listen()
+    - ✅ Initialize poll/select
+3.  ✅ Accept client connection [EXECUTION]
+    - ✅ accept()
+    - ✅ Store client socket
+4.  ✅ Receive HTTP request [EXECUTION]
+    - ✅ recv()
+    - ✅ Read raw request bytes
+5.  Parse HTTP request [PARSING]
     - Parse request line
     - Parse headers
     - Parse body
     - Build HttpRequest object
-6. Validate request [PARSING]
+6.  Validate request [PARSING]
     - Check HTTP syntax
     - Check method validity
     - Check client_max_body_size
     - Match route
     - Check allowed_methods
     - Decide status code (200, 404, 405, 413, etc.)
-7. Execute request [EXECUTION]
-    - Read requested file
+7.  🟡 Execute request [EXECUTION]
+    - ✅ Read requested file
     - Generate directory listing
     - Store uploaded file
     - Delete file
     - Execute CGI
     - Follow redirect rules
-8. Generate HTTP response [PARSING]
+8.  Generate HTTP response [PARSING]
     - Build status line
     - Build headers
     - Build response object
-9. Send HTTP response [EXECUTION]
+9.  🟡 Send HTTP response [EXECUTION]
     - send()
-10. Close connection / Keep-Alive [EXECUTION]
-    - close()
-    - or keep socket open
+10. 🟡 Close connection / Keep-Alive [EXECUTION]
+    - ✅ close()
+    - 🟡 or keep socket open # Not sure this one is necessary

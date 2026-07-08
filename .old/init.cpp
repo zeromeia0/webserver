@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/webserver.hpp"
+#include "../main.hpp"
 
 void initServer(Server::serverInfo *conf)
 {
