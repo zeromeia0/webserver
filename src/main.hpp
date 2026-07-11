@@ -28,7 +28,7 @@
 #define SIN_FAMILY			AF_INET
 #define SIN_ADDR			INADDR_ANY
 #define BUFF_SIZE			1024
-#define ROOT				"www"
+#define ROOT				"var/www"
 #define F_404				"/404.html"
 #define CONN_REQS_Q			100
 // ##############################
