@@ -19,8 +19,8 @@ void parse(Server::serverConfig *conf, char *fileName)
     for (size_t i = 0; i < conf->confFile.size(); i++)
         LOG("DEBUG", conf->confFile[i]);
     validateSyntax(conf->confFile);
-    getInfo(conf);
-    Server::routeConfig *currentRoute = NULL;
+    // getInfo(conf);
+    routeConfig *currentRoute = NULL;
     for (size_t i = 0; i < conf->confFile.size(); i++)
         confAssignValue(conf, currentRoute, conf->confFile, i);
     confDebbuger(conf);

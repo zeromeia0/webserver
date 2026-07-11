@@ -1,7 +1,6 @@
 class Req : public ARe {
 private:
     std::string                         reqMethod;
-    std::string                         reqPath;
 public:
     // OCF
     Req();
@@ -13,7 +12,6 @@ public:
 
 	// GETTERS
     std::string getMethod();
-    std::string getPath();
 
     void display();
 

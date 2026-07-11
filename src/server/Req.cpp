@@ -7,7 +7,6 @@ Req::Req( const Req &other ) { *this = other; };
 Req &Req::operator=( const Req &other ) {
     if (this != &other) {
         this->reqMethod = other.reqMethod;
-        this->reqPath = other.reqPath;
         ARe::operator=(other);
     }
     return (*this);
@@ -19,7 +18,7 @@ Req::Req( const std::string &newHeaders) {
     int i = 0;
     for (std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); it++) {
         if (i == 0)                 { this->reqMethod = *it; }
-        else if (i == 1)            { this->reqPath = *it; }
+        else if (i == 1)            { this->path = *it; }
         else if (i == 2)            { this->version = *it; }
         else if (*it == "\\r\\n")   { ; }
         else {
@@ -46,12 +45,10 @@ Req::Req( const std::string &newHeaders) {
 
 // ####### GETTERS
 std::string Req::getMethod() { return (this->reqMethod); };
-std::string Req::getPath() { return (this->reqPath); };
 
 void Req::display() {
     std::cout << "---------- REQUEST ----------" << std::endl;
     std::cout << "reqMethod: " << this->reqMethod << std::endl;
-    std::cout << "reqPath: " << this->reqPath << std::endl;
     ARe::ADisplay();
 }
 

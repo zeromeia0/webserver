@@ -70,7 +70,7 @@ void getInfo(Server::serverConfig *conf)
     std::cout << "========================\n";
 }
 
-void confAssignValue(Server::serverConfig *server, Server::routeConfig *&currentRoute, const std::vector<std::string> &tokens, size_t i)
+void confAssignValue(Server::serverConfig *server, routeConfig *&currentRoute, const std::vector<std::string> &tokens, size_t i)
 {
     if (tokens[i] == "listen")
         server->listenPorts.push_back(atoi(tokens[i + 1].c_str()));
@@ -84,7 +84,7 @@ void confAssignValue(Server::serverConfig *server, Server::routeConfig *&current
         server->errorPages[atoi(tokens[i + 1].c_str())] = tokens[i + 2];
     else if (tokens[i] == "location")
     {
-        Server::routeConfig route;
+        routeConfig route;
         route.path = tokens[i + 1];
         server->router.push_back(route);
         currentRoute = &server->router.back();

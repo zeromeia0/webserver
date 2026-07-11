@@ -39,7 +39,7 @@ std::cout << "========== PRINTING SERVER CONFIG VALUES ==========" << std::endl;
 
         std::cout << "[Methods]: ";
         for (size_t j = 0; j < conf->router[i].methods.size(); j++)
-            std::cout << conf->router[i].methods[j] << " ";
+            std::cout << conf->router[i].methods[j] << ((conf->router[i].methods.begin() + j + 1) != conf->router[i].methods.end() ? ", " : "");
         std::cout << std::endl;
 
         if (!conf->router[i].cgi.empty())

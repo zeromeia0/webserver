@@ -20,6 +20,7 @@
 #include <iomanip>
 #include <list>
 #include <set>
+#include <dirent.h>
 
 #define LOG(categ, msg) if (mode == DEV || std::string(categ) != "DEBUG") \
 	std::cout << "[" << categ << "] " << msg << std::endl
@@ -29,6 +30,8 @@
 #define SIN_ADDR			INADDR_ANY
 #define BUFF_SIZE			1024
 #define ROOT				"var/www"
+#define UPLOAD_PATH			"var/www/uploads"
+#define CGI_PATH			"var/www/cgi-bin"
 #define F_404				"/404.html"
 #define CONN_REQS_Q			100
 // ##############################
@@ -49,6 +52,26 @@ enum reqState {
     R_CONTENT,
 };
 
+struct formData {
+        std::string boundaryLimiter;
+        std::string name;
+        std::string filename;
+};
+
+struct routeConfig
+{
+	routeConfig() : autoindex(false), uploadEnabled(false) {}
+	std::string path;
+	std::string root;
+	std::string index;
+	std::string uploadPath;
+	std::string redirect;
+	bool autoindex;
+	bool uploadEnabled;
+	std::vector<std::string> methods;
+	std::map<std::string, std::string> cgi;
+};
+
 template <typename T>
 void _free(T *&ptr) {
     if (!ptr)
@@ -57,8 +80,10 @@ void _free(T *&ptr) {
 	ptr = NULL;
 }
 
-std::string intToChar( int value );
+std::string	intToChar( int value );
 char toLower( unsigned char c );
+formData parseBoundary(std::string body);
+std::string *getFileContent( std::string path );
 
 #include "./server/ARe.hpp"
 #include "./server/Client.hpp"
@@ -79,7 +104,7 @@ void parse(Server::serverConfig *conf, char *fileName);
 std::string validateFile(char *fileName);
 void getInfo(Server::serverConfig *conf);
 void confDebbuger(Server::serverConfig *conf);
-void confAssignValue(Server::serverConfig *server, Server::routeConfig *&currentRoute, const std::vector<std::string> &tokens, size_t i);
+void confAssignValue(Server::serverConfig *server, routeConfig *&currentRoute, const std::vector<std::string> &tokens, size_t i);
 std::vector<std::string> tokenize(const std::string& file);
 std::vector<std::string> tokenizeHttpRequest(const std::string& request); //TRY TO POLYMORPHISM THIS SHIT
 

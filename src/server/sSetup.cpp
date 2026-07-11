@@ -76,6 +76,7 @@ bool Server::receiveRequest() {
 		return false;
 	std::string body(str, bytes);
 	LOG("DEBUG", "Bytes: " << bytes);
+	LOG("DEBUG", "Str: " << str);
 	sConns[idx].c->receive(body);
 	return true;
 }
@@ -83,7 +84,6 @@ bool Server::receiveRequest() {
 void Server::closeServer() {
 	LOG("DEBUG", "closeServer");
 	delete sConf;
-	delete rConf;
 }
 
 void Server::init() {
@@ -98,17 +98,6 @@ void Server::init() {
 	sConf->errorPages.clear();
 	sConf->router.clear();
 	sConf->confFile.clear();
-
-	rConf = new routeConfig;
-	rConf->autoindex = false;
-    rConf->cgi.clear();
-    rConf->index.clear();
-    rConf->methods.clear();
-    rConf->path.clear();
-    rConf->redirect.clear();
-    rConf->root.clear();
-    rConf->uploadEnabled = false;
-    rConf->uploadPath.clear();
 
 }
 
