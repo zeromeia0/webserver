@@ -58,5 +58,13 @@ public:
     serverConfig         *sConf;
 
     routeConfig findRoute( std::string path );
+    bool isMethodAllowed(std::string reqMethod, std::vector<std::string> routeMethods) {
+        for (size_t i = 0; i < routeMethods.size(); i++) {
+            if (routeMethods[i] == reqMethod) {
+                return (true);
+            }
+        }
+        return (false);
+    }
 
 };

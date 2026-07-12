@@ -60,7 +60,7 @@ public:
         for (std::map<std::string, std::string>::iterator it = this->headers.begin(); it != this->headers.end(); ++it) {
             std::cout << "key: \"" << it->first << "\" value: \"" << it->second << "\"" << std::endl;
         }
-        std::cout << "content: " << this->content << std::endl;
+        // std::cout << "content: " << this->content << std::endl;
 	};
 };
 

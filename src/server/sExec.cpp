@@ -26,68 +26,98 @@ void Server::loopServer() {
 				else if (sConns[idx].pfd.revents & POLLOUT) {
 					std::string method = sConns[idx].c->REQ->getMethod();
 					routeConfig route = findRoute(sConns[idx].c->REQ->getPath());
+					int fd = sConns[idx].pfd.fd;
 
 					Res res;
 					res.setPath(route.root + sConns[idx].c->REQ->getPath());
 					res.setVersion("HTTP/1.1");
 
-					bool method_allowed = false;
-					for (size_t i = 0; i < route.methods.size(); i++) {
-						if (route.methods[i] == method) {
-							method_allowed = true;
-							break;
-						}
-					}
-
-					if (!method_allowed) {
+					if (!isMethodAllowed(method, route.methods)) {
 						res.setStatusCode(405);
-						res.respond(sConns[idx].pfd.fd);
+						res.respond(fd);
 						endConn();
 						continue;
 					}
 
-					if (!route.redirect.empty()) {
-						res.setStatusCode(301);
-						res.addHeader("Location", res.getPath());
-						res.respond(sConns[idx].pfd.fd);
-						endConn();
-						continue;
-					}
+					// try {
 
-					DIR *dir = opendir(res.getPath().c_str());
-					bool isDir = (!dir ? false : true);
+					// } catch (e) {
+					// 	RESPOND 500
+					// }
+					if (method == "GET") {
 
-					if (isDir) {
-						if (!route.index.empty()) {
-							res.setPath(route.root + route.index);
-							// Will go to GET later on vvv
-						}
-						if (route.autoindex) {
-							res.setStatusCode(200);
-							dirent *_dirent = readdir(dir);
-							res.addContent("<body>\r\n");
-							while ((_dirent = readdir(dir))) {
-								std::string cont = std::string(_dirent->d_name);
-								res.addContent("<div>");
-								res.addContent("<a href=" + cont + ">");
-								res.addContent(cont);
-								res.addContent("</a>");
-								res.addContent("</div>");
-							}
-							res.addContent("</body>\r\n");
-							res.respond(sConns[idx].pfd.fd);
+						if (!route.redirect.empty()) {
+							res.setStatusCode(301);
+							res.addHeader("Location", res.getPath());
+							res.respond(fd);
 							endConn();
 							continue;
 						}
-					}
-					
-					if (method == "GET") {
-						GET(sConns[idx].pfd.fd, route, res, res.getPath());
-					} else if (method == "POST") {
-						POST(sConns[idx].pfd.fd, route, res.getPath());
+
+						bool isDir = false;
+						DIR *dir = opendir(res.getPath().c_str());
+						if (errno == EACCES) {
+							res.setStatusCode(403);
+							res.respond(fd);
+							endConn();
+							continue;
+						}
+						isDir = (!dir ? false : true);
+						LOG("DEBUG", "isDir -> " << isDir);
+						LOG("DEBUG", "PATH -> " << res.getPath());
+
+						// THE PATH IS A DIR
+						if (isDir) {
+							if (!route.index.empty()) {
+								res.setPath(route.root + route.index);
+								// If the next statement is false,
+								// we will use the previous path
+								// in the FILE section below
+								if (route.autoindex && !(access(res.getPath().c_str(), F_OK) == 0)) {
+									res.setStatusCode(200);
+									res.makeAutoindexRes(dir, route.path); // Check for errors inside function
+									res.respond(fd);
+									endConn();
+									continue;
+								}
+							} else if (route.autoindex) {
+								res.setStatusCode(200);
+								res.makeAutoindexRes(dir, route.path); // Check for errors inside function
+								res.respond(fd);
+								endConn();
+								continue;
+							} else {
+								res.setStatusCode(403);
+								res.respond(fd);
+								endConn();
+								continue;
+							}
+						}
+
+						// THE PATH IS A FILE OR INDEXED
+						std::string *content = getFileContent(res.getPath());
+						if (!content) {
+							res.setStatusCode(404);
+							delete content;
+							content = getFileContent(route.root + "/404.html");
+							res.addHeader("Content-Type", "text/html");
+							if (!content) {
+								res.setStatusCode(500);
+								res.addContent("500 - Internal server error");
+								res.respond(fd);
+								endConn();
+								continue;
+							}
+						} else {
+							res.setStatusCode(200);
+							res.addHeader("Content-Type", "text/html"); // TO UPDATE
+						}
+						res.addContent(*content);
+						res.respond(fd);
+						delete content;
+						endConn();
 					}
 
-					endConn();
 				}
 
 			}
