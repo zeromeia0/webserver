@@ -12,7 +12,9 @@ Res &Res::operator=( const Res &other ) {
 	return (*this);
 };
 
-Res::~Res() {};
+Res::~Res() {
+	closedir(vars.dir);
+};
 
 void Res::stringify() {
 	body =

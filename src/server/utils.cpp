@@ -29,9 +29,6 @@ formData parseBoundary(std::string body) {
 
 std::string *getFileContent( std::string path ) {
 
-	// if (access(path.c_str(), F_OK) < 0)
-	// 	path = ROOT + std::string(F_404);
-
 	std::fstream file(path.c_str());
 	if (!file.is_open())
         return (NULL);
@@ -43,3 +40,12 @@ std::string *getFileContent( std::string path ) {
 
 	return (content);
 };
+
+bool valueInContainer(std::string value, std::vector<std::string> container) {
+	for (size_t i = 0; i < container.size(); i++) {
+		if (container[i] == value) {
+			return (true);
+		}
+	}
+	return (false);
+}

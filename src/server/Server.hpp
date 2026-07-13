@@ -14,23 +14,11 @@ private:
 	void						bindSocket( int port );
 
 	void						listenSocket();
-
-	void						createClient();
-	void						endConn();
 	bool						_poll();
+    void                        _pollin();
+    void                        _pollout();
 
 	void						closeServer();
-
-    // ##########################################
-    // EXEC
-    // ##########################################
-
-	bool						receiveRequest();
-	void						loopServer();
-
-    // METHODS
-    void                        GET( int fd, routeConfig route, Res &res, std::string path );
-    void                        POST( int fd, routeConfig route, std::string path );
 
 public:
 	// OCF
@@ -57,14 +45,14 @@ public:
 
     serverConfig         *sConf;
 
+    // ##########################################
+    // EXEC
+    // ##########################################
+	void						createClient();
+	void						endConn();
+
+	void						LOOP();
+
     routeConfig findRoute( std::string path );
-    bool isMethodAllowed(std::string reqMethod, std::vector<std::string> routeMethods) {
-        for (size_t i = 0; i < routeMethods.size(); i++) {
-            if (routeMethods[i] == reqMethod) {
-                return (true);
-            }
-        }
-        return (false);
-    }
 
 };

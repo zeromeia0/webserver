@@ -68,19 +68,6 @@ bool Server::_poll() {
 	return (ready > 0 ? true : false);
 }
 
-bool Server::receiveRequest() {
-	LOG("DEBUG", "receiveRequest");
-	char str[BUFF_SIZE] = "";
-	int bytes = recv(sConns[idx].pfd.fd, str, BUFF_SIZE, 0);
-	if (bytes <= 0)
-		return false;
-	std::string body(str, bytes);
-	LOG("DEBUG", "Bytes: " << bytes);
-	LOG("DEBUG", "Str: " << str);
-	sConns[idx].c->receive(body);
-	return true;
-}
-
 void Server::closeServer() {
 	LOG("DEBUG", "closeServer");
 	delete sConf;
@@ -128,6 +115,6 @@ void Server::start() {
 		listenSocket();
 		idx++;
 	}
-	loopServer();
+	LOOP();
 	closeServer();
 }

@@ -84,6 +84,7 @@ std::string	intToChar( int value );
 char toLower( unsigned char c );
 formData parseBoundary(std::string body);
 std::string *getFileContent( std::string path );
+bool valueInContainer(std::string value, std::vector<std::string> container);
 
 #include "./server/ARe.hpp"
 #include "./server/Client.hpp"
