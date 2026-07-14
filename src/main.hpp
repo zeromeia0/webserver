@@ -64,7 +64,7 @@ struct routeConfig
 	std::string path;
 	std::string root;
 	std::string index;
-	std::string uploadPath;
+	std::string uploadStore;
 	std::string redirect;
 	bool autoindex;
 	bool uploadEnabled;
@@ -83,8 +83,10 @@ void _free(T *&ptr) {
 std::string	intToChar( int value );
 char toLower( unsigned char c );
 formData parseBoundary(std::string body);
-std::string *getFileContent( std::string path );
+std::string *readFileContent( std::string path );
+void writeFileContent( std::string path, std::string content );
 bool valueInContainer(std::string value, std::vector<std::string> container);
+void printVector(std::vector<std::string> vec);
 
 #include "./server/ARe.hpp"
 #include "./server/Client.hpp"
@@ -98,6 +100,8 @@ struct sConn {
 // ##########################################################################################
 // # PARSER
 // ##########################################################################################
+
+std::string getFileName( std::string content );
 
 void parse(Server::serverConfig *conf, char *fileName);
 

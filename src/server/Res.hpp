@@ -11,9 +11,13 @@ public:
 		std::string method;
 		routeConfig route;
 		int fd;
-		std::string reqPath;
+		std::string req_path;
 		std::string path;
-		std::string indexedPath;
+		std::string indexed_path;
+		std::string req_content;
+		std::string upload_path;
+		std::string upload_filename;
+		std::string upload_root;
 		DIR *dir;
 		int dir_errno;
 	};
@@ -37,7 +41,7 @@ public:
 				if (getPath().empty() && vars.method == "GET") {
 					autoIndex(); // Check for errors inside function
 				} else if (!getPath().empty()) {
-					content = getFileContent(getPath());
+					content = readFileContent(getPath());
 					addContent(*content);
 					delete content;
 				} else {
@@ -80,7 +84,7 @@ public:
 		while ((_dirent = readdir(vars.dir))) {
 			std::string cont = std::string(_dirent->d_name);
 			addContent("<div>");
-			addContent("<a href=" + vars.reqPath + "/" + cont + ">");
+			addContent("<a href=" + vars.req_path + "/" + cont + ">");
 			addContent(cont);
 			addContent("</a>");
 			addContent("</div>");

@@ -100,7 +100,7 @@ void confAssignValue(Server::serverConfig *server, routeConfig *&currentRoute, c
         else if (tokens[i] == "upload_enabled")
             currentRoute->uploadEnabled = (tokens[i + 1] == "on");
         else if (tokens[i] == "upload_store")
-            currentRoute->uploadPath = tokens[i + 1];
+            currentRoute->uploadStore = tokens[i + 1];
         else if (tokens[i] == "redirect")
             currentRoute->redirect = tokens[i + 1];
         else if (tokens[i] == "allowed_methods")

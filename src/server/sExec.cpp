@@ -20,40 +20,47 @@ void Server::_pollin() {
 void Server::_pollout() {
 	LOG("DEBUG", "_pollout");
 
-	routeConfig		route				= findRoute(sConns[idx].c->REQ->getPath());
+	routeConfig		route					= findRoute(sConns[idx].c->REQ->getPath());
 	Res				r;
 
 	// VARS
-	r.vars.method						= sConns[idx].c->REQ->getMethod();
-	r.vars.fd							= sConns[idx].pfd.fd;
-	r.vars.reqPath						= sConns[idx].c->REQ->getPath();
-	r.vars.path							= route.root + r.vars.reqPath;
-	r.vars.indexedPath					= route.root + route.index;
-	r.vars.dir							= opendir(r.vars.path.c_str());
-	r.vars.dir_errno					= errno;
+	r.vars.fd								= sConns[idx].pfd.fd;
+	r.vars.method							= sConns[idx].c->REQ->getMethod();
+	r.vars.req_path							= sConns[idx].c->REQ->getPath();
+	r.vars.req_content						= sConns[idx].c->REQ->getContent();
+	r.vars.path								= route.root + r.vars.req_path;
+	r.vars.indexed_path						= route.root + route.index;
+	r.vars.upload_root						= route.root + route.uploadStore;
+	r.vars.dir								= opendir(r.vars.path.c_str());
+	r.vars.dir_errno						= errno;
+	r.vars.upload_filename					= getFileName(r.vars.req_content);
+	r.vars.upload_path						= r.vars.upload_root + "/" + r.vars.upload_filename;
+	
+	// CHECKS
+	bool is_method_allowed					= valueInContainer(r.vars.method, route.methods);
+	// GET
+	bool is_redirect						= !route.redirect.empty();
+	bool is_permission_denied				= (r.vars.dir_errno == EACCES);
+	bool is_directory						= ((!r.vars.dir && !is_permission_denied) ? false : true);
+	bool is_indexed							= !route.index.empty();
+	bool is_autoindex						= route.autoindex;
+	bool is_path_accessible					= (access(r.vars.path.c_str(), F_OK) == 0);
+	bool is_indexed_path_accessible			= (access(r.vars.indexed_path.c_str(), F_OK) == 0);
+	// POST
+	bool is_upload_root_accessible			= (access(r.vars.upload_root.c_str(), F_OK) == 0);
+	// bool is_upload_path_accessible			= (access(r.vars.upload_path.c_str(), F_OK) == 0);
 
-	// CHECKS);
-	bool is_method_allowed				= valueInContainer(r.vars.method, route.methods);
-	bool is_redirect					= !route.redirect.empty();
-	bool is_permission_denied			= (r.vars.dir_errno == EACCES);
-	bool is_directory					= ((!r.vars.dir && !is_permission_denied) ? false : true);
-	bool is_indexed						= !route.index.empty();
-	bool is_autoindex					= route.autoindex;
-	bool is_path_accessible				= (access(r.vars.path.c_str(), F_OK) == 0);
-	bool is_indexed_path_accessible		= (access(r.vars.indexedPath.c_str(), F_OK) == 0);
-
-	// LOGIC);
+	// LOGIC
 	if (!is_method_allowed) {
 		return (r.respond(405));										// 405
 	}
-
 
 	if (r.vars.method == "GET") {										// ########### GET
 		if (is_redirect)
 			return (r.respond(301));									// 301
 		if (is_directory) {
 			if (is_indexed && is_indexed_path_accessible)
-				return (r.setPath(r.vars.indexedPath), r.respond(200));	// 200
+				return (r.setPath(r.vars.indexed_path), r.respond(200));	// 200
 			if (!is_autoindex && !is_indexed_path_accessible)
 				return (r.respond(404));								// 404	
 			if (is_autoindex && !is_permission_denied)
@@ -66,6 +73,16 @@ void Server::_pollout() {
 	}
 
 	if (r.vars.method == "POST") {										// ########### POST
+		if (is_upload_root_accessible) {
+			writeFileContent(r.vars.upload_path
+				, r.vars.req_content.substr(r.vars.req_content.find("\r\n\r\n") + 4)
+			);
+			return (r.respond(200));										// 200
+		}
+		return (r.respond(404));											// 404
+	}
+
+	if (r.vars.method == "DELETE") {									// ########### DELETE
 		return (r.respond(200));										// 200
 	}
 

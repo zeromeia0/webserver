@@ -27,7 +27,7 @@ formData parseBoundary(std::string body) {
     return (form);
 }
 
-std::string *getFileContent( std::string path ) {
+std::string *readFileContent( std::string path ) {
 
 	std::fstream file(path.c_str());
 	if (!file.is_open())
@@ -39,6 +39,18 @@ std::string *getFileContent( std::string path ) {
 		*content = *content + c;
 
 	return (content);
+};
+
+void printVector(std::vector<std::string> vec) {
+    for (size_t i = 0; i < vec.size(); i++)
+        std::cout << vec[i] << std::endl;
+}
+
+void writeFileContent( std::string path, std::string content ) {
+
+	std::fstream file(path.c_str(), std::fstream::in | std::fstream::out | std::fstream::app);
+    file << content;
+    file.close();
 };
 
 bool valueInContainer(std::string value, std::vector<std::string> container) {

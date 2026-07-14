@@ -34,7 +34,7 @@ std::cout << "========== PRINTING SERVER CONFIG VALUES ==========" << std::endl;
         std::cout << "[Index]: " << conf->router[i].index << std::endl;
         std::cout << "[Autoindex]: " << conf->router[i].autoindex << std::endl;
         std::cout << "[Upload Enabled]: " << conf->router[i].uploadEnabled << std::endl;
-        std::cout << "[Upload Store]: " << conf->router[i].uploadPath << std::endl;
+        std::cout << "[Upload Store]: " << conf->router[i].uploadStore << std::endl;
         std::cout << "[Redirect]: " << conf->router[i].redirect << std::endl;
 
         std::cout << "[Methods]: ";

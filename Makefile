@@ -22,6 +22,7 @@ SRC =	src/main.cpp \
 		$(PARSER_DIR)/parse.cpp \
 		$(PARSER_DIR)/http_request.cpp \
 		$(PARSER_DIR)/debugger.cpp \
+		$(PARSER_DIR)/form_data.cpp \
 		$(PARSER_DIR)/conf/conf.cpp \
 		$(PARSER_DIR)/conf/conf_validation.cpp \
 		$(PARSER_DIR)/conf/helpers.cpp \
