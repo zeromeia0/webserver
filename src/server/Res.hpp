@@ -15,9 +15,12 @@ public:
 		std::string path;
 		std::string indexed_path;
 		std::string req_content;
-		std::string upload_path;
-		std::string upload_filename;
 		std::string upload_root;
+		std::string upload_filename;
+		std::string upload_path;
+		std::string delete_root;
+		std::string delete_filename;
+		std::string delete_path;
 		DIR *dir;
 		int dir_errno;
 	};

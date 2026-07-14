@@ -10,6 +10,7 @@ void Server::_pollin() {
 		int bytes = recv(sConns[idx].pfd.fd, str, BUFF_SIZE, 0);
 		if (bytes <= 0)
 			endConn();
+		LOG("DEBUG STR", str);
 		std::string body(str, bytes);
 		sConns[idx].c->receive(body);
 		if (sConns[idx].c->getState() == COMPLETED)
@@ -30,11 +31,16 @@ void Server::_pollout() {
 	r.vars.req_content						= sConns[idx].c->REQ->getContent();
 	r.vars.path								= route.root + r.vars.req_path;
 	r.vars.indexed_path						= route.root + route.index;
-	r.vars.upload_root						= route.root + route.uploadStore;
 	r.vars.dir								= opendir(r.vars.path.c_str());
 	r.vars.dir_errno						= errno;
+
+	r.vars.upload_root						= route.root + route.uploadStore;
 	r.vars.upload_filename					= getFileName(r.vars.req_content);
 	r.vars.upload_path						= r.vars.upload_root + "/" + r.vars.upload_filename;
+
+	r.vars.delete_root						= route.root;
+	r.vars.delete_filename					= r.vars.req_content;
+	r.vars.delete_path						= r.vars.delete_root + "/" + r.vars.delete_filename;
 	
 	// CHECKS
 	bool is_method_allowed					= valueInContainer(r.vars.method, route.methods);
@@ -83,6 +89,7 @@ void Server::_pollout() {
 	}
 
 	if (r.vars.method == "DELETE") {									// ########### DELETE
+		LOG("DEBUG", "DELETEEEEEEEEEEEEEE \n" << r.vars.req_content << " " << r.vars.delete_path);
 		return (r.respond(200));										// 200
 	}
 
