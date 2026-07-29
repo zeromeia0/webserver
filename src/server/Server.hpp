@@ -53,6 +53,8 @@ public:
 
 	void						LOOP();
 
+	void respond( int statusCode );
+
     routeConfig findRoute( std::string path );
 
 };

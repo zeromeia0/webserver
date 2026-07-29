@@ -25,6 +25,8 @@
 #define LOG(categ, msg) if (mode == DEV || std::string(categ) != "DEBUG") \
 	std::cout << "[" << categ << "] " << msg << std::endl
 
+#define HTTP_VERSION "HTTP/1.1"
+
 // ########## TO PARSE ##########
 #define SIN_FAMILY			AF_INET
 #define SIN_ADDR			INADDR_ANY
@@ -35,6 +37,7 @@
 #define F_404				"/404.html"
 #define CONN_REQS_Q			100
 // ##############################
+std::vector<std::string> tokenizeHttpRequest(const std::string& request); //TRY TO POLYMORPHISM THIS SHIT
 
 // ##########################################################################################
 // # SERVER
@@ -87,15 +90,23 @@ std::string *readFileContent( std::string path );
 void writeFileContent( std::string path, std::string content );
 bool valueInContainer(std::string value, std::vector<std::string> container);
 void printVector(std::vector<std::string> vec);
+std::string getStatusMsg(int code);
+std::string getFileExtension(std::string filename);
+std::string *getMime(std::string extension);
+std::string *getExtension(std::string mime);
+std::string cgi(const char *file, char **args, char **envp);
 
-#include "./server/ARe.hpp"
+#include "./server/Re.hpp"
 #include "./server/Client.hpp"
 #include "./server/Server.hpp"
 
 struct sConn {
-	struct pollfd	pfd;
-	Client			*c;
+	struct pollfd	poll_fd;
+	Client			*client;
 };
+
+std::string autoindex( std::string path, std::string base_path);
+
 
 // ##########################################################################################
 // # PARSER

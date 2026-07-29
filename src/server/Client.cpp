@@ -38,23 +38,18 @@ bool Client::receive( const std::string &body ) {
 
     if (!this->REQ) {
         this->state = R_CONTENT;
-        this->REQ = new Req(this->buffer.substr(0, findRes));
-        this->REQ->addContent(this->buffer.substr(findRes + 4));
+        this->REQ = new Re;
+		this->REQ->addHeaders(this->buffer.substr(0, findRes));
+        this->REQ->addPayload(this->buffer.substr(findRes + 4));
     } else {
-        this->REQ->addContent(body);
+        this->REQ->addPayload(body);
     }
 
     const char *conLen = REQ->getHeader("content-length");
-    if ((conLen ? std::atoi(conLen) : 0) == REQ->getContentLen()) {
+    if ((size_t)(conLen ? std::atoi(conLen) : 0) == REQ->payloadLen) {
         this->state = COMPLETED;
         return false;
     }
 
     return (true);
 };
-
-// GETTERS
-int Client::getState() { return this->state; }
-
-// SETTERS
-void Client::setState( reqState newState ) { this->state = newState; }

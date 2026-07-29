@@ -1,11 +1,10 @@
 class Client {
-private:
-    int             fd;
-    std::string     buffer;
-    reqState        state;
 public:
-    Req             *REQ;
-    Res             *RES;
+	int             fd;
+	std::string     buffer;
+	reqState        state;
+    Re             *REQ;
+    Re             *RES;
 
     // OCF
     Client();
@@ -16,10 +15,4 @@ public:
 
     void _reset();
     bool receive( const std::string &body );
-
-    // GETTERS
-    int getState();
-
-    // SETTERS
-    void setState( reqState newState );
 };

@@ -41,13 +41,16 @@ std::string *readFileContent( std::string path ) {
 	return (content);
 };
 
+std::string getFileExtension(std::string filename) {
+	return (filename.substr(filename.find_last_of('.') + 1));
+}
+
 void printVector(std::vector<std::string> vec) {
     for (size_t i = 0; i < vec.size(); i++)
         std::cout << vec[i] << std::endl;
 }
 
 void writeFileContent( std::string path, std::string content ) {
-
 	std::fstream file(path.c_str(), std::fstream::in | std::fstream::out | std::fstream::app);
     file << content;
     file.close();
