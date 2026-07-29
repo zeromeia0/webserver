@@ -22,15 +22,19 @@ SRC =	src/main.cpp \
 		$(PARSER_DIR)/parse.cpp \
 		$(PARSER_DIR)/http_request.cpp \
 		$(PARSER_DIR)/debugger.cpp \
+		$(PARSER_DIR)/form_data.cpp \
 		$(PARSER_DIR)/conf/conf.cpp \
 		$(PARSER_DIR)/conf/conf_validation.cpp \
 		$(PARSER_DIR)/conf/helpers.cpp \
 		$(SERVER_DIR)/sSetup.cpp \
 		$(SERVER_DIR)/sExec.cpp \
-		$(SERVER_DIR)/Res.cpp \
-		$(SERVER_DIR)/Req.cpp \
-		$(SERVER_DIR)/Client.cpp \
-		$(SERVER_DIR)/utils.cpp
+		$(SERVER_DIR)/cgi.cpp \
+		$(SERVER_DIR)/autoindex.cpp \
+		$(SERVER_DIR)/Re.cpp \
+ 		$(SERVER_DIR)/Client.cpp \
+		$(SERVER_DIR)/utils.cpp \
+		$(SERVER_DIR)/maps/_mime.cpp \
+		$(SERVER_DIR)/maps/_status.cpp
 
 OBJ = $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 

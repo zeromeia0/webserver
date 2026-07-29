@@ -20,18 +20,24 @@
 #include <iomanip>
 #include <list>
 #include <set>
+#include <dirent.h>
 
 #define LOG(categ, msg) if (mode == DEV || std::string(categ) != "DEBUG") \
 	std::cout << "[" << categ << "] " << msg << std::endl
+
+#define HTTP_VERSION "HTTP/1.1"
 
 // ########## TO PARSE ##########
 #define SIN_FAMILY			AF_INET
 #define SIN_ADDR			INADDR_ANY
 #define BUFF_SIZE			1024
-#define ROOT				"www"
+#define ROOT				"var/www"
+#define UPLOAD_PATH			"var/www/uploads"
+#define CGI_PATH			"var/www/cgi-bin"
 #define F_404				"/404.html"
 #define CONN_REQS_Q			100
 // ##############################
+std::vector<std::string> tokenizeHttpRequest(const std::string& request); //TRY TO POLYMORPHISM THIS SHIT
 
 // ##########################################################################################
 // # SERVER
@@ -49,6 +55,26 @@ enum reqState {
     R_CONTENT,
 };
 
+struct formData {
+        std::string boundaryLimiter;
+        std::string name;
+        std::string filename;
+};
+
+struct routeConfig
+{
+	routeConfig() : autoindex(false), uploadEnabled(false) {}
+	std::string path;
+	std::string root;
+	std::string index;
+	std::string uploadStore;
+	std::string redirect;
+	bool autoindex;
+	bool uploadEnabled;
+	std::vector<std::string> methods;
+	std::map<std::string, std::string> cgi;
+};
+
 template <typename T>
 void _free(T *&ptr) {
     if (!ptr)
@@ -57,21 +83,36 @@ void _free(T *&ptr) {
 	ptr = NULL;
 }
 
-std::string intToChar( int value );
+std::string	intToChar( int value );
 char toLower( unsigned char c );
+formData parseBoundary(std::string body);
+std::string *readFileContent( std::string path );
+void writeFileContent( std::string path, std::string content );
+bool valueInContainer(std::string value, std::vector<std::string> container);
+void printVector(std::vector<std::string> vec);
+std::string getStatusMsg(int code);
+std::string getFileExtension(std::string filename);
+std::string *getMime(std::string extension);
+std::string *getExtension(std::string mime);
+std::string cgi(const char *file, char **args, char **envp);
 
-#include "./server/ARe.hpp"
+#include "./server/Re.hpp"
 #include "./server/Client.hpp"
 #include "./server/Server.hpp"
 
 struct sConn {
-	struct pollfd	pfd;
-	Client			*c;
+	struct pollfd	poll_fd;
+	Client			*client;
 };
+
+std::string autoindex( std::string path, std::string base_path);
+
 
 // ##########################################################################################
 // # PARSER
 // ##########################################################################################
+
+std::string getFileName( std::string content );
 
 void parse(Server::serverConfig *conf, char *fileName);
 
@@ -79,7 +120,7 @@ void parse(Server::serverConfig *conf, char *fileName);
 std::string validateFile(char *fileName);
 void getInfo(Server::serverConfig *conf);
 void confDebbuger(Server::serverConfig *conf);
-void confAssignValue(Server::serverConfig *server, Server::routeConfig *&currentRoute, const std::vector<std::string> &tokens, size_t i);
+void confAssignValue(Server::serverConfig *server, routeConfig *&currentRoute, const std::vector<std::string> &tokens, size_t i);
 std::vector<std::string> tokenize(const std::string& file);
 std::vector<std::string> tokenizeHttpRequest(const std::string& request); //TRY TO POLYMORPHISM THIS SHIT
 

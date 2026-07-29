@@ -14,25 +14,11 @@ private:
 	void						bindSocket( int port );
 
 	void						listenSocket();
-
-	void						createClient();
-	void						endConn();
 	bool						_poll();
+    void                        _pollin();
+    void                        _pollout();
 
 	void						closeServer();
-
-    // ##########################################
-    // EXEC
-    // ##########################################
-
-	bool						receiveRequest();
-	void						respondRequest();
-	void						loopServer();
-
-    // METHODS
-    void                        GET( int fd, const std::string &path );
-    void                        POST();
-    void                        DELETE();
 
 public:
 	// OCF
@@ -46,20 +32,6 @@ public:
     void start();
 
     // STRUCTS
-    struct routeConfig
-    {
-        routeConfig() : autoindex(false), uploadEnabled(false) {}
-        std::string path;
-        std::string root;
-        std::string index;
-        std::string uploadPath;
-        std::string redirect;
-        bool autoindex;
-        bool uploadEnabled;
-        std::vector<std::string> methods;
-        std::map<std::string, std::string> cgi;
-    };
-
     struct serverConfig
     {
         std::vector<int> listenPorts;
@@ -72,6 +44,17 @@ public:
     };
 
     serverConfig         *sConf;
-    routeConfig          *rConf;
+
+    // ##########################################
+    // EXEC
+    // ##########################################
+	void						createClient();
+	void						endConn();
+
+	void						LOOP();
+
+	void respond( int statusCode );
+
+    routeConfig findRoute( std::string path );
 
 };
