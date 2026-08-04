@@ -10,31 +10,36 @@
 #                                                                              #
 # **************************************************************************** #
 
-CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror -g -std=c++98
+CXX				= c++
+CXXFLAGS		= -Wall -Wextra -Werror -g -std=c++98
 
-NAME = webserver
-PARSER_DIR = ./src/parser
-SERVER_DIR = ./src/server
-OBJ_DIR = obj
+NAME			= webserver
+OBJ_DIR			= obj
 
-SRC =	src/main.cpp \
-		$(PARSER_DIR)/parse.cpp \
-		$(PARSER_DIR)/http_request.cpp \
-		$(PARSER_DIR)/debugger.cpp \
-		$(PARSER_DIR)/form_data.cpp \
-		$(PARSER_DIR)/conf/conf.cpp \
-		$(PARSER_DIR)/conf/conf_validation.cpp \
-		$(PARSER_DIR)/conf/helpers.cpp \
-		$(SERVER_DIR)/sSetup.cpp \
-		$(SERVER_DIR)/sExec.cpp \
-		$(SERVER_DIR)/cgi.cpp \
-		$(SERVER_DIR)/autoindex.cpp \
-		$(SERVER_DIR)/Re.cpp \
- 		$(SERVER_DIR)/Client.cpp \
-		$(SERVER_DIR)/utils.cpp \
-		$(SERVER_DIR)/maps/_mime.cpp \
-		$(SERVER_DIR)/maps/_status.cpp
+PARSER_DIR		= ./src/parser
+SRC_PARSER		= $(PARSER_DIR)/conf_validation.cpp \
+				$(PARSER_DIR)/config.cpp \
+				$(PARSER_DIR)/debugger.cpp \
+				$(PARSER_DIR)/form_data.cpp \
+				$(PARSER_DIR)/form_urlencoded.cpp \
+				$(PARSER_DIR)/head.cpp \
+				$(PARSER_DIR)/tokenize.cpp \
+
+EXEC_DIR		= ./src/exec
+SRC_EXEC		= $(EXEC_DIR)/utils.cpp \
+				$(EXEC_DIR)/Re/cgi.cpp \
+				$(EXEC_DIR)/Re/autoindex.cpp \
+ 				$(EXEC_DIR)/Client/Client.cpp \
+				$(EXEC_DIR)/Server/Setup.cpp \
+				$(EXEC_DIR)/Server/LOOP.cpp \
+				$(EXEC_DIR)/Server/IN.cpp \
+				$(EXEC_DIR)/Server/OUT.cpp
+
+ROOT_DIR		= ./src
+SRC_ROOT		= $(ROOT_DIR)/main.cpp \
+				$(ROOT_DIR)/MAP.cpp
+
+SRC = $(SRC_ROOT) $(SRC_PARSER) $(SRC_EXEC)
 
 OBJ = $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 

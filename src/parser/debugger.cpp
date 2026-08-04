@@ -10,9 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../main.hpp"
+#include "_parser.hpp"
 
-void confDebbuger(Server::serverConfig *conf)
+void confDebbuger(S_CONFIG *conf)
 {
 std::cout << "========== PRINTING SERVER CONFIG VALUES ==========" << std::endl;
     for (size_t i = 0; i < conf->listenPorts.size(); i++)
