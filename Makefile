@@ -11,35 +11,48 @@
 # **************************************************************************** #
 
 CXX				= c++
-CXXFLAGS		= -Wall -Wextra -Werror -g -std=c++98
+CXXFLAGS		= -Wall -Wextra -Werror -g -std=c++98 -I inc
 
 NAME			= webserver
 OBJ_DIR			= obj
 
-PARSER_DIR		= ./src/parser
-SRC_PARSER		= $(PARSER_DIR)/conf_validation.cpp \
-				$(PARSER_DIR)/config.cpp \
-				$(PARSER_DIR)/debugger.cpp \
-				$(PARSER_DIR)/form_data.cpp \
-				$(PARSER_DIR)/form_urlencoded.cpp \
-				$(PARSER_DIR)/head.cpp \
-				$(PARSER_DIR)/tokenize.cpp \
+# ########################################
+# SRC
+# ########################################
 
-EXEC_DIR		= ./src/exec
-SRC_EXEC		= $(EXEC_DIR)/utils.cpp \
-				$(EXEC_DIR)/Re/cgi.cpp \
-				$(EXEC_DIR)/Re/autoindex.cpp \
- 				$(EXEC_DIR)/Client/Client.cpp \
-				$(EXEC_DIR)/Server/Setup.cpp \
-				$(EXEC_DIR)/Server/LOOP.cpp \
-				$(EXEC_DIR)/Server/IN.cpp \
-				$(EXEC_DIR)/Server/OUT.cpp
+SRC_CHECK = \
+	src/check/check_configs.cpp
 
-ROOT_DIR		= ./src
-SRC_ROOT		= $(ROOT_DIR)/main.cpp \
-				$(ROOT_DIR)/MAP.cpp
+SRC_DEBUG = \
+	src/debug/debug_configs.cpp
 
-SRC = $(SRC_ROOT) $(SRC_PARSER) $(SRC_EXEC)
+SRC_EXEC = \
+	src/exec/Client/Client.cpp \
+	src/exec/Connection/Connection.cpp \
+	src/exec/Server/ServerIn.cpp \
+	src/exec/Server/ServerLoop.cpp \
+	src/exec/Server/ServerOut.cpp \
+	src/exec/Server/ServerSetup.cpp
+
+SRC_PARSE = \
+	src/parse/parse_configs.cpp \
+	src/parse/parse_form_data.cpp \
+	src/parse/parse_form_urlencoded.cpp \
+	src/parse/parse_headers.cpp
+
+SRC_UTILS = \
+	src/utils/exec.cpp \
+	src/utils/map.cpp \
+	src/utils/parse.cpp \
+	src/utils/utils.cpp
+
+SRC = \
+	src/main.cpp \
+	$(SRC_CHECK) \
+	$(SRC_DEBUG) \
+	$(SRC_EXEC) \
+	$(SRC_PARSE) \
+	$(SRC_UTILS)
 
 OBJ = $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 

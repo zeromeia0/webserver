@@ -4,4 +4,5 @@
 webserver
 # subject.pdf
 .claude
+.vscode
 forbidden.py

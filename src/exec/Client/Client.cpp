@@ -1,5 +1,4 @@
 #include "Client.hpp"
-#include "../../_main.hpp"
 
 Client::Client() : fd(-1), state(READING_HEADERS), REQ(NULL), RES(NULL) {}
 
