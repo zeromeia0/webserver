@@ -6,3 +6,4 @@ webserver
 .claude
 .vscode
 forbidden.py
+obj/
