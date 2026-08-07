@@ -1,5 +1,18 @@
 #include "_exec.hpp"
 
+serverRoute findRoute(std::string uri, std::vector<serverRoute> router) {
+	serverRoute ret;
+	size_t longest = 0;
+	for (std::vector<serverRoute>::const_iterator it = router.begin(); it != router.end(); ++it ) {
+		std::string routerPath = it->path;
+		size_t routerPathSize = routerPath.size();
+		std::string pathSubstr = uri.substr(0, routerPathSize);
+		if (pathSubstr == routerPath && routerPathSize > longest)
+			ret = *it;
+	}
+	return (ret);
+}
+
 std::string *cgi(const char *file, char **args, char **envp, const std::string &payload) {
 	LOG("DEBUG", __FUNCTION__);
 	int pipe_out[2];
@@ -39,8 +52,6 @@ std::string *cgi(const char *file, char **args, char **envp, const std::string &
 		output->append(buf, bytes);
 
 	close(pipe_out[0]);
-
-	LOG("DEBUG", "OUTPUT=" << *output);
 
 	int status;
 	waitpid(pid, &status, 0);

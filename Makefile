@@ -24,9 +24,13 @@ SRC_CHECK = \
 	src/check/check_configs.cpp
 
 SRC_DEBUG = \
-	src/debug/debug_configs.cpp
+	src/debug/debug_configs.cpp \
+	src/debug/debug_re.cpp
 
 SRC_EXEC = \
+	src/exec/Re/Re.cpp \
+	src/exec/Re/Request.cpp \
+	src/exec/Re/Response.cpp \
 	src/exec/Client/Client.cpp \
 	src/exec/Connection/Connection.cpp \
 	src/exec/Server/ServerIn.cpp \

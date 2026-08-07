@@ -1,26 +1,22 @@
 #include "Server.hpp"
 
-serverRoute Server::findRoute(std::string path) {
-	serverRoute ret;
-	size_t longest = 0;
-	for (std::vector<serverRoute>::const_iterator it = serverConfigs->router.begin(); it != serverConfigs->router.end(); ++it ) {
-		std::string routerPath = it->path;
-		size_t routerPathSize = routerPath.size();
-		std::string pathSubstr = path.substr(0, routerPathSize);
-		if (pathSubstr == routerPath && routerPathSize > longest)
-			ret = *it;
+void Server::ERROR( int status_code ) {
+	curClient->RES->status_code = status_code;
+	std::string content;
+	if (serverConfigs->errorPages.find(status_code) != serverConfigs->errorPages.end()) {
+		content = readFileContent(serverConfigs->errorPages[status_code]);
+	} else {
+		content = intToChar(status_code) + " " + *getStatusMsg(status_code);
 	}
-	return (ret);
-}
+	curClient->RES->addPayload(content);
+};
 
 void Server::OUT() {
 	LOG("DEBUG", __FUNCTION__);
-	std::cout << "---------- REQ ----------" << std::endl;
-	curClient->REQ->display();
-	// curClient->REQ->saveLog("REQ");
+	curClient->REQ->saveLog("REQ");
 
 	Response	*RES = curClient->RES;
-	serverRoute	ROUT = findRoute(RES->headers.path);
+	serverRoute	ROUT = findRoute(RES->headers.path, serverConfigs->router);
 	eMethod		METH = RES->headers.method;
 	std::string	PATH = ROUT.root + RES->headers.path;
 
@@ -107,6 +103,7 @@ void Server::OUT() {
 				break;
 			}
 			default: {
+				ERROR(500);
 				break;
 			}
 		}
@@ -120,8 +117,12 @@ void Server::OUT() {
 		RES->addHeader("Content-Length", intToChar(RES->payload.size()));
 	}
 	RES->stringify();
-	std::cout << "---------- RES ----------" << std::endl;
-	RES->display();
-	// RES->saveLog("RES");
+	if (DEBUG) {
+		std::cout << "---------- REQ ----------" << std::endl;
+		debugRe(*curClient->REQ, false);
+		std::cout << "---------- RES ----------" << std::endl;
+		debugRe(*curClient->RES, false);
+	}
+	RES->saveLog("RES");
 	send(curConnec->pollFd.fd, RES->body.c_str(), RES->body.size(), 0); // CHECK THE BYTES SENT IF MULTI PACKAGE
 }

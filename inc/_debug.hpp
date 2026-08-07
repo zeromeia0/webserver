@@ -1,8 +1,10 @@
 #pragma once
 
 #include "_main.hpp"
+#include RE_HPP
 
-void confDebbuger(serverConfigs *conf);
+void	debugRe(Re re, bool printPayload);
+void	confDebbuger(serverConfigs *conf);
 
 template <typename T>
 void printVector(std::vector<T> vec) {
