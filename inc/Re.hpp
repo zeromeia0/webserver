@@ -3,7 +3,6 @@
 #include "main.hpp"
 #include EXEC_HPP
 #include UTILS_HPP
-#include TYPES_HPP
 #include <dirent.h>
 #include <unistd.h>
 

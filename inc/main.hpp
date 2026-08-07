@@ -1,15 +1,9 @@
 #pragma once
 
-#include <iostream>
-
-#define DEBUG 1
-#define LOG(categ, msg) \
-if (DEBUG || std::string(categ) != "DEBUG") \
-	std::cout << "[" << categ << "] " << msg << std::endl
-
-// HPP FILES
+#define CHECK_HPP		"check.hpp"
 #define CLIENT_HPP		"Client.hpp"
 #define CONNECTION_HPP	"Connection.hpp"
+#define DEBUG_HPP		"debug.hpp"
 #define EXEC_HPP		"exec.hpp"
 #define MAP_HPP			"map.hpp"
 #define PARSE_HPP		"parse.hpp"
@@ -20,6 +14,13 @@ if (DEBUG || std::string(categ) != "DEBUG") \
 #define TYPES_HPP		"types.hpp"
 #define UTILS_HPP		"utils.hpp"
 
+#include TYPES_HPP
+#include <iostream>
+
+#define DEBUG 1
+#define LOG(categ, msg) \
+if (DEBUG || std::string(categ) != "DEBUG") \
+	std::cout << "[" << categ << "] " << msg << std::endl
 
 // ########## TO PARSE ##########
 #define HTTP_VERSION		"HTTP/1.1"

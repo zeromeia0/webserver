@@ -1,7 +1,6 @@
 #pragma once
 
 #include "main.hpp"
-#include TYPES_HPP
 
 std::string	*getMethodTxt(eMethod code);
 eMethod		*getMethodCode(std::string txt);
