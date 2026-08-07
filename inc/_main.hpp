@@ -1,18 +1,18 @@
 #pragma once
 
-#define CHECK_HPP		"check.hpp"
+#define CHECK_HPP		"_check.hpp"
+#define DEBUG_HPP		"_debug.hpp"
+#define EXEC_HPP		"_exec.hpp"
+#define MAP_HPP			"_map.hpp"
+#define PARSE_HPP		"_parse.hpp"
+#define TYPES_HPP		"_types.hpp"
+#define UTILS_HPP		"_utils.hpp"
 #define CLIENT_HPP		"Client.hpp"
 #define CONNECTION_HPP	"Connection.hpp"
-#define DEBUG_HPP		"debug.hpp"
-#define EXEC_HPP		"exec.hpp"
-#define MAP_HPP			"map.hpp"
-#define PARSE_HPP		"parse.hpp"
 #define RE_HPP			"Re.hpp"
 #define REQUEST_HPP		"Request.hpp"
 #define RESPONSE_HPP	"Response.hpp"
 #define SERVER_HPP		"Server.hpp"
-#define TYPES_HPP		"types.hpp"
-#define UTILS_HPP		"utils.hpp"
 
 #include TYPES_HPP
 #include <iostream>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "main.hpp"
+#include "_main.hpp"
 
 void confDebbuger(serverConfigs *conf);
 

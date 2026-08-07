@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "parse.hpp"
+#include "_parse.hpp"
 
 static void saveConfigs(serverConfigs *server) {
 	std::string filename = "./var/data/configs.json";

@@ -1,4 +1,4 @@
-#include "main.hpp"
+#include "_main.hpp"
 #include SERVER_HPP
 
 int main(int argc, char **argv) {

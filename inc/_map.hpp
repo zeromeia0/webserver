@@ -1,6 +1,6 @@
 #pragma once
 
-#include "main.hpp"
+#include "_main.hpp"
 
 std::string	*getMethodTxt(eMethod code);
 eMethod		*getMethodCode(std::string txt);

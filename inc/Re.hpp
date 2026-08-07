@@ -1,6 +1,6 @@
 #pragma once
 
-#include "main.hpp"
+#include "_main.hpp"
 #include EXEC_HPP
 #include UTILS_HPP
 #include <dirent.h>

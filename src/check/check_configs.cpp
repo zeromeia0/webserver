@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "check.hpp"
+#include "_check.hpp"
 
 static bool isDirective(const std::string &token)
 {

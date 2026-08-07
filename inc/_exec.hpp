@@ -1,6 +1,6 @@
 #pragma once
 
-#include "main.hpp"
+#include "_main.hpp"
 #include <unistd.h>
 
 std::string *cgi(const char *file, char **args, char **envp, const std::string &payload);

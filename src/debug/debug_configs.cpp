@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "debug.hpp"
+#include "_debug.hpp"
 
 void confDebbuger(serverConfigs *conf) {
 std::cout << "========== PRINTING SERVER CONFIG VALUES ==========" << std::endl;
