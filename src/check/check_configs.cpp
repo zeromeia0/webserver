@@ -34,7 +34,7 @@ static bool isNumber(const std::string &token)
 
 static bool isMethod(const std::string &token)
 {
-    return (token == "GET" || token == "POST" || token == "DELETE");
+    return (token == "GET" || token == "POST" || token == "DELETE" || token == "HEAD");
 }
 
 static size_t findSemicolon(const std::vector<std::string> &tokens, size_t start)

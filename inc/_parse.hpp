@@ -7,8 +7,7 @@
 #include <string>
 #include <sstream>
 
-// PARSERS
 reHeaders		parseHeaders( std::string str );
 serverConfigs	*parseConfigs(char *fileName);
 formData		*parseFormData(std::string body);
-formUrlEncoded	*parseFormUrlEncoded(std::string body);
+formUrlEncoded	*parseFormUrlEncoded(std::string url);

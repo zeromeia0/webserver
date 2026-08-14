@@ -3,7 +3,9 @@
 #include "_main.hpp"
 #include RE_HPP
 
-void	debugRe(Re re, bool printPayload);
+void	debugRe(Re &re, bool printPayload);
+void	debugRes(Response &res);
+void	debugReq(Request &req);
 void	confDebbuger(serverConfigs *conf);
 
 template <typename T>

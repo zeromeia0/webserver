@@ -1,3 +1,18 @@
+from common.footer import footer
+from common.header import header
+import os, json
+
+header('ROUTES')
+
+# ########################
+# FUNCTIONS
+# ########################
+
+
+# ########################
+# LOGIC
+# ########################
+
 with open("var/data/configs.json") as f:
 	data = f.read()
 jsondata = eval(data)
@@ -11,3 +26,7 @@ for i in jsondata['routes']:
 		print(f'</div>')
 	print(f'</div>')
 print(f'</div>')
+
+# ########################
+
+footer()

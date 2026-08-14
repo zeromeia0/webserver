@@ -4,5 +4,5 @@
 #include <unistd.h>
 
 serverRoute findRoute(std::string uri, std::vector<serverRoute> router);
-std::string *cgi(const char *file, char **args, char **envp, const std::string &payload);
+std::string *cgi(char *bin, char *file, std::map<std::string, std::string> inputs, std::string &payload);
 std::string autoindex( std::string path, std::string base_path );

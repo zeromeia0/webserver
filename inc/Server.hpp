@@ -41,6 +41,6 @@ public:
 	void                        OUT();
 	void						END();
 
-	void						ERROR( int status_code );
+	void						STATUS( int status_code );
 
 };

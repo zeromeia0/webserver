@@ -23,7 +23,7 @@ void Server::setOptions() {
 }
 
 void Server::bindSocket( int port ) {
-	LOG("DEBUG", __FUNCTION__);
+	LOG("DEBUG", __FUNCTION__ << " " << port);
 	struct sockaddr_in service;
     service.sin_family = SIN_FAMILY;
     service.sin_addr.s_addr = SIN_ADDR;
@@ -54,12 +54,12 @@ Server::~Server() {}
 void Server::START() {
 	LOG("DEBUG", __FUNCTION__);
     curIdx = 0;
-	for (std::vector<int>::iterator it = serverConfigs->listenPorts.begin(); it != serverConfigs->listenPorts.end(); ++it) {
+	for (std::vector<int>::iterator port = serverConfigs->listenPorts.begin(); port != serverConfigs->listenPorts.end(); ++port) {
 		Connection *conn = new Connection;
 		curConnec = conn;
 		setupServer();
 		setOptions();
-		bindSocket(*it);
+		bindSocket(*port);
 		listenSocket();
 		S_CONNS.push_back(conn);
 		curIdx++;

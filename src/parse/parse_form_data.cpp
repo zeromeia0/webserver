@@ -12,7 +12,6 @@ std::string getFileName( std::string content ) {
 
 formData *parseFormData(std::string body) {
     std::string rawHeaders = body.substr(0, body.find("\r\n\r\n"));
-    std::string rawContent = body.substr(body.find("\r\n\r\n") + 4);
     std::vector<std::string> tokens = tokenizeHttpRequest(rawHeaders);
 
     formData *form = new formData;
@@ -21,6 +20,24 @@ formData *parseFormData(std::string body) {
             if (tokens[i].substr(0, 6) == "name=\"") { form->name = tokens[i].substr(6, tokens[i].substr(6).find("\"")); }
             if (tokens[i].substr(0, 10) == "filename=\"") { form->filename = tokens[i].substr(10, tokens[i].substr(10).find("\"")); }
     }
-
+	size_t start = body.find("\r\n\r\n") + 4;
+	size_t end = body.find("\r\n" + form->boundaryLimiter + "--\r\n");
+	form->payload = body.substr(start, end - start);
     return (form);
 }
+
+// int main() {
+// 	std::string payload =
+// 		"------WebKitFormBoundaryiKFQwgjcJQvQrTa9\r\n"
+// 		"Content-Disposition: form-data; name=\"file\"; filename=\"hello\"\r\n"
+// 		"Content-Type: application/octet-stream\r\n"
+// 		"\r\n"
+// 		"bonjour\r\n"
+// 		"------WebKitFormBoundaryiKFQwgjcJQvQrTa9--\r\n";
+// 	formData *form = parseFormData(payload);
+// 	LOG("boundaryLimiter", form->boundaryLimiter);
+// 	LOG("payload", form->payload);
+// 	LOG("filename", form->filename);
+// 	LOG("name", form->name);
+// 	return (0);
+// }

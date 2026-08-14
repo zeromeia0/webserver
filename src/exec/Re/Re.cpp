@@ -1,15 +1,15 @@
 #include "Re.hpp"
 
-Re::Re() : status_code(0), payloadLen(0) {}
+Re::Re() : payloadLen(0) {}
 Re::Re( const Re &other ) { *this = other; }
 Re &Re::operator=( const Re &other ) {
 	if (this != &other) {
 		this->body = other.body;
 		this->headers.version = other.headers.version;
 		this->headers.path = other.headers.path;
+		this->headers.query = other.headers.query;
 		this->headers.headers = other.headers.headers;
 		this->headers.method = other.headers.method;
-		this->status_code = other.status_code;
 		this->payload = other.payload;
 		this->payloadLen = other.payloadLen;
 	}
@@ -33,20 +33,21 @@ void Re::addPayload(const std::string newContent) {
 	this->payloadLen = payload.length();
 };
 
-void Re::saveLog(std::string type) {
-	// LOG("DEBUG", __FUNCTION__);
-	char *args[] = {
-		(char *)"/usr/bin/python3",
-		(char *)"./var/cgi-bin/add_log.py",
-		NULL
-	};
+void Re::saveLog() {
+	LOG("DEBUG", __FUNCTION__);
+	char *bin = (char *)"/usr/bin/python3";
+	char *file = (char *)"./var/cgi-bin/add_log.py";
 	std::map<std::string, std::string> map;
 	map.insert(std::pair<std::string, std::string>("method", *getMethodTxt(this->headers.method)));
 	map.insert(std::pair<std::string, std::string>("path", this->headers.path));
-	map.insert(std::pair<std::string, std::string>("type", type));
-	if (type == "RES")
-		map.insert(std::pair<std::string, std::string>("status", intToChar(this->status_code)));
+	map.insert(std::pair<std::string, std::string>("type", (type == RES ? "RES" : "REQ")));
+	if (type == RES)
+		map.insert(std::pair<std::string, std::string>("status", intToChar(static_cast<Response*>(this)->statusCode)));
 	else
 		map.insert(std::pair<std::string, std::string>("status", ""));
-	cgi((const char *)args[0], args, NULL, mapToJsonString(map));
+	std::map<std::string, std::string> inputs;
+	inputs.insert(std::pair<std::string, std::string>("BODY", mapToJsonString<std::string, std::string>(map)));
+	std::string payload = "";
+	std::string *output = cgi(bin, file, inputs, payload);
+	LOG("DEBUG", output);
 };

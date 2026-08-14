@@ -1,3 +1,18 @@
+from common.footer import footer
+from common.header import header
+import os, json
+
+header('LOGS')
+
+# ########################
+# FUNCTIONS
+# ########################
+
+
+# ########################
+# LOGIC
+# ########################
+
 with open("var/data/configs.json") as f:
 	data = f.read()
 jsondata = eval(data)
@@ -9,3 +24,7 @@ for k, v in jsondata.items():
 		print(f'	<p>{k}: {v}</p>')
 		print(f'</div>')
 print(f'</div>')
+
+# ########################
+
+footer()

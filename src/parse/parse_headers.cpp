@@ -5,9 +5,17 @@ reHeaders parseHeaders( std::string str ) {
 	reHeaders headers;
 	int i = 0;
 	for (std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); it++) {
-		if (i == 0)                 { headers.method = *getMethodCode(*it); }
-		else if (i == 1)            { headers.path = *it; }
-		else if (i == 2)            { headers.version = *it; }
+		if (i == 0) {
+			headers.method = *getMethodCode(*it);
+		}
+		else if (i == 1) {
+			formUrlEncoded *form = parseFormUrlEncoded(*it);
+			headers.path = form->path;
+			headers.query = form->query;
+		}
+		else if (i == 2) {
+			headers.version = *it;
+		}
 		else if (*it == "\\r\\n")   { ; }
 		else {
 			std::pair<std::string, std::string> tmp;

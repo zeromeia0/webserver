@@ -6,6 +6,8 @@
 
 class Response : public Re {
 public:
+	int			 						statusCode;
+
 	Response();
 	Response( const Re &other );
 	void stringify();

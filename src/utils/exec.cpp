@@ -13,7 +13,7 @@ serverRoute findRoute(std::string uri, std::vector<serverRoute> router) {
 	return (ret);
 }
 
-std::string *cgi(const char *file, char **args, char **envp, const std::string &payload) {
+std::string *cgi(char *bin, char *file, std::map<std::string, std::string> inputs, std::string &payload) {
 	LOG("DEBUG", __FUNCTION__);
 	int pipe_out[2];
 	pipe(pipe_out);
@@ -22,6 +22,7 @@ std::string *cgi(const char *file, char **args, char **envp, const std::string &
 	pipe(pipe_in);
 
 	pid_t pid = fork();
+
 	if (pid == 0) {
 
 		close(pipe_out[0]);
@@ -33,7 +34,19 @@ std::string *cgi(const char *file, char **args, char **envp, const std::string &
 		dup2(pipe_out[1], STDOUT_FILENO);
 		close(pipe_out[1]);
 
-		execve(file, args, envp);
+		char *args[] = { bin, file, NULL };
+
+		// Build envp — strings must outlive execve
+		std::vector<std::string> env_strs;
+		for (std::map<std::string, std::string>::iterator it = inputs.begin(); it != inputs.end(); ++it)
+			env_strs.push_back(it->first + "=" + it->second);
+
+		char **envp = new char*[env_strs.size() + 1];
+		for (size_t i = 0; i < env_strs.size(); i++)
+			envp[i] = (char *)env_strs[i].c_str();
+		envp[env_strs.size()] = NULL;
+
+		execve(bin, args, envp);
 		exit(1);
 	}
 
@@ -63,18 +76,11 @@ std::string *cgi(const char *file, char **args, char **envp, const std::string &
 }
 
 std::string autoindex( std::string path, std::string base_path ) {
-	char *py_bin = (char *)"/usr/bin/python3";
-	char *args[] = {
-		py_bin,
-		(char *)"./var/cgi-bin/autoindex.py",
-		NULL
-	};
-	std::string FOLDER = "FOLDER=" + path;
-	std::string BASE_PATH = "BASE_PATH=" + base_path;
-	char *envp[] = {
-		(char *)FOLDER.c_str(),
-		(char *)BASE_PATH.c_str(),
-		NULL
-	};
-	return (*cgi(py_bin, args, envp, ""));
+	char *bin = (char *)"/usr/bin/python3";
+	char *file = (char *)"./var/cgi-bin/autoindex.py";
+	std::map<std::string, std::string> inputs;
+	inputs.insert(std::pair<std::string, std::string>("FOLDER", path));
+	inputs.insert(std::pair<std::string, std::string>("BASE_PATH", base_path));
+	std::string payload = "";
+	return (*cgi(bin, file, inputs, payload));
 }

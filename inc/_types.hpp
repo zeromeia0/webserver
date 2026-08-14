@@ -13,6 +13,11 @@ struct reStatusCode {
 	std::string	msg;
 };
 
+enum reType {
+	RES,
+	REQ,
+};
+
 enum eMethod {
 	GET,
 	POST,
@@ -26,19 +31,21 @@ struct method {
 };
 
 struct formUrlEncoded {
-	std::map<std::string, std::string> data;
+	std::string							path;
+	std::map<std::string, std::string>	*query;
 };
 
 struct formData {
 	std::string boundaryLimiter;
 	std::string name;
 	std::string filename;
-	std::string data;
+	std::string payload;
 };
 
 struct reHeaders {
 	eMethod								method;
 	std::string							path;
+	std::map<std::string, std::string>	*query;
 	std::string							version;
 	std::map<std::string, std::string>	headers;
 };
