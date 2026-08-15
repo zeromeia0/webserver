@@ -1,28 +1,24 @@
 #pragma once
 
-#include "_main.hpp"
+#include "#MAIN.hpp"
 #include <set>
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <map>
 
-// PARSE
-void confDebbuger(serverConfigs *conf);
-serverConfigs *parseConfigs(char *fileName);
-std::vector<std::string> tokenize(const std::string& file);
-void validateSyntax(const std::vector<std::string> &tokens);
-std::vector<std::string> tokenizeHttpRequest(const std::string& request);
+// ############################################################
+// 							PARSE
+// ############################################################
 
-// EXEC
-std::string	intToChar( int value );
-char toLower( unsigned char c );
-std::string readFileContent( std::string path );
-std::string getFileExtension(std::string filename);
-void writeFileContent( std::string filename, std::string content );
+void						confDebbuger(sConfigs *conf);
+sConfigs					*parseConfigs(char *fileName);
+std::vector<std::string>	tokenize(const std::string& file);
+std::vector<std::string>	tokenizeHttpRequest(const std::string& request);
+void						validateSyntax(const std::vector<std::string> &tokens);
 
-template <typename T>
-std::string vectorToListString(std::vector<T> vector) {
+template					<typename T>
+std::string					vectorToListString(std::vector<T> vector) {
 	std::string ret;
 	ret.append("[");
 	for (size_t i = 0; i < vector.size(); i++) {
@@ -36,8 +32,18 @@ std::string vectorToListString(std::vector<T> vector) {
 	return (ret);
 }
 
-template <typename T>
-bool valueInContainer(std::string *value, std::vector<T> container) {
+// ############################################################
+// 							EXEC
+// ############################################################
+
+std::string					intToChar( int value );
+char						toLower( unsigned char c );
+std::string					readFileContent( std::string path );
+std::string					getFileExtension(std::string filename);
+void						writeFileContent( std::string filename, std::string content );
+
+template					<typename T>
+bool						valueInContainer(std::string *value, std::vector<T> container) {
 	if (!value)
 		return (false);
 	for (size_t i = 0; i < container.size(); i++) {
@@ -48,8 +54,8 @@ bool valueInContainer(std::string *value, std::vector<T> container) {
 	return (false);
 }
 
-template <typename T, typename U>
-std::string mapToJsonString(std::map<T, U> map) {
+template					<typename T, typename U>
+std::string					mapToJsonString(std::map<T, U> map) {
 	std::string ret;
 	ret.append("{");
 	for (typename std::map<T, U>::iterator it = map.begin(); it != map.end(); ++it) {

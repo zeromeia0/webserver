@@ -16,8 +16,8 @@ void Server::OUT() {
 	curClient->REQ->saveLog();
 
 	Response	*RES = curClient->RES;
-	serverRoute	ROUT = findRoute(RES->headers.path, serverConfigs->router);
-	eMethod		METH = RES->headers.method;
+	sRoute		ROUT = findRoute(RES->headers.path, serverConfigs->router);
+	METHOD		METH = RES->headers.method;
 	std::string	PATH = ROUT.root + RES->headers.path;
 
 	bool MethodNotAllowed = !valueInContainer<std::string>(getMethodTxt(METH), ROUT.methods);
@@ -89,7 +89,7 @@ void Server::OUT() {
 			}
 			case POST: {
 				RES->headers.path = PATH;
-				formData *form = parseFormData(curClient->REQ->payload);
+				sFormData *form = parseFormData(curClient->REQ->payload);
 				writeFileContent(RES->headers.path, form->payload);
 				STATUS(201);
 				break;
@@ -106,8 +106,7 @@ void Server::OUT() {
 			}
 		}
 	}
-	
-	RES->headers.version = HTTP_VERSION;
+
 	if (!RES->payload.empty()) {
 		std::string *mime = getMimeType(getFileExtension(RES->headers.path));
 		if (mime)

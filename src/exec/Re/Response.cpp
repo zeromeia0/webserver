@@ -1,7 +1,25 @@
 #include "Response.hpp"
 
-Response::Response() : Re(RES), statusCode(0) {};
-Response::Response( const Re &other ) : Re(other) {};
+Response::Response() : Re(RES) {
+	statusCode = 0;
+};
+
+Response::Response( const Response &other ) {
+	*this = other;
+};
+
+Response &Response::operator=( const Response &other ) {
+	if (this != &other) {
+		Re::operator=(other);
+		this->statusCode = other.statusCode;
+	}
+	return (*this);
+};
+
+Response::~Response() {
+
+};
+
 void Response::stringify() {
 	this->body =
 		this->headers.version + " "

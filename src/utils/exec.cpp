@@ -1,9 +1,9 @@
 #include "_exec.hpp"
 
-serverRoute findRoute(std::string uri, std::vector<serverRoute> router) {
-	serverRoute ret;
+sRoute findRoute(std::string uri, std::vector<sRoute> router) {
+	sRoute ret;
 	size_t longest = 0;
-	for (std::vector<serverRoute>::const_iterator it = router.begin(); it != router.end(); ++it ) {
+	for (std::vector<sRoute>::const_iterator it = router.begin(); it != router.end(); ++it ) {
 		std::string routerPath = it->path;
 		size_t routerPathSize = routerPath.size();
 		std::string pathSubstr = uri.substr(0, routerPathSize);

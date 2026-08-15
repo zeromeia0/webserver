@@ -24,11 +24,11 @@ void Server::setOptions() {
 
 void Server::bindSocket( int port ) {
 	LOG("DEBUG", __FUNCTION__ << " " << port);
-	struct sockaddr_in service;
+	sockaddr_in service;
     service.sin_family = SIN_FAMILY;
     service.sin_addr.s_addr = SIN_ADDR;
     service.sin_port = htons(port);
-    bind(curConnec->pollFd.fd, (struct sockaddr *)&service, sizeof(sockaddr));
+    bind(curConnec->pollFd.fd, (sockaddr *)&service, sizeof(sockaddr));
 }
 
 void Server::listenSocket() {
@@ -40,16 +40,6 @@ void Server::END() {
 	LOG("DEBUG", __FUNCTION__);
 	delete serverConfigs;
 }
-
-Server::Server( char *confFileName ) {
-	LOG("DEBUG", __FUNCTION__);
-	signal(SIGPIPE, SIG_IGN);
-	serverConfigs = parseConfigs(confFileName);
-
-}
-Server::Server( const Server &other ) { (void)other; }
-Server &Server::operator=( const Server &other ) { (void)other; return (*this); }
-Server::~Server() {}
 
 void Server::START() {
 	LOG("DEBUG", __FUNCTION__);

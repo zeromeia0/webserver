@@ -1,11 +1,11 @@
 #include "Server.hpp"
 
-/* Each connection contains the poll_fd struct,
+/* Each connection contains the poll_fd,
 but we must send only poll_fds vector to the poll() function,
 so we're recreating the poll_fds vector, request poll(),
 then we re-updated the pollFds in each connection. */
 bool Server::POLL() {
-	std::vector<struct pollfd> tmp;
+	std::vector<pollfd> tmp;
 	for (std::vector<Connection*>::iterator it = S_CONNS.begin(); it != S_CONNS.end(); ++it) {
 		tmp.push_back((*it)->pollFd);
 	}

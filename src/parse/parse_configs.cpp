@@ -1,18 +1,6 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   parse.cpp                                          :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/11 06:54:37 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/12 21:05:10 by vvazzs           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "_parse.hpp"
 
-static void saveConfigs(serverConfigs *server) {
+static void saveConfigs(sConfigs *server) {
 	std::string filename = "./var/data/configs.json";
 	std::remove(filename.c_str());
 	std::string content;
@@ -43,7 +31,7 @@ static void saveConfigs(serverConfigs *server) {
 	writeFileContent(filename, content);
 }
 
-static void confAssignValue(serverConfigs *server, serverRoute *&currentRoute, const std::vector<std::string> &tokens, size_t i)
+static void confAssignValue(sConfigs *server, sRoute *&currentRoute, const std::vector<std::string> &tokens, size_t i)
 {
     if (tokens[i] == "listen")
         server->listenPorts.push_back(atoi(tokens[i + 1].c_str()));
@@ -57,7 +45,7 @@ static void confAssignValue(serverConfigs *server, serverRoute *&currentRoute, c
         server->errorPages[atoi(tokens[i + 1].c_str())] = tokens[i + 2];
     else if (tokens[i] == "location")
     {
-        serverRoute route;
+        sRoute route;
         route.path = tokens[i + 1];
         server->router.push_back(route);
         currentRoute = &server->router.back();
@@ -90,7 +78,7 @@ static void confAssignValue(serverConfigs *server, serverRoute *&currentRoute, c
     }
 }
 
-static void resetConfig(serverConfigs *CONF) {
+static void resetConfig(sConfigs *CONF) {
 	CONF->listenPorts.clear();
 	CONF->host.clear();
 	CONF->serverName.clear();
@@ -114,15 +102,15 @@ static std::string validateFile(char *fileName)
     return (fileContent);
 }
 
-serverConfigs *parseConfigs(char *fileName) {
-	serverConfigs *CONF = new serverConfigs;
+sConfigs *parseConfigs(char *fileName) {
+	sConfigs *CONF = new sConfigs;
 	resetConfig(CONF);
 	std::string file = validateFile(fileName);
 	CONF->confFile = tokenize(file);
 	for (size_t i = 0; i < CONF->confFile.size(); i++)
 		LOG("DEBUG", CONF->confFile[i]);
 	validateSyntax(CONF->confFile);
-	serverRoute *currentRoute = NULL;
+	sRoute *currentRoute = NULL;
 	for (size_t i = 0; i < CONF->confFile.size(); i++)
 		confAssignValue(CONF, currentRoute, CONF->confFile, i);
 	saveConfigs(CONF);

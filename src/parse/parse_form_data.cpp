@@ -10,11 +10,11 @@ std::string getFileName( std::string content ) {
     return ("");
 }
 
-formData *parseFormData(std::string body) {
+sFormData *parseFormData(std::string body) {
     std::string rawHeaders = body.substr(0, body.find("\r\n\r\n"));
     std::vector<std::string> tokens = tokenizeHttpRequest(rawHeaders);
 
-    formData *form = new formData;
+    sFormData *form = new sFormData;
     for (size_t i = 0; i < tokens.size(); i++) {
             if (i == 0) { form->boundaryLimiter = tokens[i]; continue; }
             if (tokens[i].substr(0, 6) == "name=\"") { form->name = tokens[i].substr(6, tokens[i].substr(6).find("\"")); }
@@ -34,7 +34,7 @@ formData *parseFormData(std::string body) {
 // 		"\r\n"
 // 		"bonjour\r\n"
 // 		"------WebKitFormBoundaryiKFQwgjcJQvQrTa9--\r\n";
-// 	formData *form = parseFormData(payload);
+// 	sFormData *form = parseFormData(payload);
 // 	LOG("boundaryLimiter", form->boundaryLimiter);
 // 	LOG("payload", form->payload);
 // 	LOG("filename", form->filename);

@@ -1,17 +1,16 @@
 #pragma once
 
-#include "_main.hpp"
+#include "#MAIN.hpp"
 #include CLIENT_HPP
 #include <poll.h>
 
 class Connection {
 public:
-	pollfd			pollFd;
-	Client			*client;
+	pollfd		pollFd;
+	Client		*client;
 
-	// OCF
 	Connection();
-	// Connection( const Connection &other);
-	// Connection &operator=( const Connection &other);
+	Connection( const Connection &other);
+	Connection &operator=( const Connection &other);
 	~Connection();
 };

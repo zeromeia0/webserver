@@ -1,9 +1,8 @@
-#include "_main.hpp"
+#include "#MAIN.hpp"
 #include SERVER_HPP
 
 int main(int argc, char **argv) {
 
-    // CHECK INPUTS
     if (argc != 2)
     {
         std::cerr << "Error: Invalid Argument" << std::endl;
@@ -11,7 +10,6 @@ int main(int argc, char **argv) {
         return (1);
     }
 
-    // START SERVER
     try {
         Server S(argv[1]);
         S.START();

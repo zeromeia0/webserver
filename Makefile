@@ -33,6 +33,7 @@ SRC_EXEC = \
 	src/exec/Re/Response.cpp \
 	src/exec/Client/Client.cpp \
 	src/exec/Connection/Connection.cpp \
+	src/exec/Server/Server.cpp \
 	src/exec/Server/ServerIn.cpp \
 	src/exec/Server/ServerLoop.cpp \
 	src/exec/Server/ServerOut.cpp \

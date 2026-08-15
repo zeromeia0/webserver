@@ -1,11 +1,14 @@
 #pragma once
 
-#include "_main.hpp"
+#include "#MAIN.hpp"
 #include RE_HPP
 
 class Request : public Re {
 public:
-	std::string queryString;
+	std::string		queryString;
 
-	Request() : Re(REQ) {};
+	Request();
+	Request( const Request &other );
+	Request &operator=( const Request &other );
+	~Request();
 };

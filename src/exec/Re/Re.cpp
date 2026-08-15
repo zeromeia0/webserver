@@ -1,9 +1,20 @@
 #include "Re.hpp"
 
-Re::Re() : payloadLen(0) {}
-Re::Re( const Re &other ) { *this = other; }
+Re::Re() {
+	payloadLen = 0;
+}
+
+Re::Re( TYPE nType ) {
+	type = nType;
+};
+
+Re::Re( const Re &other ) {
+	*this = other;
+}
+
 Re &Re::operator=( const Re &other ) {
 	if (this != &other) {
+		this->type = other.type;
 		this->body = other.body;
 		this->headers.version = other.headers.version;
 		this->headers.path = other.headers.path;
@@ -15,7 +26,10 @@ Re &Re::operator=( const Re &other ) {
 	}
 	return (*this);
 };
-Re::~Re() {};
+
+Re::~Re() {
+
+};
 
 const char *Re::getHeader( std::string strKey ) {
 	std::map<std::string, std::string>::iterator it = headers.headers.find(strKey);
@@ -24,11 +38,11 @@ const char *Re::getHeader( std::string strKey ) {
 	return (it->second.c_str());
 }
 
-void Re::addHeader(std::string strKey, std::string strValue) {
+void Re::addHeader( std::string strKey, std::string strValue ) {
 	headers.headers.insert(std::pair<std::string, std::string>(strKey, strValue));
 };
 
-void Re::addPayload(const std::string newContent) {
+void Re::addPayload( const std::string newContent ) {
 	this->payload = this->payload + newContent;
 	this->payloadLen = payload.length();
 };

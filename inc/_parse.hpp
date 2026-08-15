@@ -1,13 +1,12 @@
 #pragma once
 
-#include "_main.hpp"
+#include "#MAIN.hpp"
 #include UTILS_HPP
+#include MAP_HPP
 #include <fcntl.h>
 #include <unistd.h>
-#include <string>
-#include <sstream>
 
-reHeaders		parseHeaders( std::string str );
-serverConfigs	*parseConfigs(char *fileName);
-formData		*parseFormData(std::string body);
-formUrlEncoded	*parseFormUrlEncoded(std::string url);
+sHeaders			parseHeaders(std::string str);
+sConfigs			*parseConfigs(char *fileName);
+sFormData			*parseFormData(std::string body);
+sFormUrlEncoded		*parseFormUrlEncoded(std::string url);

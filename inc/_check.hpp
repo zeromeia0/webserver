@@ -1,6 +1,6 @@
 #pragma once
 
-#include "_main.hpp"
+#include "#MAIN.hpp"
 #include <set>
 
-void validateSyntax(const std::vector<std::string> &tokens);
+void	validateSyntax(const std::vector<std::string> &tokens);

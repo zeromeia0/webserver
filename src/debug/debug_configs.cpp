@@ -1,18 +1,6 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   debugger.cpp                                       :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: vvazzs <vvazzs@student.42.fr>              +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/12 12:24:17 by vvazzs            #+#    #+#             */
-/*   Updated: 2026/06/12 15:16:20 by vvazzs           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "_debug.hpp"
 
-void confDebbuger(serverConfigs *conf) {
+void confDebbuger(sConfigs *conf) {
 std::cout << "========== PRINTING SERVER CONFIG VALUES ==========" << std::endl;
     for (size_t i = 0; i < conf->listenPorts.size(); i++)
         std::cout << "[Listen]: " << conf->listenPorts[i] << std::endl;

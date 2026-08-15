@@ -1,14 +1,17 @@
 #pragma once
 
-#include "_main.hpp"
+#include "#MAIN.hpp"
 #include RE_HPP
 #include MAP_HPP
 
 class Response : public Re {
 public:
-	int			 						statusCode;
+	int		statusCode;
 
 	Response();
-	Response( const Re &other );
-	void stringify();
+	Response( const Response &other );
+	Response &operator=( const Response &other );
+	~Response();
+
+	void	stringify();
 };

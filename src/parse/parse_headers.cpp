@@ -1,15 +1,15 @@
 #include "_parse.hpp"
 
-reHeaders parseHeaders( std::string str ) {
+sHeaders parseHeaders( std::string str ) {
 	std::vector<std::string> tokens = tokenizeHttpRequest(str);
-	reHeaders headers;
+	sHeaders headers;
 	int i = 0;
 	for (std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); it++) {
 		if (i == 0) {
 			headers.method = *getMethodCode(*it);
 		}
 		else if (i == 1) {
-			formUrlEncoded *form = parseFormUrlEncoded(*it);
+			sFormUrlEncoded *form = parseFormUrlEncoded(*it);
 			headers.path = form->path;
 			headers.query = form->query;
 		}

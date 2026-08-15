@@ -18,8 +18,8 @@ static std::string decode(std::string str) {
 	return new_str;
 }
 
-formUrlEncoded *parseFormUrlEncoded(std::string url) {
-	formUrlEncoded *f = new formUrlEncoded;
+sFormUrlEncoded *parseFormUrlEncoded(std::string url) {
+	sFormUrlEncoded *f = new sFormUrlEncoded;
 	f->path = url.substr(0, url.find("?"));
 	f->query = new std::map<std::string, std::string>;
 	size_t find = url.find("?");

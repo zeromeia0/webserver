@@ -2,7 +2,7 @@
 
 #define DEFAULT_MIME "application/octet-stream"
 
-reMime MAP_mime[] = {
+sMime MAP_mime[] = {
 	{ ".html", "text/html" },
 	{ ".css",  "text/css" },
 	{ ".js",   "application/javascript" },
@@ -17,7 +17,7 @@ reMime MAP_mime[] = {
 	{ ".pdf",  "application/pdf" },
 };
 
-reStatusCode MAP_status_code[] = {
+sStatusCode MAP_status_code[] = {
 	{ 200, "OK" },
 	{ 201, "Created" },
 	{ 301, "Moved Permanently" },
@@ -29,7 +29,7 @@ reStatusCode MAP_status_code[] = {
 	{ 504, "Gateway Timeout" },
 };
 
-method MAP_method[] = {
+sMethod MAP_method[] = {
 	{ GET, "GET" },
 	{ POST, "POST" },
 	{ DELETE, "DELETE" },
@@ -60,7 +60,7 @@ std::string *getStatusMsg(int status_code) {
 	return (NULL);
 }
 
-std::string *getMethodTxt(eMethod code) {
+std::string *getMethodTxt(METHOD code) {
 	for (size_t i = 0; i < (sizeof(MAP_method) / sizeof(MAP_method[0])); i++) {
 		if (MAP_method[i].code == code)
 			return (&MAP_method[i].txt);
@@ -68,7 +68,7 @@ std::string *getMethodTxt(eMethod code) {
 	return (NULL);
 }
 
-eMethod *getMethodCode(std::string txt) {
+METHOD *getMethodCode(std::string txt) {
 	for (size_t i = 0; i < (sizeof(MAP_method) / sizeof(MAP_method[0])); i++) {
 		if (MAP_method[i].txt == txt)
 			return (&MAP_method[i].code);
