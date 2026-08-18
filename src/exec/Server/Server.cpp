@@ -10,8 +10,9 @@ Server::Server() {
 
 Server::Server( char *confFileName ) {
 	LOG("DEBUG", __FUNCTION__);
-	signal(SIGPIPE, SIG_IGN);
+	LOG("serverConfigs", serverConfigs);
 	serverConfigs = parseConfigs(confFileName);
+	LOG("serverConfigs", serverConfigs);
 
 }
 
@@ -32,7 +33,5 @@ Server &Server::operator=( const Server &other ) {
 }
 
 Server::~Server() {
-	_free<sConfigs>(serverConfigs);
-	_free<Connection>(curConnec);
-	_free<Client>(curClient);
+
 }

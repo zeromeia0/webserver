@@ -4,7 +4,7 @@ Re::Re() {
 	payloadLen = 0;
 }
 
-Re::Re( TYPE nType ) {
+Re::Re( RE_TYPE nType ) {
 	type = nType;
 };
 
@@ -43,7 +43,13 @@ void Re::addHeader( std::string strKey, std::string strValue ) {
 };
 
 void Re::addPayload( const std::string newContent ) {
-	this->payload = this->payload + newContent;
+	if (headers.transfer_type == CHUNKED) {
+		size_t pos_start = newContent.find("\r\n") + 2;
+		size_t pos_end = newContent.substr(pos_start).find("\r\n");
+		this->payload = this->payload + newContent.substr(pos_start, pos_end);
+	} else {
+		this->payload = this->payload + newContent;
+	}
 	this->payloadLen = payload.length();
 };
 
@@ -63,5 +69,5 @@ void Re::saveLog() {
 	inputs.insert(std::pair<std::string, std::string>("BODY", mapToJsonString<std::string, std::string>(map)));
 	std::string payload = "";
 	std::string *output = cgi(bin, file, inputs, payload);
-	LOG("DEBUG", output);
+	LOG("DEBUG", "output: " << *output);
 };

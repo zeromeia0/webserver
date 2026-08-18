@@ -8,14 +8,14 @@
 
 class Re {
 public:
-	TYPE			type;
+	RE_TYPE			type;
 	std::string		body;
 	sHeaders		headers;
     std::string		payload;
     size_t			payloadLen;
 
 	Re();
-	Re( TYPE nType );
+	Re( RE_TYPE nType );
 	Re( const Re &other );
 	Re &operator=( const Re &other );
 	~Re();
@@ -26,5 +26,5 @@ public:
 	void			saveLog();
 };
 
-#include RESPONSE_HPP
 #include REQUEST_HPP
+#include RESPONSE_HPP

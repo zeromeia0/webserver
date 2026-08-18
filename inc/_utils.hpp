@@ -39,8 +39,8 @@ std::string					vectorToListString(std::vector<T> vector) {
 std::string					intToChar( int value );
 char						toLower( unsigned char c );
 std::string					readFileContent( std::string path );
-std::string					getFileExtension(std::string filename);
-void						writeFileContent( std::string filename, std::string content );
+std::string					*getFileExtension(std::string filename);
+bool						writeFileContent( std::string filename, std::string content );
 
 template					<typename T>
 bool						valueInContainer(std::string *value, std::vector<T> container) {

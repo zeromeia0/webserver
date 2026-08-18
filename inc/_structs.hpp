@@ -15,14 +15,14 @@ struct sStatusCode {
 };
 
 struct sMethod {
-	METHOD								code;
+	RE_METHOD							code;
 	std::string							txt;
 };
 
 struct sFormUrlEncoded {
 	std::string							path;
 	std::map<std::string, std::string>	*query;
-	sFormUrlEncoded() {};
+	sFormUrlEncoded() : query(NULL) {};
 };
 
 struct sFormData {
@@ -34,12 +34,13 @@ struct sFormData {
 };
 
 struct sHeaders {
-	METHOD								method;
+	RE_METHOD							method;
 	std::string							path;
 	std::map<std::string, std::string>	*query;
 	std::string							version;
 	std::map<std::string, std::string>	headers;
-	sHeaders() {};
+	TRANSFER_TYPE						transfer_type;
+	sHeaders() : query(NULL), transfer_type(CONTENT) {};
 };
 
 struct sRoute {

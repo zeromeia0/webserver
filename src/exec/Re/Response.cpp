@@ -4,6 +4,13 @@ Response::Response() : Re(RES) {
 	statusCode = 0;
 };
 
+Response::Response( const Request *req ) : Re(RES) {
+	headers.method = req->headers.method;
+	headers.version = req->headers.version;
+	headers.path = req->headers.path;
+	statusCode = 0;
+};
+
 Response::Response( const Response &other ) {
 	*this = other;
 };
@@ -21,6 +28,7 @@ Response::~Response() {
 };
 
 void Response::stringify() {
+	LOG("DEBUG", __FUNCTION__);
 	this->body =
 		this->headers.version + " "
 		+ intToChar(this->statusCode) + " "

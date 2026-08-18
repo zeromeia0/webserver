@@ -6,7 +6,7 @@
 void		debugRe(Re &re, bool printPayload);
 void		debugRes(Response &res);
 void		debugReq(Request &req);
-void		confDebbuger(sConfigs *conf);
+void		debugConfigs(sConfigs *configs);
 
 template	<typename T>
 void		printVector(std::vector<T> vec) {

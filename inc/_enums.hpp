@@ -2,18 +2,23 @@
 
 #include "#MAIN.hpp"
 
-enum STATE {
+enum CLIENT_STATE {
 	READING_HEADERS,
     READING_PAYLOAD,
     COMPLETED,
 };
 
-enum TYPE {
+enum TRANSFER_TYPE {
+	CONTENT,
+	CHUNKED,
+};
+
+enum RE_TYPE {
 	RES,
 	REQ,
 };
 
-enum METHOD {
+enum RE_METHOD {
 	GET,
 	POST,
 	DELETE,

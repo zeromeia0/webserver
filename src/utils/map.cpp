@@ -24,6 +24,7 @@ sStatusCode MAP_status_code[] = {
 	{ 403, "Forbidden" },
 	{ 404, "Not Found" },
 	{ 405, "Method Not Allowed" },
+	{ 408, "Request Timeout" },
 	{ 413, "Payload Too Large" },
 	{ 500, "Internal Server Error" },
 	{ 504, "Gateway Timeout" },
@@ -36,9 +37,11 @@ sMethod MAP_method[] = {
 	{ HEAD, "HEAD" },
 };
 
-std::string *getMimeType(std::string extension) {
+std::string *getMimeType(std::string *extension) {
+	if (!extension)
+		return (NULL);
 	for (size_t i = 0; i < (sizeof(MAP_mime) / sizeof(MAP_mime[0])); i++) {
-		if (MAP_mime[i].extension == extension)
+		if (MAP_mime[i].extension == *extension)
 			return (&MAP_mime[i].mime);
 	}
 	return (NULL);
@@ -60,7 +63,7 @@ std::string *getStatusMsg(int status_code) {
 	return (NULL);
 }
 
-std::string *getMethodTxt(METHOD code) {
+std::string *getMethodTxt(RE_METHOD code) {
 	for (size_t i = 0; i < (sizeof(MAP_method) / sizeof(MAP_method[0])); i++) {
 		if (MAP_method[i].code == code)
 			return (&MAP_method[i].txt);
@@ -68,7 +71,7 @@ std::string *getMethodTxt(METHOD code) {
 	return (NULL);
 }
 
-METHOD *getMethodCode(std::string txt) {
+RE_METHOD *getMethodCode(std::string txt) {
 	for (size_t i = 0; i < (sizeof(MAP_method) / sizeof(MAP_method[0])); i++) {
 		if (MAP_method[i].txt == txt)
 			return (&MAP_method[i].code);

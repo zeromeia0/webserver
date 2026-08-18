@@ -26,12 +26,19 @@ std::string readFileContent( std::string path ) {
 	return (content);
 };
 
-std::string getFileExtension(std::string filename) {
-	return (filename.substr(filename.find_last_of('.')));
+std::string *getFileExtension(std::string filename) {
+	size_t pos = filename.find_last_of('.');
+	if (pos == std::string::npos)
+		return (NULL);
+	std::string *ret = new std::string(filename.substr(pos));
+	return (ret);
 }
 
-void writeFileContent( std::string filename, std::string content ) {
+bool writeFileContent( std::string filename, std::string content ) {
 	std::fstream file(filename.c_str(), std::fstream::in | std::fstream::out | std::fstream::app);
     file << content;
+	if (file.fail())
+		return (false);
     file.close();
+	return (true);
 };

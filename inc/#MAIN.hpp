@@ -23,6 +23,7 @@
 #define SIN_ADDR		INADDR_ANY
 #define BUFF_SIZE		1024
 #define CONN_REQS_Q		100
+#define TIMEOUT			30
 
 #define DEBUG			1
 #define LOG(categ, msg)	do {\
@@ -32,6 +33,7 @@
 
 template <typename T>
 void _free(T *&ptr) {
+	std::cout << "FREE PTR" << ptr << std::endl;
     if (!ptr)
 		return;
 	delete ptr;

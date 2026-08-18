@@ -4,9 +4,11 @@ void Server::STATUS( int status_code ) {
 	curClient->RES->statusCode = status_code;
 	std::string content;
 	if (serverConfigs->errorPages.find(status_code) != serverConfigs->errorPages.end()) {
-		content = readFileContent(serverConfigs->errorPages[status_code]);
+		curClient->RES->headers.path = serverConfigs->errorPages[status_code];
+		content = readFileContent(curClient->RES->headers.path);
 	} else {
 		content = intToChar(status_code) + " " + *getStatusMsg(status_code);
+		curClient->RES->addHeader("Content-Type", "text/plain");
 	}
 	curClient->RES->addPayload(content);
 };
@@ -14,10 +16,10 @@ void Server::STATUS( int status_code ) {
 void Server::OUT() {
 	LOG("DEBUG", __FUNCTION__);
 	curClient->REQ->saveLog();
-
+	
 	Response	*RES = curClient->RES;
 	sRoute		ROUT = findRoute(RES->headers.path, serverConfigs->router);
-	METHOD		METH = RES->headers.method;
+	RE_METHOD	METH = RES->headers.method;
 	std::string	PATH = ROUT.root + RES->headers.path;
 
 	bool MethodNotAllowed = !valueInContainer<std::string>(getMethodTxt(METH), ROUT.methods);
@@ -31,7 +33,7 @@ void Server::OUT() {
 		RES->headers.path = ROUT.redirect;
 		RES->addHeader("Location", RES->headers.path);
 		STATUS(301);
-	} else if (ROUT.cgi.find(getFileExtension(PATH)) != ROUT.cgi.end()) {
+	} else if (ROUT.cgi.find(*getFileExtension(PATH)) != ROUT.cgi.end()) {
 		RES->headers.path = PATH;
 		if (!(access(RES->headers.path.c_str(), F_OK) == 0)) {
 			STATUS(404);
@@ -41,7 +43,7 @@ void Server::OUT() {
 			std::map<std::string, std::string> inputs;
 			inputs.insert(std::pair<std::string, std::string>("QUERY_STRING", mapToJsonString<std::string, std::string>(*curClient->REQ->headers.query)));
 			std::string *ret = cgi(
-				(char *)ROUT.cgi[getFileExtension(RES->headers.path)].c_str(),
+				(char *)ROUT.cgi[*getFileExtension(RES->headers.path)].c_str(),
 				(char *)RES->headers.path.c_str(),
 				inputs,
 				curClient->REQ->payload
@@ -90,8 +92,8 @@ void Server::OUT() {
 			case POST: {
 				RES->headers.path = PATH;
 				sFormData *form = parseFormData(curClient->REQ->payload);
-				writeFileContent(RES->headers.path, form->payload);
-				STATUS(201);
+				writeFileContent(RES->headers.path, form->payload) ? STATUS(201) : STATUS(404);
+				delete form;
 				break;
 			}
 			case DELETE: {
@@ -119,11 +121,15 @@ void Server::OUT() {
 		std::cout << "---------- RES ----------" << std::endl;
 		debugRe(*curClient->RES, false);
 	}
+	LOG("DEBUG", "HELLO");
 	RES->saveLog();
+	LOG("DEBUG", "HELLO2");
 	if (METH == HEAD) {
 		RES->payload.clear();
 		RES->payloadLen = 0;
 	}
+	LOG("DEBUG", "HELLO");
 	RES->stringify();
+	LOG("DEBUG", "HELLO");
 	send(curConnec->pollFd.fd, RES->body.c_str(), RES->body.size(), 0); // CHECK THE BYTES SENT IF MULTI PACKAGE
 }

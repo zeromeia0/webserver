@@ -1,7 +1,16 @@
 #include "#MAIN.hpp"
 #include SERVER_HPP
 
+bool G_RUNNING = true;
+
+void signalHandler(int sigCode) {
+	LOG("SIGNAL", sigCode);
+	G_RUNNING = false;
+}
+
 int main(int argc, char **argv) {
+
+	signal(SIGINT, signalHandler);
 
     if (argc != 2)
     {

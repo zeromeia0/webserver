@@ -5,10 +5,10 @@
 
 class Client {
 public:
-	int			fd;
-	STATE		state;
-	Request		*REQ;
-    Response	*RES;
+	int				fd;
+	CLIENT_STATE	state;
+	Request			*REQ;
+    Response		*RES;
 
     Client();
     Client( int nFd );

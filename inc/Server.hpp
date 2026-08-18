@@ -6,9 +6,9 @@
 #include DEBUG_HPP
 #include CONNECTION_HPP
 #include UTILS_HPP
-#include <fcntl.h>
-#include <sys/socket.h>
 #include <netinet/ip.h>
+
+extern bool G_RUNNING;
 
 class Server {
 public:
@@ -37,7 +37,7 @@ public:
 	
     void						START();
 	void						LOOP();
-	bool						POLL();
+	void						POLL();
 	void                        IN();
 	void                        OUT();
 	void						END();
