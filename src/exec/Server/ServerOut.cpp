@@ -92,6 +92,7 @@ void Server::OUT() {
 			case POST: {
 				RES->headers.path = PATH;
 				sFormData *form = parseFormData(curClient->REQ->payload);
+				LOG("PAYLOAD", form->payload);
 				writeFileContent(RES->headers.path, form->payload) ? STATUS(201) : STATUS(404);
 				delete form;
 				break;
@@ -117,13 +118,11 @@ void Server::OUT() {
 	}
 	if (DEBUG) {
 		std::cout << "---------- REQ ----------" << std::endl;
-		debugRe(*curClient->REQ, false);
+		debugRe(*curClient->REQ, true);
 		std::cout << "---------- RES ----------" << std::endl;
-		debugRe(*curClient->RES, false);
+		debugRe(*curClient->RES, true);
 	}
-	LOG("DEBUG", "HELLO");
 	RES->saveLog();
-	LOG("DEBUG", "HELLO2");
 	if (METH == HEAD) {
 		RES->payload.clear();
 		RES->payloadLen = 0;

@@ -16,7 +16,14 @@ sFormData *parseFormData(std::string body) {
 
     sFormData *form = new sFormData;
     for (size_t i = 0; i < tokens.size(); i++) {
-            if (i == 0) { form->boundaryLimiter = tokens[i]; continue; }
+            if (i == 0) {
+				if (tokens[i].find("------WebKitFormBoundary") == std::string::npos) {
+					form->payload = body;
+					return (form);
+				}
+				form->boundaryLimiter = tokens[i];
+				continue;
+			}
             if (tokens[i].substr(0, 6) == "name=\"") { form->name = tokens[i].substr(6, tokens[i].substr(6).find("\"")); }
             if (tokens[i].substr(0, 10) == "filename=\"") { form->filename = tokens[i].substr(10, tokens[i].substr(10).find("\"")); }
     }
