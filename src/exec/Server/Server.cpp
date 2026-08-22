@@ -10,9 +10,7 @@ Server::Server() {
 
 Server::Server( char *confFileName ) {
 	LOG("DEBUG", __FUNCTION__);
-	LOG("serverConfigs", serverConfigs);
 	serverConfigs = parseConfigs(confFileName);
-	LOG("serverConfigs", serverConfigs);
 
 }
 
@@ -23,7 +21,7 @@ Server::Server( const Server &other ) {
 Server &Server::operator=( const Server &other ) {
 	if (this != &other) {
 		this->serverConfigs = other.serverConfigs;
-		this->S_CONNS = other.S_CONNS;
+		this->serverConnections = other.serverConnections;
 		this->curIdx = other.curIdx;
 		this->curConnec = other.curConnec;
 		this->curClient = other.curClient;

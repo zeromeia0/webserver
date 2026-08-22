@@ -13,7 +13,7 @@ extern bool G_RUNNING;
 class Server {
 public:
 	sConfigs					*serverConfigs;
-	std::vector<Connection*>	S_CONNS;
+	std::vector<Connection*>	serverConnections;
 
 	/*To reduce the path to a certain object,
 	we created these current parameters to use
@@ -39,6 +39,7 @@ public:
 	void						LOOP();
 	void						POLL();
 	void                        IN();
+	void						SEND();
 	void                        OUT();
 	void						END();
 

@@ -35,7 +35,7 @@ std::string *getFileExtension(std::string filename) {
 }
 
 bool writeFileContent( std::string filename, std::string content ) {
-	std::fstream file(filename.c_str(), std::fstream::in | std::fstream::out | std::fstream::app);
+	std::fstream file(filename.c_str(), std::fstream::out | std::fstream::trunc);
     file << content;
 	if (file.fail())
 		return (false);

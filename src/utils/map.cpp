@@ -20,6 +20,7 @@ sMime MAP_mime[] = {
 sStatusCode MAP_status_code[] = {
 	{ 200, "OK" },
 	{ 201, "Created" },
+	{ 204, "No Content" },
 	{ 301, "Moved Permanently" },
 	{ 403, "Forbidden" },
 	{ 404, "Not Found" },

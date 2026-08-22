@@ -13,9 +13,38 @@ void Server::STATUS( int status_code ) {
 	curClient->RES->addPayload(content);
 };
 
+void Server::SEND() {
+	if (!curClient->RES->payload.empty()) {
+		std::string *mime = getMimeType(getFileExtension(curClient->RES->headers.path));
+		if (mime)
+			curClient->RES->addHeader("Content-Type", *mime);
+		curClient->RES->addHeader("Content-Length", intToChar(curClient->RES->payload.size()));
+	}
+	if (DEBUG) {
+		std::cout << "---------- REQ ----------" << std::endl;
+		debugRe(*curClient->REQ, true);
+		std::cout << "---------- RES ----------" << std::endl;
+		debugRe(*curClient->RES, true);
+	}
+	if (curClient->RES->headers.method == HEAD) {
+		curClient->RES->payload.clear();
+		curClient->RES->payloadLen = 0;
+	}
+	curClient->RES->stringify();
+	send(curConnec->pollFd.fd, curClient->RES->body.c_str(), curClient->RES->body.size(), 0);
+	
+	// Save logs
+	curClient->REQ->saveLog();
+	curClient->RES->saveLog();
+
+	// Close connections
+	close(curFd);
+	serverConnections.erase(serverConnections.begin() + curIdx);
+	curIdx--;
+}
+
 void Server::OUT() {
 	LOG("DEBUG", __FUNCTION__);
-	curClient->REQ->saveLog();
 	
 	Response	*RES = curClient->RES;
 	sRoute		ROUT = findRoute(RES->headers.path, serverConfigs->router);
@@ -57,8 +86,8 @@ void Server::OUT() {
 		}
 	} else {
 		switch (METH) {
-			case GET:
-			case HEAD: {
+			case HEAD:
+			case GET: {
 				DIR *dir = opendir(PATH.c_str());
 				int _errno = errno;
 				if (dir && !(_errno == EACCES)) {
@@ -98,9 +127,12 @@ void Server::OUT() {
 				break;
 			}
 			case DELETE: {
-				LOG("DELETE", PATH);
-				std::remove(PATH.c_str());
-				RES->statusCode = 200;
+				if (access(PATH.c_str(), F_OK) != 0)
+					STATUS(404);
+				else if (std::remove(PATH.c_str()) != 0)
+					STATUS(403);
+				else
+					STATUS(204);
 				break;
 			}
 			default: {
@@ -109,26 +141,5 @@ void Server::OUT() {
 			}
 		}
 	}
-
-	if (!RES->payload.empty()) {
-		std::string *mime = getMimeType(getFileExtension(RES->headers.path));
-		if (mime)
-			RES->addHeader("Content-Type", *mime);
-		RES->addHeader("Content-Length", intToChar(RES->payload.size()));
-	}
-	if (DEBUG) {
-		std::cout << "---------- REQ ----------" << std::endl;
-		debugRe(*curClient->REQ, true);
-		std::cout << "---------- RES ----------" << std::endl;
-		debugRe(*curClient->RES, true);
-	}
-	RES->saveLog();
-	if (METH == HEAD) {
-		RES->payload.clear();
-		RES->payloadLen = 0;
-	}
-	LOG("DEBUG", "HELLO");
-	RES->stringify();
-	LOG("DEBUG", "HELLO");
-	send(curConnec->pollFd.fd, RES->body.c_str(), RES->body.size(), 0); // CHECK THE BYTES SENT IF MULTI PACKAGE
+	SEND();
 }

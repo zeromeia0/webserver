@@ -51,7 +51,7 @@ void Server::START() {
 		setOptions();
 		bindSocket(*port);
 		listenSocket();
-		S_CONNS.push_back(conn);
+		serverConnections.push_back(conn);
 		curIdx++;
 	}
 	LOOP();
