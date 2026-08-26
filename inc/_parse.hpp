@@ -5,6 +5,8 @@
 #include MAP_HPP
 #include <fcntl.h>
 #include <unistd.h>
+#include <cstdlib>
+#include <algorithm>
 
 sHeaders			parseHeaders(std::string str);
 sConfigs			*parseConfigs(char *fileName);

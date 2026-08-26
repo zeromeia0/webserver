@@ -30,9 +30,11 @@ void Server::SEND() {
 		curClient->RES->payload.clear();
 		curClient->RES->payloadLen = 0;
 	}
+
+	curClient->RES->addHeader("Connection", "close");
 	curClient->RES->stringify();
 	send(curConnec->pollFd.fd, curClient->RES->body.c_str(), curClient->RES->body.size(), 0);
-	
+
 	// Save logs
 	curClient->REQ->saveLog();
 	curClient->RES->saveLog();
@@ -49,16 +51,18 @@ void Server::OUT() {
 	Response	*RES = curClient->RES;
 	sRoute		ROUT = findRoute(RES->headers.path, serverConfigs->router);
 	RE_METHOD	METH = RES->headers.method;
-	std::string	PATH = ROUT.root + RES->headers.path;
+	std::string PATH;
+	if (!ROUT.alias.empty()) {
+		std::string rest = RES->headers.path.substr(ROUT.path.size());
+		if (rest.empty() || rest[0] != '/')
+			rest = "/" + rest;
+		PATH = ROUT.alias + rest;
+	} else {
+		PATH = ROUT.root + RES->headers.path;
+	}
 
-	bool MethodNotAllowed = !valueInContainer<std::string>(getMethodTxt(METH), ROUT.methods);
-	bool PayloadTooLarge = curClient->REQ->payloadLen > serverConfigs->clientMaxBodySize;
 	bool MovedPermanently = !ROUT.redirect.empty();
-	if (MethodNotAllowed) {
-		STATUS(405);
-	} else if (PayloadTooLarge) {
-		STATUS(413);
-	} else if (MovedPermanently) {
+	if (MovedPermanently) {
 		RES->headers.path = ROUT.redirect;
 		RES->addHeader("Location", RES->headers.path);
 		STATUS(301);
@@ -93,9 +97,20 @@ void Server::OUT() {
 				if (dir && !(_errno == EACCES)) {
 					closedir(dir);
 					if (!ROUT.index.empty()) {
-						RES->headers.path = ROUT.root + ROUT.index;
-						RES->statusCode = 200;
-						RES->addPayload(readFileContent(RES->headers.path));
+						std::string indexPath = PATH + ROUT.index;
+						if (access(indexPath.c_str(), F_OK) == 0) {
+							RES->headers.path = indexPath;
+							RES->statusCode = 200;
+							RES->addPayload(readFileContent(indexPath));
+						} else if (ROUT.autoindex) {
+							RES->addPayload(autoindex(PATH, PATH));
+							RES->addHeader("Content-Type", "text/html");
+							RES->headers.path = PATH;
+							RES->statusCode = 200;
+						} else {
+							RES->headers.path = PATH;
+							STATUS(404);
+						}
 					} else if (ROUT.autoindex && !(_errno == EACCES)) {
 						RES->addPayload(autoindex(PATH, RES->headers.path));
 						RES->addHeader("Content-Type", "text/html");
@@ -121,7 +136,6 @@ void Server::OUT() {
 			case POST: {
 				RES->headers.path = PATH;
 				sFormData *form = parseFormData(curClient->REQ->payload);
-				LOG("PAYLOAD", form->payload);
 				writeFileContent(RES->headers.path, form->payload) ? STATUS(201) : STATUS(404);
 				delete form;
 				break;

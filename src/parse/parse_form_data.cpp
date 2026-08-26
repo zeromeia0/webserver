@@ -1,22 +1,21 @@
 #include "_parse.hpp"
 
 std::string getFileName( std::string content ) {
-    std::vector<std::string> tokens = tokenize(content);
-    // printVector(tokens);
-    for (size_t i = 0; i < tokens.size(); i++) {
-        if (tokens[i].substr(0, 10) == "filename=\"")
-            return (tokens[i].substr(10, tokens[i].substr(10).find("\"")));
-    }
-    return ("");
+	std::vector<std::string> tokens = tokenize(content);
+	for (size_t i = 0; i < tokens.size(); i++) {
+		if (tokens[i].substr(0, 10) == "filename=\"")
+			return (tokens[i].substr(10, tokens[i].substr(10).find("\"")));
+	}
+	return ("");
 }
 
 sFormData *parseFormData(std::string body) {
-    std::string rawHeaders = body.substr(0, body.find("\r\n\r\n"));
-    std::vector<std::string> tokens = tokenizeHttpRequest(rawHeaders);
+	std::string rawHeaders = body.substr(0, body.find("\r\n\r\n"));
+	std::vector<std::string> tokens = tokenizeHttpRequest(rawHeaders);
 
-    sFormData *form = new sFormData;
-    for (size_t i = 0; i < tokens.size(); i++) {
-            if (i == 0) {
+	sFormData *form = new sFormData;
+	for (size_t i = 0; i < tokens.size(); i++) {
+			if (i == 0) {
 				if (tokens[i].find("------WebKitFormBoundary") == std::string::npos) {
 					form->payload = body;
 					return (form);
@@ -24,13 +23,13 @@ sFormData *parseFormData(std::string body) {
 				form->boundaryLimiter = tokens[i];
 				continue;
 			}
-            if (tokens[i].substr(0, 6) == "name=\"") { form->name = tokens[i].substr(6, tokens[i].substr(6).find("\"")); }
-            if (tokens[i].substr(0, 10) == "filename=\"") { form->filename = tokens[i].substr(10, tokens[i].substr(10).find("\"")); }
-    }
+			if (tokens[i].substr(0, 6) == "name=\"") { form->name = tokens[i].substr(6, tokens[i].substr(6).find("\"")); }
+			if (tokens[i].substr(0, 10) == "filename=\"") { form->filename = tokens[i].substr(10, tokens[i].substr(10).find("\"")); }
+	}
 	size_t start = body.find("\r\n\r\n") + 4;
 	size_t end = body.find("\r\n" + form->boundaryLimiter + "--\r\n");
 	form->payload = body.substr(start, end - start);
-    return (form);
+	return (form);
 }
 
 // int main() {

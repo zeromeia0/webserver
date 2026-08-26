@@ -1,6 +1,7 @@
 #include "Server.hpp"
 
 void Server::POLL() {
+	LOG("DEBUG", __FUNCTION__);
 	/* Each connection contains the poll_fd,
 	but we must send only poll_fds vector to the poll() function,
 	so we're recreating the poll_fds vector, request poll(),
@@ -16,7 +17,7 @@ void Server::POLL() {
 
 void Server::LOOP() {
 	LOG("DEBUG", __FUNCTION__);
-    while (G_RUNNING) {
+	while (G_RUNNING) {
 
 		POLL();
 
@@ -45,7 +46,14 @@ void Server::LOOP() {
 					serverConnections.push_back(conn);
 				} else {
 					IN();
-					if (curConnec->client->REQ->payloadLen > serverConfigs->clientMaxBodySize) {
+					sRoute		ROUT = findRoute(curConnec->client->REQ->headers.path, serverConfigs->router);
+					bool MethodNotAllowed = !valueInContainer<std::string>(getMethodTxt(curConnec->client->REQ->headers.method), ROUT.methods);
+					bool PayloadTooLarge = curConnec->client->REQ->payloadLen > serverConfigs->clientMaxBodySize;
+					if (MethodNotAllowed) {
+						curClient->RES	= new Response(curClient->REQ);
+						STATUS(405);
+						SEND();
+					} else if (PayloadTooLarge) {
 						curClient->RES	= new Response(curClient->REQ);
 						STATUS(413);
 						SEND();

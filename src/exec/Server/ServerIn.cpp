@@ -39,17 +39,17 @@ void Server::IN() {
 			if (content_len == curClient->REQ->payloadLen) {
 				curClient->state = COMPLETED;
 				curConnec->pollFd.events = POLLOUT;
-			}		
+				curClient->REQ->printRe();
+			}
 			break;
 		}
 		case CHUNKED: {
 			if (newBody.find("0\r\n\r\n") != std::string::npos) {
 				curClient->state = COMPLETED;
 				curConnec->pollFd.events = POLLOUT;
+				curClient->REQ->printRe();
 			}
 			break;
 		}
 	}
-	LOG("PAYLOAD LEN", curClient->REQ->payloadLen);
-	LOG("CLIENT_STATE", curClient->state);
 }

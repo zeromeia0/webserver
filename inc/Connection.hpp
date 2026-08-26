@@ -5,6 +5,7 @@
 #include <poll.h>
 #include <fcntl.h>
 #include <sys/socket.h>
+#include <cstring>
 
 class Connection {
 public:

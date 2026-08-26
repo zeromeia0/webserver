@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <map>
+#include <vector>
 
 // ############################################################
 // 							PARSE
@@ -61,7 +62,7 @@ std::string					mapToJsonString(std::map<T, U> map) {
 	for (typename std::map<T, U>::iterator it = map.begin(); it != map.end(); ++it) {
 		if (it != map.begin())
 			ret.append(", ");
-        ret.append("\"" + it->first + "\": \"" + it->second + "\"");
+		ret.append("\"" + it->first + "\": \"" + it->second + "\"");
 	}
 	ret.append("}");
 	return (ret);

@@ -1,15 +1,15 @@
 #include "_utils.hpp"
 
 std::string	intToChar( int value ) {
-    std::stringstream iss;
-    iss << value;
-    std::string str;
-    iss >> str;
-    return (str);
+	std::stringstream iss;
+	iss << value;
+	std::string str;
+	iss >> str;
+	return (str);
 }
 
 char toLower( unsigned char c ) {
-    return std::tolower(c);
+	return std::tolower(c);
 }
 
 std::string readFileContent( std::string path ) {
@@ -17,9 +17,9 @@ std::string readFileContent( std::string path ) {
 	std::string content;
 	std::fstream file(path.c_str());
 	if (!file.is_open())
-        return (content);
+		return (content);
 
-    char c;
+	char c;
 	while(file.get(c))
 		content = content + c;
 
@@ -36,9 +36,9 @@ std::string *getFileExtension(std::string filename) {
 
 bool writeFileContent( std::string filename, std::string content ) {
 	std::fstream file(filename.c_str(), std::fstream::out | std::fstream::trunc);
-    file << content;
+	file << content;
 	if (file.fail())
 		return (false);
-    file.close();
+	file.close();
 	return (true);
 };

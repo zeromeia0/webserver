@@ -40,8 +40,8 @@ sFormUrlEncoded *parseFormUrlEncoded(std::string url) {
 		std::string scd = decode(query_str.substr(del_pos + 1, end_pos - (del_pos + 1)));
 		f->query->insert(std::pair<std::string, std::string>(fst, scd.substr(0, scd.find("&"))));
 		query_str = std::string(&query_str[end_pos]);
-    }
-    return (f);
+	}
+	return (f);
 }
 
 // int main() {

@@ -1,6 +1,7 @@
 #include "Server.hpp"
 
 Server::Server() {
+	LOG("DEBUG", __FUNCTION__);
 	serverConfigs = NULL;
 	curIdx = 0;
 	curConnec = NULL;
@@ -11,14 +12,17 @@ Server::Server() {
 Server::Server( char *confFileName ) {
 	LOG("DEBUG", __FUNCTION__);
 	serverConfigs = parseConfigs(confFileName);
-
+	if (DEBUG)
+		debugVector<std::string>(serverConfigs->confFile);
 }
 
 Server::Server( const Server &other ) {
+	LOG("DEBUG", __FUNCTION__);
 	*this = other;
 }
 
 Server &Server::operator=( const Server &other ) {
+	LOG("DEBUG", __FUNCTION__);
 	if (this != &other) {
 		this->serverConfigs = other.serverConfigs;
 		this->serverConnections = other.serverConnections;
@@ -31,5 +35,5 @@ Server &Server::operator=( const Server &other ) {
 }
 
 Server::~Server() {
-
+	LOG("DEBUG", __FUNCTION__);
 }

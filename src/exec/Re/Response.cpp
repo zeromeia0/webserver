@@ -11,7 +11,7 @@ Response::Response( const Request *req ) : Re(RES) {
 	statusCode = 0;
 };
 
-Response::Response( const Response &other ) {
+Response::Response( const Response &other ) : Re(other) {
 	*this = other;
 };
 
@@ -28,7 +28,6 @@ Response::~Response() {
 };
 
 void Response::stringify() {
-	LOG("DEBUG", __FUNCTION__);
 	this->body =
 		this->headers.version + " "
 		+ intToChar(this->statusCode) + " "

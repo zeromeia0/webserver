@@ -14,7 +14,6 @@ sRoute findRoute(std::string uri, std::vector<sRoute> router) {
 }
 
 std::string *cgi(char *bin, char *file, std::map<std::string, std::string> inputs, std::string &payload) {
-	LOG("DEBUG", __FUNCTION__);
 	int pipe_out[2];
 	pipe(pipe_out);
 
@@ -47,7 +46,7 @@ std::string *cgi(char *bin, char *file, std::map<std::string, std::string> input
 		envp[env_strs.size()] = NULL;
 
 		execve(bin, args, envp);
-		exit(1);
+		std::exit(1);
 	}
 
 	close(pipe_out[1]);

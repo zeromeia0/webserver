@@ -18,6 +18,7 @@
 #include ENUMS_HPP
 #include STRUCTS_HPP
 #include <iostream>
+#include <string>
 
 #define SIN_FAMILY		AF_INET
 #define SIN_ADDR		INADDR_ANY
@@ -31,10 +32,12 @@
 		std::cout << "[" << categ << "] " << msg << std::endl;\
 } while(0)
 
+#define THROW(msg) throw std::runtime_error("Error: " + std::string(msg));
+
 template <typename T>
 void _free(T *&ptr) {
 	std::cout << "FREE PTR" << ptr << std::endl;
-    if (!ptr)
+	if (!ptr)
 		return;
 	delete ptr;
 	ptr = NULL;

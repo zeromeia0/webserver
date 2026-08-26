@@ -1,5 +1,6 @@
 #include "#MAIN.hpp"
 #include SERVER_HPP
+#include <csignal>
 
 bool G_RUNNING = true;
 
@@ -12,19 +13,19 @@ int main(int argc, char **argv) {
 
 	signal(SIGINT, signalHandler);
 
-    if (argc != 2)
-    {
-        std::cerr << "Error: Invalid Argument" << std::endl;
-        std::cout << "Usage: ./webserv config.info" << std::endl;
-        return (1);
-    }
+	if (argc != 2)
+	{
+		std::cerr << "Error: Invalid Argument" << std::endl;
+		std::cout << "Usage: ./webserv config.info" << std::endl;
+		return (1);
+	}
 
-    try {
-        Server S(argv[1]);
-        S.START();
-    } catch (std::exception &e) {
-        std::cout << e.what() << std::endl;
-    }
+	try {
+		Server S(argv[1]);
+		S.START();
+	} catch (std::exception &e) {
+		std::cout << e.what() << std::endl;
+	}
 
-    return (0);
+	return (0);
 }

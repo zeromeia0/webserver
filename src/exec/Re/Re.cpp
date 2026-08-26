@@ -54,7 +54,6 @@ void Re::addPayload( const std::string newContent ) {
 };
 
 void Re::saveLog() {
-	LOG("DEBUG", __FUNCTION__);
 	char *bin = (char *)"/usr/bin/python3";
 	char *file = (char *)"./var/cgi-bin/add_log.py";
 	std::map<std::string, std::string> map;
@@ -68,6 +67,13 @@ void Re::saveLog() {
 	std::map<std::string, std::string> inputs;
 	inputs.insert(std::pair<std::string, std::string>("BODY", mapToJsonString<std::string, std::string>(map)));
 	std::string payload = "";
-	std::string *output = cgi(bin, file, inputs, payload);
-	LOG("DEBUG", "output: " << *output);
+	cgi(bin, file, inputs, payload);
 };
+
+void Re::printRe() {
+	std::cout << *getMethodTxt(headers.method) << " ";
+	std::cout << headers.version << " ";
+	std::cout << headers.path << " ";
+	std::cout << payloadLen << " ";
+	std::cout << std::endl;
+}

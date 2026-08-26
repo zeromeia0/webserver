@@ -18,7 +18,7 @@ def filters():
 	for k, v in data.items():
 		print(f"<div>")
 		for i in v:
-			print(f"    <input name='{k}' value='{i}' type='checkbox'/>")
+			print(f"	<input name='{k}' value='{i}' type='checkbox'/>")
 			print(f"	<label>{i}<label/>")
 		print(f"</div>")
 	print("""

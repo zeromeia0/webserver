@@ -4,7 +4,7 @@ Request::Request() : Re(REQ) {
 
 };
 
-Request::Request( const Request &other ) {
+Request::Request( const Request &other ) : Re(other) {
 	*this = other;
 };
 

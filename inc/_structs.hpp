@@ -3,6 +3,8 @@
 #include "#MAIN.hpp"
 #include ENUMS_HPP
 #include <map>
+#include <vector>
+#include <string>
 
 struct sMime {
 	std::string							extension;
@@ -49,6 +51,7 @@ struct sRoute {
 	std::string							index;
 	std::string							uploadStore;
 	std::string							redirect;
+	std::string							alias;
 	bool								autoindex;
 	bool								uploadEnabled;
 	std::vector<std::string>			methods;

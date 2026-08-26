@@ -7,6 +7,9 @@
 #include CONNECTION_HPP
 #include UTILS_HPP
 #include <netinet/ip.h>
+#include <vector>
+#include <map>
+#include <cstdlib>
 
 extern bool G_RUNNING;
 
@@ -23,25 +26,24 @@ public:
 	Client						*curClient;
 	int							curFd;
 
-    Server();
-    Server( char *configsFilename );
-    Server( const Server &other );
-    Server &operator=( const Server &other );
-    ~Server();
+	Server();
+	Server( char *configsFilename );
+	Server( const Server &other );
+	Server &operator=( const Server &other );
+	~Server();
 
 	void						setupServer();
 	void						setOptions();
 	void						bindSocket( int port );
 	void						listenSocket();
-	bool						checkSetup();
-	
-    void						START();
+
+	void						START();
 	void						LOOP();
 	void						POLL();
-	void                        IN();
+	void						IN();
+	void						OUT();
+	void						STATUS( int status_code );
 	void						SEND();
-	void                        OUT();
 	void						END();
 
-	void						STATUS( int status_code );
 };
