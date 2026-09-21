@@ -7,7 +7,10 @@
 #include <cstdlib>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include <signal.h>
+#include <cerrno>
+#include <climits>
+#include <dirent.h>
 
-sRoute			findRoute(std::string uri, std::vector<sRoute> router);
-std::string		*cgi(char *bin, char *file, std::map<std::string, std::string> inputs, std::string &payload);
+sRoute			findRoute( const std::string &uri, const std::vector<sRoute> &router );
 std::string		autoindex( std::string path, std::string base_path );

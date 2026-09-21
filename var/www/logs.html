@@ -1,0 +1,75 @@
+<html>
+	<head>
+		<title>Webserv</title>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="./css/styles.css">
+	</head>
+	<script>
+		function applyFilters() {
+			var uri = '?'
+			var filters = {};
+			var checked = document.querySelectorAll('input[type=checkbox]:checked');
+			for (var i = 0; i < checked.length; i++) {
+				var name = checked[i].name;
+				var value = checked[i].value;
+				if (!filters[name]) filters[name] = [];
+				filters[name].push(value);
+			}
+			for (const [key, value] of Object.entries(filters)) {
+				uri = uri + key + '=['
+				value.forEach((e) => {
+					uri = uri + "'" + e + "',"
+				})
+				uri = uri + ']&'
+			}
+			console.log(uri)
+			fetch("/cgi-bin/logs.py" + uri, { method: "POST" })
+				.then(r => r.text())
+				.then(html => document.getElementById("output").innerHTML = html);
+		}
+	</script>
+	<body>
+		<div>
+			<input name='method' value='GET' type='checkbox'/>
+			<label>GET</label>
+			<input name='method' value='POST' type='checkbox'/>
+			<label>POST</label>
+			<input name='method' value='DELETE' type='checkbox'/>
+			<label>DELETE</label>
+			<input name='method' value='HEAD' type='checkbox'/>
+			<label>HEAD</label>
+		</div>
+		<div>
+			<input name='type' value='RES' type='checkbox'/>
+			<label>RES</label>
+			<input name='type' value='REQ' type='checkbox'/>
+			<label>REQ</label>
+		</div>
+		<div>
+			<input name='status' value='200' type='checkbox'/>
+			<label>200</label>
+			<input name='status' value='201' type='checkbox'/>
+			<label>201</label>
+			<input name='status' value='301' type='checkbox'/>
+			<label>301</label>
+			<input name='status' value='403' type='checkbox'/>
+			<label>403</label>
+			<input name='status' value='400' type='checkbox'/>
+			<label>400</label>
+			<input name='status' value='404' type='checkbox'/>
+			<label>404</label>
+			<input name='status' value='405' type='checkbox'/>
+			<label>405</label>
+			<input name='status' value='408' type='checkbox'/>
+			<label>408</label>
+			<input name='status' value='413' type='checkbox'/>
+			<label>413</label>
+			<input name='status' value='500' type='checkbox'/>
+			<label>500</label>
+			<input name='status' value='504' type='checkbox'/>
+			<label>504</label>
+		</div>
+		<button onclick="applyFilters()">Filter</button>
+		<div id="output"></div>
+	</body>
+</html>

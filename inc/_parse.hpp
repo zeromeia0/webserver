@@ -8,7 +8,8 @@
 #include <cstdlib>
 #include <algorithm>
 
-sHeaders			parseHeaders(std::string str);
+sHeaders			*parseHeaders(std::string str);
 sConfigs			*parseConfigs(char *fileName);
-sFormData			*parseFormData(std::string body);
-sFormUrlEncoded		*parseFormUrlEncoded(std::string url);
+std::string			parseFormData(std::string payload, std::string contentType);
+sFormUrlEncoded		parseFormUrlEncoded(std::string url);
+std::string			parseChunkedBody( std::string *newBytes, std::string *previousBytes, int *status );

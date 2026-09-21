@@ -4,13 +4,6 @@ Response::Response() : Re(RES) {
 	statusCode = 0;
 };
 
-Response::Response( const Request *req ) : Re(RES) {
-	headers.method = req->headers.method;
-	headers.version = req->headers.version;
-	headers.path = req->headers.path;
-	statusCode = 0;
-};
-
 Response::Response( const Response &other ) : Re(other) {
 	*this = other;
 };
@@ -27,14 +20,16 @@ Response::~Response() {
 
 };
 
-void Response::stringify() {
-	this->body =
+std::string Response::stringify() {
+	std::string body;
+	body =
 		this->headers.version + " "
 		+ intToChar(this->statusCode) + " "
-		+ *getStatusMsg(this->statusCode) + " "
+		+ getStatusMsg(this->statusCode) + " "
 		+ "\r\n";
 	for (std::map<std::string, std::string>::iterator it = this->headers.headers.begin(); it != this->headers.headers.end(); ++it)
-		this->body = this->body + it->first + ": " + it->second + "\r\n";
-	this->body = this->body + "\r\n";
-	this->body = this->body + this->payload;
+		body = body + it->first + ": " + it->second + "\r\n";
+	body = body + "\r\n";
+	body = body + this->payload;
+	return (body);
 };	

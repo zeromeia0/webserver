@@ -31,7 +31,7 @@ static void saveConfigs(sConfigs *server) {
 	writeFileContent(filename, content);
 }
 
-static void confAssignValue(sConfigs *server, sRoute *&currentRoute, const std::vector<std::string> &tokens, size_t i)
+static void confAssignValue(sConfigs *server, int &currentRouteIdx, const std::vector<std::string> &tokens, size_t i)
 {
 	if (tokens[i] == "listen")
 		server->listenPorts.push_back(atoi(tokens[i + 1].c_str()));
@@ -39,7 +39,7 @@ static void confAssignValue(sConfigs *server, sRoute *&currentRoute, const std::
 		server->host = tokens[i + 1];
 	else if (tokens[i] == "server_name")
 		server->serverName = tokens[i + 1];
-	else if (tokens[i] == "client_max_body_size")
+	else if (tokens[i] == "client_max_body_size" && currentRouteIdx < 0)
 		server->clientMaxBodySize = atoi(tokens[i + 1].c_str());
 	else if (tokens[i] == "error_page")
 		server->errorPages[atoi(tokens[i + 1].c_str())] = tokens[i + 2];
@@ -48,10 +48,11 @@ static void confAssignValue(sConfigs *server, sRoute *&currentRoute, const std::
 		sRoute route;
 		route.path = tokens[i + 1];
 		server->router.push_back(route);
-		currentRoute = &server->router.back();
+		currentRouteIdx = server->router.size() - 1;
 	}
-	else if (currentRoute)
+	else if (currentRouteIdx >= 0)
 	{
+		sRoute *currentRoute = &server->router[currentRouteIdx];
 		if (tokens[i] == "root")
 			currentRoute->root = tokens[i + 1];
 		else if (tokens[i] == "index")
@@ -66,6 +67,8 @@ static void confAssignValue(sConfigs *server, sRoute *&currentRoute, const std::
 			currentRoute->redirect = tokens[i + 1];
 		else if (tokens[i] == "alias")
 			currentRoute->alias = tokens[i + 1];
+		else if (tokens[i] == "client_max_body_size")
+			currentRoute->clientMaxBodySize = atoi(tokens[i + 1].c_str());
 		else if (tokens[i] == "allowed_methods")
 		{
 			size_t j = i + 1;
@@ -78,16 +81,6 @@ static void confAssignValue(sConfigs *server, sRoute *&currentRoute, const std::
 		else if (tokens[i] == "cgi")
 			currentRoute->cgi[tokens[i + 1]] = tokens[i + 2];
 	}
-}
-
-static void resetConfig(sConfigs *CONF) {
-	CONF->listenPorts.clear();
-	CONF->host.clear();
-	CONF->serverName.clear();
-	CONF->clientMaxBodySize = 0;
-	CONF->errorPages.clear();
-	CONF->router.clear();
-	CONF->confFile.clear();
 }
 
 static std::string validateFile(char *fileName)
@@ -106,13 +99,12 @@ static std::string validateFile(char *fileName)
 
 sConfigs *parseConfigs(char *fileName) {
 	sConfigs *CONF = new sConfigs;
-	resetConfig(CONF);
 	std::string file = validateFile(fileName);
 	CONF->confFile = tokenize(file);
 	validateSyntax(CONF->confFile);
-	sRoute *currentRoute = NULL;
+	int currentRouteIdx = -1;
 	for (size_t i = 0; i < CONF->confFile.size(); i++)
-		confAssignValue(CONF, currentRoute, CONF->confFile, i);
+		confAssignValue(CONF, currentRouteIdx, CONF->confFile, i);
 	saveConfigs(CONF);
 	return (CONF);
 }

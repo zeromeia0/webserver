@@ -22,24 +22,26 @@
 
 #define SIN_FAMILY		AF_INET
 #define SIN_ADDR		INADDR_ANY
-#define BUFF_SIZE		1024
-#define CONN_REQS_Q		100
+#define BUFF_SIZE		65536
+#define CONN_REQS_Q		1024
 #define TIMEOUT			30
+#define DEF_MAX_BODY	100000000
 
 #define DEBUG			1
-#define LOG(categ, msg)	do {\
-	if (DEBUG || std::string(categ) != "DEBUG")\
-		std::cout << "[" << categ << "] " << msg << std::endl;\
+#if DEBUG
+#define LOG(categ, msg) do {\
+	std::cerr << "[" << categ << "] " << msg << std::endl;\
 } while(0)
+#else
+#define LOG(categ, msg) do {} while(0)
+#endif
 
 #define THROW(msg) throw std::runtime_error("Error: " + std::string(msg));
 
 template <typename T>
 void _free(T *&ptr) {
-	std::cout << "FREE PTR" << ptr << std::endl;
 	if (!ptr)
 		return;
 	delete ptr;
 	ptr = NULL;
 }
-

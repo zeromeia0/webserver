@@ -1,6 +1,6 @@
 from common.footer import footer
 from common.header import header
-import os, json
+import json, html
 
 header('LOGS')
 
@@ -15,13 +15,13 @@ header('LOGS')
 
 with open("var/data/configs.json") as f:
 	data = f.read()
-jsondata = eval(data)
+jsondata = json.loads(data)
 
 print(f'<div class="containers">')
 for k, v in jsondata.items():
 	if (k != 'routes'):
 		print(f'<div class="container">')
-		print(f'	<p>{k}: {v}</p>')
+		print(f'<p>{html.escape(str(k))}: {html.escape(str(v))}</p>')
 		print(f'</div>')
 print(f'</div>')
 

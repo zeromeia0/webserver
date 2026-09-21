@@ -8,13 +8,13 @@ class Request;
 
 class Response : public Re {
 public:
-	int		statusCode;
+	std::string		body;
+	int				statusCode;
 
 	Response();
-	Response( const Request *req );
 	Response( const Response &other );
 	Response &operator=( const Response &other );
 	~Response();
 
-	void	stringify();
+	std::string		stringify();
 };

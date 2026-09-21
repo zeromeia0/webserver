@@ -8,14 +8,25 @@
 #include <cstring>
 
 class Connection {
-public:
-	pollfd		pollFd;
-	time_t		lastActive;
-	Client		*client;
-
-	Connection();
-	Connection( int fd );
+private:
 	Connection( const Connection &other);
 	Connection &operator=( const Connection &other);
+	void init();
+public:
+	CONNECTION_TYPE		type;
+	pollfd				pollFd;
+	time_t				lastActive;
+	Client				*client;
+	Connection			*parent;
+	CGI_STATE			cgi_state;
+	int					cgi_offset;
+	TRANSFER_TYPE		transfer_type;
+	size_t				contentLen;
+	std::string			buffer;
+
+	Connection();
+	Connection( int fd, CONNECTION_TYPE newType, Connection *newParent );
 	~Connection();
+
+	void				updateLastActive();
 };

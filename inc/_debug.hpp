@@ -5,7 +5,7 @@
 #include <map>
 #include <vector>
 
-void		debugRe(Re &re, bool printPayload);
+void		debugRe(Re &re);
 void		debugRes(Response &res);
 void		debugReq(Request &req);
 void		debugConfigs(sConfigs *configs);
@@ -13,12 +13,12 @@ void		debugConfigs(sConfigs *configs);
 template	<typename T>
 void		debugVector(std::vector<T> vec) {
 	for (size_t i = 0; i < vec.size(); i++)
-		std::cout << vec[i] << std::endl;
+		std::cerr << vec[i] << std::endl;
 }
 
 template	<typename T, typename U>
 void		debugMap(std::map<T, U> map) {
 	for (typename std::map<T, U>::iterator it = map.begin(); it != map.end(); ++it) {
-		std::cout << it->first << " -> " << it->second << std::endl;
+		std::cerr << it->first << " -> \"" << it->second << "\"" << std::endl;
 	}
 }

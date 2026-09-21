@@ -5,7 +5,7 @@ static bool isDirective(const std::string &token)
 	return (token == "server" || token == "listen" || token == "host" || token == "server_name" ||
 			token == "client_max_body_size" || token == "error_page" || token == "location" ||
 			token == "root" || token == "index" || token == "autoindex" || token == "allowed_methods" ||
-			token == "upload_enabled" || token == "upload_store" || token == "redirect"  || token == "alias" || token == "cgi");
+			token == "upload_enabled" || token == "upload_store" || token == "redirect"  || token == "alias" || token == "client_max_body_size" || token == "cgi");
 }
 
 static bool isNumber(const std::string &token)
@@ -170,7 +170,8 @@ static void checkDuplicates(const std::vector<std::string>& tokens)
 				tokens[i] == "upload_enabled" ||
 				tokens[i] == "upload_store" ||
 				tokens[i] == "redirect" ||
-				tokens[i] == "alias")
+				tokens[i] == "alias" ||
+				tokens[i] == "client_max_body_size")
 			{
 				if (locationDirectives.count(tokens[i]))
 					THROW("Duplicate directive in location: " + tokens[i]);
@@ -200,12 +201,17 @@ static void checkDirectiveContext(const std::vector<std::string> &tokens)
 				THROW("location directive must be inside server block");
 			inLocation = true;
 		}
-		else if (tokens[i] == "listen" || tokens[i] == "host" || tokens[i] == "server_name" || tokens[i] == "client_max_body_size" || tokens[i] == "error_page")
+		else if (tokens[i] == "listen" || tokens[i] == "host" || tokens[i] == "server_name" || tokens[i] == "error_page")
 		{
 			if (depth != 1)
 				THROW("Server directive in wrong context: " + tokens[i]);
 		}
-		else if (tokens[i] == "root" || tokens[i] == "index" || tokens[i] == "autoindex" || tokens[i] == "allowed_methods" || tokens[i] == "upload_enabled" || tokens[i] == "upload_store" || tokens[i] == "redirect" || tokens[i] == "alias" || tokens[i] == "cgi")
+		else if (tokens[i] == "client_max_body_size")
+		{
+			if (depth != 1 && !(depth == 2 && inLocation))
+				THROW("client_max_body_size in wrong context");
+		} 
+		else if (tokens[i] == "root" || tokens[i] == "index" || tokens[i] == "autoindex" || tokens[i] == "allowed_methods" || tokens[i] == "upload_enabled" || tokens[i] == "upload_store" || tokens[i] == "redirect" || tokens[i] == "alias"  || tokens[i] == "cgi")
 		{
 			if (depth != 2 || !inLocation)
 				THROW("Route directive in wrong context: " + tokens[i]);
@@ -229,7 +235,7 @@ static void checkDirectiveArguments(const std::vector<std::string> &tokens)
 			if (tokens[i + 1].empty() || tokens[i + 1][0] != '/')
 				THROW("Invalid location path");
 		}
-		else if (tokens[i] == "listen" || tokens[i] == "host" || tokens[i] == "server_name" || tokens[i] == "client_max_body_size" || tokens[i] == "root" || tokens[i] == "index" || tokens[i] == "autoindex" || tokens[i] == "upload_enabled" || tokens[i] == "upload_store" || tokens[i] == "redirect" || tokens[i] == "alias")
+		else if (tokens[i] == "listen" || tokens[i] == "host" || tokens[i] == "server_name" || tokens[i] == "client_max_body_size" || tokens[i] == "root" || tokens[i] == "index" || tokens[i] == "autoindex" || tokens[i] == "upload_enabled" || tokens[i] == "upload_store" || tokens[i] == "redirect" || tokens[i] == "alias" || tokens[i] == "client_max_body_size")
 			expectArgs(tokens, i, 1);
 		else if (tokens[i] == "error_page")
 			expectArgs(tokens, i, 2);

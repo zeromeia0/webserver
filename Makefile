@@ -1,5 +1,5 @@
 CXX				= c++
-CXXFLAGS		= -Wall -Wextra -Werror -g -std=c++98 -I inc
+CXXFLAGS		= -Wall -Wextra -Werror -std=c++98 -I inc
 
 NAME			= webserver
 OBJ_DIR			= obj
@@ -9,7 +9,8 @@ OBJ_DIR			= obj
 # ########################################
 
 SRC_CHECK = \
-	src/check/check_configs.cpp
+	src/check/check_configs.cpp \
+	src/check/check_headers.cpp
 
 SRC_DEBUG = \
 	src/debug/debug_configs.cpp \
@@ -22,12 +23,12 @@ SRC_EXEC = \
 	src/exec/Client/Client.cpp \
 	src/exec/Connection/Connection.cpp \
 	src/exec/Server/Server.cpp \
-	src/exec/Server/ServerIn.cpp \
 	src/exec/Server/ServerLoop.cpp \
 	src/exec/Server/ServerOut.cpp \
 	src/exec/Server/ServerSetup.cpp
 
 SRC_PARSE = \
+	src/parse/parse_chunked_body.cpp \
 	src/parse/parse_configs.cpp \
 	src/parse/parse_form_data.cpp \
 	src/parse/parse_form_urlencoded.cpp \

@@ -1,23 +1,26 @@
 #include "_parse.hpp"
 
-sHeaders parseHeaders( std::string str ) {
+sHeaders *parseHeaders( std::string str ) {
 	std::vector<std::string> tokens = tokenizeHttpRequest(str);
-	sHeaders headers;
+	sHeaders *headers = new sHeaders;
 	int i = 0;
 	for (std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); it++) {
 		if (i == 0) {
-			headers.method = *getMethodCode(*it);
-		}
-		else if (i == 1) {
-			sFormUrlEncoded *form = parseFormUrlEncoded(*it);
-			headers.path = form->path;
-			headers.query = form->query;
-		}
-		else if (i == 2) {
-			headers.version = *it;
-		}
-		else if (*it == "\\r\\n")   { ; }
-		else {
+			RE_METHOD *method = getMethodCode(*it);
+			if (!method) {
+				delete headers;
+				return (NULL);
+			}
+			headers->method = *method;
+		} else if (i == 1) {
+			sFormUrlEncoded form = parseFormUrlEncoded(*it);
+			headers->path = form.path;
+			headers->query_str = form.query_str;
+		} else if (i == 2) {
+			headers->version = *it;
+		} else if (*it == "\\r\\n") {
+			;
+		} else {
 			std::pair<std::string, std::string> tmp;
 			tmp.first = *it;
 			it++;
@@ -25,14 +28,16 @@ sHeaders parseHeaders( std::string str ) {
 				break;
 			it++;
 			while (1) {
-				tmp.second += *it;
+				if (*it == ":" || tmp.second.empty() || tmp.second[tmp.second.size() - 1] == ':')
+					tmp.second += *it;
+				else
+					tmp.second += " " + *it;
 				if (it + 1 == tokens.end() || *(it + 1) == "\\r\\n")
 					break;
 				it++; i++;
-				tmp.second += " ";
 			}
 			std::transform(tmp.first.begin(), tmp.first.end(), tmp.first.begin(), tolower);
-			headers.headers.insert(tmp);
+			headers->headers.insert(tmp);
 		}
 		i++;
 	}

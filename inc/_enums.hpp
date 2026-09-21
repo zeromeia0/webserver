@@ -2,6 +2,19 @@
 
 #include "#MAIN.hpp"
 
+enum CONNECTION_TYPE {
+	SERVER,
+	CLIENT,
+	CGI_IN,
+	CGI_OUT,
+};
+
+enum CGI_STATE {
+	DEFAULT,
+	ONGOING,
+	DONE,
+};
+
 enum CLIENT_STATE {
 	READING_HEADERS,
 	READING_PAYLOAD,
@@ -14,8 +27,8 @@ enum TRANSFER_TYPE {
 };
 
 enum RE_TYPE {
-	RES,
 	REQ,
+	RES,
 };
 
 enum RE_METHOD {

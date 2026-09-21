@@ -12,7 +12,6 @@
 // 							PARSE
 // ############################################################
 
-void						confDebbuger(sConfigs *conf);
 sConfigs					*parseConfigs(char *fileName);
 std::vector<std::string>	tokenize(const std::string& file);
 std::vector<std::string>	tokenizeHttpRequest(const std::string& request);
@@ -40,15 +39,16 @@ std::string					vectorToListString(std::vector<T> vector) {
 std::string					intToChar( int value );
 char						toLower( unsigned char c );
 std::string					readFileContent( std::string path );
-std::string					*getFileExtension(std::string filename);
+std::string					getFileExtension(std::string filename);
 bool						writeFileContent( std::string filename, std::string content );
+std::string					decodeUrl(std::string url);
 
 template					<typename T>
-bool						valueInContainer(std::string *value, std::vector<T> container) {
-	if (!value)
+bool						valueInContainer(std::string value, std::vector<T> container) {
+	if (value.empty())
 		return (false);
 	for (size_t i = 0; i < container.size(); i++) {
-		if (container[i] == *value) {
+		if (container[i] == value) {
 			return (true);
 		}
 	}

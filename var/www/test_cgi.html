@@ -1,0 +1,17 @@
+<script>
+	const url = "/cgi-bin/test_cgi.py"
+	async function cgi_tester() {
+		const input = document.getElementById("input").value;
+		const response = await fetch(url, {
+			method: "POST",
+			body: input,
+		})
+		const output = await response.text();
+		console.log(output);
+		document.getElementById("output").innerHTML = output;
+	}
+</script>
+
+<input id="input"></input>
+<button onclick="cgi_tester()">TEST</button>
+<div style="padding: 10px" id="output"></div>

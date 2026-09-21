@@ -22,6 +22,7 @@ sStatusCode MAP_status_code[] = {
 	{ 201, "Created" },
 	{ 204, "No Content" },
 	{ 301, "Moved Permanently" },
+	{ 400, "Bad Request" },
 	{ 403, "Forbidden" },
 	{ 404, "Not Found" },
 	{ 405, "Method Not Allowed" },
@@ -38,11 +39,11 @@ sMethod MAP_method[] = {
 	{ HEAD, "HEAD" },
 };
 
-std::string *getMimeType(std::string *extension) {
-	if (!extension)
+std::string *getMimeType(std::string extension) {
+	if (extension.empty())
 		return (NULL);
 	for (size_t i = 0; i < (sizeof(MAP_mime) / sizeof(MAP_mime[0])); i++) {
-		if (MAP_mime[i].extension == *extension)
+		if (MAP_mime[i].extension == extension)
 			return (&MAP_mime[i].mime);
 	}
 	return (NULL);
@@ -56,20 +57,20 @@ std::string *getMimeExtension(std::string mime) {
 	return (NULL);
 }
 
-std::string *getStatusMsg(int status_code) {
+std::string getStatusMsg(int status_code) {
 	for (size_t i = 0; i < (sizeof(MAP_status_code) / sizeof(MAP_status_code[0])); i++) {
 		if (MAP_status_code[i].code == status_code)
-			return (&MAP_status_code[i].msg);
+			return (MAP_status_code[i].msg);
 	}
-	return (NULL);
+	return ("");
 }
 
-std::string *getMethodTxt(RE_METHOD code) {
+std::string getMethodTxt(RE_METHOD code) {
 	for (size_t i = 0; i < (sizeof(MAP_method) / sizeof(MAP_method[0])); i++) {
 		if (MAP_method[i].code == code)
-			return (&MAP_method[i].txt);
+			return (MAP_method[i].txt);
 	}
-	return (NULL);
+	return ("");
 }
 
 RE_METHOD *getMethodCode(std::string txt) {

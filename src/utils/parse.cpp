@@ -81,10 +81,10 @@ std::vector<std::string> tokenize(const std::string& file)
 //		 char buffer[4096];
 //		 int bytes = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
 //		 buffer[bytes] = '\0';
-//		 std::cout << "==== REQUEST ====\n" << buffer << "=================" << std::endl;
+//		 std::cerr << "==== REQUEST ====\n" << buffer << "=================" << std::endl;
 //	 req->tokens = tokenizeHttpRequest(static_cast<char*>(buffer));
-//	 // std::cout << "===== TOKENIZED REQUEST FROM BROWSER =====" << std::endl;
+//	 // std::cerr << "===== TOKENIZED REQUEST FROM BROWSER =====" << std::endl;
 //	 // for (std::vector<std::string>::iterator i = req->tokens.begin(); i != req->tokens.end(); i++)
-//	 //	 std::cout << "[" << *i << "]" << std::endl;
-//	 // std::cout << "===== FINISHED TOKENIZED REQUEST FROM BROSERR ======" << std::endl;
+//	 //	 std::cerr << "[" << *i << "]" << std::endl;
+//	 // std::cerr << "===== FINISHED TOKENIZED REQUEST FROM BROSERR ======" << std::endl;
 // }

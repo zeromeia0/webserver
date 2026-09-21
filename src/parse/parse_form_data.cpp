@@ -1,49 +1,78 @@
 #include "_parse.hpp"
 
-std::string getFileName( std::string content ) {
-	std::vector<std::string> tokens = tokenize(content);
-	for (size_t i = 0; i < tokens.size(); i++) {
-		if (tokens[i].substr(0, 10) == "filename=\"")
-			return (tokens[i].substr(10, tokens[i].substr(10).find("\"")));
+std::string parseFormData(std::string payload, std::string contentType) {
+	if (contentType.empty() || contentType.find("boundary=") == std::string::npos)
+		return (payload);
+	std::string boundaryLimiter = contentType.substr(contentType.find("boundary=") + 9);
+	std::string content;
+	size_t start = payload.find("\r\n\r\n");
+	size_t end = payload.find("\r\n--" + boundaryLimiter);
+	if (start == std::string::npos || end == std::string::npos)
+		return (payload);
+	start = start + 4;
+	content += payload.substr(start, end - start);
+	if (end == payload.find("\r\n--" + boundaryLimiter + "--\r\n")) {
+		return (content);
+	} else {
+		content += "\n";
+		content += parseFormData(payload.substr(end + 4 + boundaryLimiter.size()), contentType);
 	}
-	return ("");
-}
-
-sFormData *parseFormData(std::string body) {
-	std::string rawHeaders = body.substr(0, body.find("\r\n\r\n"));
-	std::vector<std::string> tokens = tokenizeHttpRequest(rawHeaders);
-
-	sFormData *form = new sFormData;
-	for (size_t i = 0; i < tokens.size(); i++) {
-			if (i == 0) {
-				if (tokens[i].find("------WebKitFormBoundary") == std::string::npos) {
-					form->payload = body;
-					return (form);
-				}
-				form->boundaryLimiter = tokens[i];
-				continue;
-			}
-			if (tokens[i].substr(0, 6) == "name=\"") { form->name = tokens[i].substr(6, tokens[i].substr(6).find("\"")); }
-			if (tokens[i].substr(0, 10) == "filename=\"") { form->filename = tokens[i].substr(10, tokens[i].substr(10).find("\"")); }
-	}
-	size_t start = body.find("\r\n\r\n") + 4;
-	size_t end = body.find("\r\n" + form->boundaryLimiter + "--\r\n");
-	form->payload = body.substr(start, end - start);
-	return (form);
+	return (content);
 }
 
 // int main() {
-// 	std::string payload =
-// 		"------WebKitFormBoundaryiKFQwgjcJQvQrTa9\r\n"
-// 		"Content-Disposition: form-data; name=\"file\"; filename=\"hello\"\r\n"
-// 		"Content-Type: application/octet-stream\r\n"
+	
+// 	std::string in;
+// 	std::string out;
+
+// 	std::cerr << std::endl << "---- Multipart with one file ----" << std::endl;
+// 	in =
+// 		"--abcdef123456\r\n"
+// 		"Content-Disposition: form-data; name=\"file\"; filename=\"test.txt\"\r\n"
+// 		"Content-Type: text/plain\r\n"
+// 		"\r\n"
+// 		"hello world\r\n"
+// 		"--abcdef123456--\r\n";
+// 	LOG("OUT", parseFormData(in, "multipart/form-data; boundary=abcdef123456"));
+
+// 	std::cerr << std::endl << "---- Multipart with one file ----" << std::endl;
+// 	in =
+// 		"--abc123\r\n"
+// 		"Content-Disposition: form-data; name=\"file\"; filename=\"hello.txt\"\r\n"
+// 		"Content-Type: text/plain\r\n"
 // 		"\r\n"
 // 		"bonjour\r\n"
-// 		"------WebKitFormBoundaryiKFQwgjcJQvQrTa9--\r\n";
-// 	sFormData *form = parseFormData(payload);
-// 	LOG("boundaryLimiter", form->boundaryLimiter);
-// 	LOG("payload", form->payload);
-// 	LOG("filename", form->filename);
-// 	LOG("name", form->name);
+// 		"--abc123--\r\n";
+// 	LOG("OUT", parseFormData(in, "multipart/form-data; boundary=abc123"));
+
+// 	std::cerr << std::endl << "---- Multipart with multiple fields ----" << std::endl;
+// 	in =
+// 		"--XYZZY\r\n"
+// 		"Content-Disposition: form-data; name=\"username\"\r\n"
+// 		"\r\n"
+// 		"admin\r\n"
+// 		"--XYZZY\r\n"
+// 		"Content-Disposition: form-data; name=\"avatar\"; filename=\"pic.png\"\r\n"
+// 		"Content-Type: image/png\r\n"
+// 		"\r\n"
+// 		"<binary data here>\r\n"
+// 		"--XYZZY--\r\n";
+// 	LOG("OUT", parseFormData(in, "multipart/form-data; boundary=XYZZY"));
+
+// 	std::cerr << std::endl << "---- Plain JSON (no multipart) ----" << std::endl;
+// 	in =
+// 		"{\"action\":\"do_thing\"}";
+// 	LOG("OUT", parseFormData(in, "application/json"));
+
+// 	std::cerr << std::endl << "---- Plain text (no multipart) ----" << std::endl;
+// 	in =
+// 		"{\"action\":\"do_thing\"}";
+// 	LOG("OUT", parseFormData(in, "application/json"));
+
+// 	std::cerr << std::endl << "---- Multipart with one file ----" << std::endl;
+// 	in =
+// 		"just raw text";
+// 	LOG("OUT", parseFormData(in, "text/plain"));
+
 // 	return (0);
 // }

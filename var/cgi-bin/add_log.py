@@ -3,7 +3,7 @@ import json, os, time
 with open("var/data/logs.json", "r") as f:
 	data = f.read()
 
-jsondata = eval(data)
+jsondata = json.loads(data)
 BODY = json.loads(os.getenv("BODY"))
 BODY["timestamp"] = time.time()
 jsondata["entries"].append(BODY)
