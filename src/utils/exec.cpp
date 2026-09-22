@@ -20,14 +20,14 @@ std::string autoindex( std::string path, std::string base_path ) {
 
 	std::string output;
 	output += "<h2>" + base_path + "</h2>\n";
-    DIR* dir = opendir(path.c_str());
-    if (dir == NULL) {
-        std::cerr << "Error opening directory" << std::endl;
-        return (output);
-    }
-    struct dirent* entry;
-    while ((entry = readdir(dir)) != NULL)
+	DIR* dir = opendir(path.c_str());
+	if (dir == NULL) {
+		std::cerr << "Error opening directory" << std::endl;
+		return (output);
+	}
+	struct dirent* entry;
+	while ((entry = readdir(dir)) != NULL)
 		output += "<div><a href=" + base_path + "/" + entry->d_name + " >" + entry->d_name + "<a></div>\n";
-    closedir(dir);
+	closedir(dir);
 	return (output);
 }

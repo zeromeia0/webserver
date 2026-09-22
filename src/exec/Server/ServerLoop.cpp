@@ -58,23 +58,25 @@ bool Server::isCgi() {
 std::map<std::string, std::string> Server::handleEnvp() {
 	Request *REQ = curConnec->client->REQ;
 	std::map<std::string, std::string> inputs;
-	inputs.insert(std::pair<std::string, std::string>("QUERY_STRING", REQ->headers.query_str));
-	inputs.insert(std::pair<std::string, std::string>("REQUEST_METHOD", getMethodTxt(REQ->headers.method)));
+
+	inputs["QUERY_STRING"]			= REQ->headers.query_str;
+	inputs["REQUEST_METHOD"]		= getMethodTxt(REQ->headers.method);
+	inputs["REQUEST_URI"]			= REQ->headers.raw;
+	inputs["SCRIPT_NAME"]			= REQ->headers.script;
+	inputs["PATH_INFO"]				= REQ->headers.info;
+	inputs["CONTENT_TYPE"]			= REQ->getHeader("content-type");
+	inputs["SERVER_PROTOCOL"]		= REQ->headers.version;
+
 	std::string contentLength = REQ->headers.get("content-length");
 	if (!contentLength.empty())
-		inputs.insert(std::pair<std::string, std::string>("CONTENT_LENGTH", contentLength));
-	inputs.insert(std::pair<std::string, std::string>("CONTENT_TYPE", REQ->getHeader("content-type")));
-	inputs.insert(std::pair<std::string, std::string>("REQUEST_URI", "/directory/youpi.bla"));
-	// inputs.insert(std::pair<std::string, std::string>("SCRIPT_NAME", curRoute.cgi[fileExtension]));
-	inputs.insert(std::pair<std::string, std::string>("SCRIPT_NAME", "youpi.bla"));
-	// std::string pathInfo = REQ->headers.path.substr(REQ->headers.path.find(fileExtension) + fileExtension.size(), REQ->headers.path.find("?"));
-	inputs.insert(std::pair<std::string, std::string>("PATH_INFO", "/directory/youpi.bla"));
+		inputs["CONTENT_LENGTH"]	= contentLength;
+
 	std::string host = REQ->getHeader("host");
 	std::string sep = ":";
 	size_t sep_pos = host.find(sep);
-	inputs.insert(std::pair<std::string, std::string>("SERVER_NAME", (sep_pos == std::string::npos) ? host : host.substr(0, sep_pos)));
-	inputs.insert(std::pair<std::string, std::string>("SERVER_PORT", (sep_pos == std::string::npos) ? "" : host.substr(sep_pos + sep.size())));
-	inputs.insert(std::pair<std::string, std::string>("SERVER_PROTOCOL", REQ->headers.version));
+	inputs["SERVER_NAME"]			= (sep_pos == std::string::npos) ? host : host.substr(0, sep_pos);
+	inputs["SERVER_PORT"]			= (sep_pos == std::string::npos) ? "" : host.substr(sep_pos + sep.size());
+
 	for (std::map<std::string, std::string>::iterator it = REQ->headers.headers.begin(); it != REQ->headers.headers.end(); ++it) {
 		std::string name = "HTTP_" + it->first;
 		for (size_t i = 5; i < name.size(); i++) {
@@ -83,12 +85,12 @@ std::map<std::string, std::string> Server::handleEnvp() {
 			else
 				name[i] = toupper(name[i]);
 		}
-		inputs.insert(std::pair<std::string, std::string>(name, it->second));
+		inputs[name]				= it->second;
 	}
-	// if (DEBUG) {
-	// 	std::cerr << "---------- CGI ENVP ----------" << std::endl;
-	// 	debugMap<std::string, std::string>(inputs);
-	// }
+	if (DEBUG) {
+		std::cerr << "---------- CGI ENVP ----------" << std::endl;
+		debugMap<std::string, std::string>(inputs);
+	}
 	return (inputs);
 }
 
@@ -355,6 +357,13 @@ void Server::LOOP() {
 								if (curClient->REQ->getHeader("transfer-encoding") == "chunked")
 									curConnec->transfer_type = CHUNKED;
 								if (isCgi()) {
+									std::string uri = curClient->REQ->headers.raw;
+									std::string file_ext = getFileExtension(uri);
+									size_t ext_pos = uri.find(file_ext);
+									curClient->REQ->headers.script = uri.substr(0, ext_pos + file_ext.size());
+									curClient->REQ->headers.info = uri.substr(curClient->REQ->headers.script.size());
+									if (curClient->REQ->headers.info.empty())
+										curClient->REQ->headers.info = curClient->REQ->headers.script;
 									curConnec->cgi_state = ONGOING;
 									startCgi();
 								}

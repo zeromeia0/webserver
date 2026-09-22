@@ -23,6 +23,7 @@ struct sMethod {
 };
 
 struct sFormUrlEncoded {
+	std::string							raw;
 	std::string							path;
 	std::string							query_str;
 	sFormUrlEncoded() {};
@@ -30,7 +31,10 @@ struct sFormUrlEncoded {
 
 struct sHeaders {
 	RE_METHOD							method;
+	std::string							raw;
 	std::string							path;
+	std::string							script;
+	std::string							info;
 	std::string							query_str;
 	std::map<std::string, std::string>	query;
 	std::string							version;

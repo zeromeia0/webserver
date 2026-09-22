@@ -14,6 +14,7 @@ sHeaders *parseHeaders( std::string str ) {
 			headers->method = *method;
 		} else if (i == 1) {
 			sFormUrlEncoded form = parseFormUrlEncoded(*it);
+			headers->raw = form.raw;
 			headers->path = form.path;
 			headers->query_str = form.query_str;
 		} else if (i == 2) {
