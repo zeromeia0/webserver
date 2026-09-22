@@ -1,7 +1,7 @@
 CXX				= c++
 CXXFLAGS		= -Wall -Wextra -Werror -std=c++98 -I inc
 
-NAME			= webserver
+NAME			= webserv
 OBJ_DIR			= obj
 
 # ########################################

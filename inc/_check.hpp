@@ -1,6 +1,6 @@
 #pragma once
 
-#include "#MAIN.hpp"
+#include "main.hpp"
 #include <set>
 #include <cstdlib>
 

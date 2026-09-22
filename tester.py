@@ -1,4 +1,4 @@
-import requests, pytest, subprocess
+import requests, pytest, subprocess, json
 
 BASE_URL = "http://localhost:8089"
 
@@ -30,7 +30,7 @@ tests = [
 	{
 		"uri": "/cgi-bin/test_cgi.py",
 		"method": "POST",
-		"body": f"{"e" * 100}",
+		"body": f"{'e' * 100}",
 		"expected": {
 			"status": 200,
 		},
@@ -38,7 +38,7 @@ tests = [
 	{
 		"uri": "/cgi-bin/test_cgi.py",
 		"method": "POST",
-		"body": f"{"e" * 10000}",
+		"body": f"{'e' * 10000}",
 		"expected": {
 			"status": 200,
 		},
@@ -46,7 +46,7 @@ tests = [
 	{
 		"uri": "/cgi-bin/test_cgi.py",
 		"method": "POST",
-		"body": f"{"e" * 1000000}",
+		"body": f"{'e' * 1000000}",
 		"expected": {
 			"status": 200,
 		},
@@ -54,7 +54,7 @@ tests = [
 	{
 		"uri": "/cgi-bin/test_cgi.py",
 		"method": "POST",
-		"body": f"{"e" * 10000000}",
+		"body": f"{'e' * 10000000}",
 		"expected": {
 			"status": 200,
 		},
@@ -62,7 +62,7 @@ tests = [
 	{
 		"uri": "/cgi-bin/test_cgi.py",
 		"method": "POST",
-		"body": f"{"e" * 100000000}",
+		"body": f"{'e' * 100000000}",
 		"expected": {
 			"status": 413,
 		},
@@ -79,11 +79,10 @@ def test_request(t):
 
 def test_siege():
 	result = subprocess.run(
-		["siege", "-c", "20", "-r", "5000", BASE_URL + "/"],
-		capture_output=True, text=True, timeout=120
+		["siege", "-c", "20", "-r", "5", BASE_URL + "/"],
+		capture_output=True, text=True
 	)
-	print(result.stderr)
-	assert "Failed transactions:	        0" in result.stderr
+	assert 0 == json.loads(result.stdout)["failed_transactions"]
 
 if (__name__ == "__main__"):
 	input("Make sure the webserver is up and running.\nPress Enter to continue")

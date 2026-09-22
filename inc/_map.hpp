@@ -1,6 +1,6 @@
 #pragma once
 
-#include "#MAIN.hpp"
+#include "main.hpp"
 #include STRUCTS_HPP
 
 std::string		getMethodTxt( RE_METHOD code );

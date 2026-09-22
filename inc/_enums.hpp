@@ -1,6 +1,6 @@
 #pragma once
 
-#include "#MAIN.hpp"
+#include "main.hpp"
 
 enum CONNECTION_TYPE {
 	SERVER,

@@ -1,9 +1,0 @@
-*.o
-./obj/*
-./obj
-webserver
-# subject.pdf
-.claude
-.vscode
-forbidden.py
-obj/

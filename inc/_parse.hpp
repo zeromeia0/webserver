@@ -1,6 +1,6 @@
 #pragma once
 
-#include "#MAIN.hpp"
+#include "main.hpp"
 #include UTILS_HPP
 #include MAP_HPP
 #include <fcntl.h>
