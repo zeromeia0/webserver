@@ -1,8 +1,4 @@
-from common.footer import footer
-from common.header import header
 import json, html
-
-header('LOGS')
 
 # ########################
 # FUNCTIONS
@@ -26,5 +22,3 @@ for k, v in jsondata.items():
 print(f'</div>')
 
 # ########################
-
-footer()

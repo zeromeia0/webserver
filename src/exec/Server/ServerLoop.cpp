@@ -52,7 +52,7 @@ bool Server::isCgi() {
 	LOG("DEBUG", __FUNCTION__);
 	std::string PATH = getPath();
 	std::string fileExtension = getFileExtension(PATH);
-	return ((curRoute.cgi.find(fileExtension) != curRoute.cgi.end()) && (curMethod == POST));
+	return ((curRoute.cgi.find(fileExtension) != curRoute.cgi.end()));
 }
 
 std::map<std::string, std::string> Server::handleEnvp() {
@@ -344,6 +344,7 @@ void Server::LOOP() {
 								if (DEBUG)
 									debugRe(*curClient->REQ);
 								curConnec->buffer = curConnec->buffer.substr(headersEof + 4);
+								nbytes = 0;
 								buff[0] = '\0';
 								// postHeadersUpdates
 								curMethod = curClient->REQ->headers.method;
@@ -351,7 +352,7 @@ void Server::LOOP() {
 								if (curMethod == GET) {
 									curClient->state = COMPLETED;
 									curConnec->pollFd.events = POLLOUT;
-									break;
+									// break;
 								}
 								curClient->state = READING_PAYLOAD;
 								if (curClient->REQ->getHeader("transfer-encoding") == "chunked")
@@ -382,9 +383,9 @@ void Server::LOOP() {
 						if (curClient->state == READING_PAYLOAD) {
 							int status = 0;
 							std::string new_payload;
-							std::string new_bytes = buff;
+							std::string new_bytes(buff, nbytes);
 							if (curConnec->transfer_type == CONTENT) {
-								new_payload = curConnec->buffer + std::string(buff);
+								new_payload = curConnec->buffer + std::string(buff, nbytes);
 								curConnec->buffer.clear();
 								if (curClient->REQ->payload.size() + new_payload.size() < curContentLen)
 									status = 1;

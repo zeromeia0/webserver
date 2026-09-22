@@ -1,8 +1,4 @@
-from common.footer import footer
-from common.header import header
 import os, json
-
-header('FILES')
 
 # ########################
 # FUNCTIONS
@@ -63,5 +59,3 @@ for i in dirs:
 print(f'</div>')
 
 # ########################
-
-footer()

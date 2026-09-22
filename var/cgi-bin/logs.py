@@ -1,9 +1,5 @@
-from common.footer import footer
-from common.header import header
 import os, json, ast, html, sys
 from urllib.parse import unquote
-
-header('LOGS')
 
 # ########################
 # FUNCTIONS

@@ -74,6 +74,38 @@ void Server::OUT() {
 		return (SEND());
 	}
 
+	if (curConnec->cgi_state == DONE) {
+		std::string &cgiOutput = RES->payload;
+		size_t headerEnd = cgiOutput.find("\r\n\r\n");
+		if (headerEnd == std::string::npos)
+			headerEnd = cgiOutput.find("\n\n");
+		if (headerEnd != std::string::npos) {
+			std::string cgiHeaders = cgiOutput.substr(0, headerEnd);
+			size_t sep = (cgiOutput[headerEnd] == '\r') ? 4 : 2;
+			cgiOutput = cgiOutput.substr(headerEnd + sep);
+			// parse Status line from CGI headers
+			size_t statusPos = cgiHeaders.find("Status:");
+			if (statusPos != std::string::npos) {
+				RES->statusCode = strtoul(cgiHeaders.substr(statusPos + 8).c_str(), NULL, 10);
+			} else {
+				RES->statusCode = 200;
+			}
+			// parse Content-Type from CGI headers
+			size_t ctPos = cgiHeaders.find("Content-Type:");
+			if (ctPos != std::string::npos) {
+				size_t ctEnd = cgiHeaders.find("\n", ctPos);
+				std::string ct = cgiHeaders.substr(ctPos + 14, ctEnd - ctPos - 14);
+				// trim trailing \r if present
+				if (!ct.empty() && ct[ct.size() - 1] == '\r')
+					ct = ct.substr(0, ct.size() - 1);
+				RES->addHeader("Content-Type", ct);
+			}
+		} else {
+			RES->statusCode = 200;
+		}
+		return (SEND());
+	}
+
 	std::string PATH = getPath();
 	switch (curMethod) {
 		case HEAD:
@@ -90,7 +122,6 @@ void Server::OUT() {
 						RES->statusCode = 200;
 						RES->addPayload(readFileContent(indexPath));
 					} else if (curRoute.autoindex) {
-						LOG("HELLO", "");
 						RES->addPayload(autoindex(PATH, curClient->REQ->headers.path));
 						RES->addHeader("Content-Type", "text/html");
 						RES->headers.path = PATH;
@@ -123,42 +154,11 @@ void Server::OUT() {
 		}
 		case POST: {
 			RES->headers.path = PATH;
-			if (curConnec->cgi_state == DONE) {
-				std::string &cgiOutput = RES->payload;
-				size_t headerEnd = cgiOutput.find("\r\n\r\n");
-				if (headerEnd == std::string::npos)
-					headerEnd = cgiOutput.find("\n\n");
-				if (headerEnd != std::string::npos) {
-					std::string cgiHeaders = cgiOutput.substr(0, headerEnd);
-					size_t sep = (cgiOutput[headerEnd] == '\r') ? 4 : 2;
-					cgiOutput = cgiOutput.substr(headerEnd + sep);
-					// parse Status line from CGI headers
-					size_t statusPos = cgiHeaders.find("Status:");
-					if (statusPos != std::string::npos) {
-						RES->statusCode = strtoul(cgiHeaders.substr(statusPos + 8).c_str(), NULL, 10);
-					} else {
-						RES->statusCode = 200;
-					}
-					// parse Content-Type from CGI headers
-					size_t ctPos = cgiHeaders.find("Content-Type:");
-					if (ctPos != std::string::npos) {
-						size_t ctEnd = cgiHeaders.find("\n", ctPos);
-						std::string ct = cgiHeaders.substr(ctPos + 14, ctEnd - ctPos - 14);
-						// trim trailing \r if present
-						if (!ct.empty() && ct[ct.size() - 1] == '\r')
-							ct = ct.substr(0, ct.size() - 1);
-						RES->addHeader("Content-Type", ct);
-					}
-				} else {
-					RES->statusCode = 200;
-				}
-			} else {
-				std::string payload = parseFormData(REQ->payload, REQ->headers.get("content-type"));
-				if (!payload.empty())
-					writeFileContent(RES->headers.path, payload) ? STATUS(201) : STATUS(404);
-				else
-					STATUS(200);
-			}
+			std::string payload = parseFormData(REQ->payload, REQ->headers.get("content-type"));
+			if (!payload.empty())
+				writeFileContent(RES->headers.path, payload) ? STATUS(201) : STATUS(404);
+			else
+				STATUS(200);
 			break;
 		}
 		case DELETE: {
