@@ -20,6 +20,7 @@ class Server {
 public:
 	sConfigs					*serverConfigs;
 	std::vector<Connection*>	serverConnections;
+	std::vector<pid_t>			cgiPids;
 	std::vector<Connection*>	newConns;
 
 	/*To reduce the path to a certain object,
@@ -45,6 +46,7 @@ public:
 	void								setOptions();
 	void								bindSocket( int port );
 	void								listenSocket();
+	void								removeZombiesCgi();
 	void								addConnection();
 	void								closeConnection();
 	std::string							getPath();

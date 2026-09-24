@@ -15,7 +15,6 @@ jsondata = json.loads(data)
 entries = jsondata["entries"]
 
 QUERY_STRING = unquote(os.getenv("QUERY_STRING", ""))
-
 splits = QUERY_STRING.split("&")
 qs = {}
 for s in splits:

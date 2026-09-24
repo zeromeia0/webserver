@@ -8,11 +8,7 @@ public:
 	std::string		queryString;
 
 	/*Errors occuring during the loop*/
-	bool			BadRequest;
-	bool			RequestTimedOut;
-	bool			MethodNotAllowed;
-	bool			PayloadTooLarge;
-	bool			MovedPermanently;
+	RUNTIME_ERROR	rError;
 
 	Request();
 	Request( const Request &other );

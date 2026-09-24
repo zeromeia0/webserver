@@ -27,7 +27,7 @@ Connection::Connection( int fd, CONNECTION_TYPE newType, Connection *newParent )
 		case SERVER:
 			break;
 		case CLIENT:
-			client = new Client(fd);
+			client = new Client;
 			pollFd.events = POLLIN;
 			break;
 		case CGI_IN:

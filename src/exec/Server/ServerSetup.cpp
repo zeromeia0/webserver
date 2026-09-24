@@ -5,10 +5,8 @@ void Server::setupServer() {
 	curConnec->pollFd.fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (curConnec->pollFd.fd < 0)
 		THROW("Creating socket file descriptor");
-	if(fcntl(curConnec->pollFd.fd, F_SETFL, O_NONBLOCK) < 0) {
-		close(curConnec->pollFd.fd);
-		THROW("Setting file descriptor status flags");
-	}
+	fcntl(curConnec->pollFd.fd, F_SETFL, O_NONBLOCK);
+	fcntl(curConnec->pollFd.fd, F_SETFD, FD_CLOEXEC);
 	curConnec->pollFd.events = POLLIN;
 }
 

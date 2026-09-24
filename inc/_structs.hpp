@@ -39,7 +39,7 @@ struct sHeaders {
 	std::map<std::string, std::string>	query;
 	std::string							version;
 	std::map<std::string, std::string>	headers;
-	sHeaders() {};
+	sHeaders() : method(UNKNOWN) {};
 	std::string get(std::string strKey) {
 		std::map<std::string, std::string>::iterator it = this->headers.find(strKey);
 		if (it == this->headers.end())

@@ -4,7 +4,7 @@
 #define DEBUG_HPP		"_debug.hpp"
 #define ENUMS_HPP		"_enums.hpp"
 #define EXEC_HPP		"_exec.hpp"
-#define MAP_HPP			"_map.hpp"
+#define MAP_HPP			"_maps.hpp"
 #define PARSE_HPP		"_parse.hpp"
 #define STRUCTS_HPP		"_structs.hpp"
 #define UTILS_HPP		"_utils.hpp"

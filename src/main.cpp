@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
 		return (1);
 	}
 	if (argc != 2)
-		confFilename = "./templates/conf/maxserver.conf";
+		confFilename = "./templates/conf/server.conf";
 	else
 		confFilename = argv[1];
 

@@ -32,8 +32,19 @@ enum RE_TYPE {
 };
 
 enum RE_METHOD {
+	UNKNOWN,
 	GET,
 	POST,
 	DELETE,
 	HEAD,
+};
+
+enum RUNTIME_ERROR {
+	NONE,
+	BadRequest,
+	RequestTimedOut,
+	MethodNotAllowed,
+	PayloadTooLarge,
+	MovedPermanently,
+	InternalServerError,
 };

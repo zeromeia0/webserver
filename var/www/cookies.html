@@ -1,0 +1,34 @@
+<html>
+    <head>
+        <script>
+            function addCookie() {
+                let output = ""
+                try {
+                    const cookie_name   = document.querySelector('input[id="name"]').value
+                    const cookie_value  = document.querySelector('input[id="value"]').value
+                    document.cookie = cookie_name + "=" + cookie_value
+                    output = "OK"
+                } catch (e) {
+                    output = "KO"
+                }
+                document.getElementById("output").innerHTML = output
+                displayCookies()
+            }
+            function displayCookies() {
+                const cookies = document.cookie
+                let output = ""
+                cookies.split("; ").forEach(e => {
+                    const pair = e.split("=")
+                    output += "<div>" + "<b>name:</b> " + pair[0] + "      <b>value:</b> " + pair[1] + "</div>"
+                });
+                document.getElementById("cookies").innerHTML = output
+            }
+        </script>
+    </head>
+    <input id="name" type="text">
+    <input id="value" type="text">
+    <button onclick="addCookie()">ADD</button>
+    <div id="output"></div>
+    <div id="cookies"></div>
+    <script>displayCookies()</script>
+</html>

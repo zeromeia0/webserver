@@ -24,14 +24,10 @@ void Server::SEND() {
 		curClient->RES->addHeader("Content-Length", intToChar(curClient->RES->payload.size()));
 	}
 
-	if (curClient->RES->headers.method == HEAD) {
+	if (curClient->RES->headers.method == HEAD)
 		curClient->RES->payload.clear();
-	}
 
 	curClient->RES->addHeader("Connection", "close");
-
-	if (DEBUG)
-		debugRe(*curClient->RES);
 
 	// curClient->REQ->saveLog();
 	// curClient->RES->saveLog();
@@ -57,24 +53,27 @@ void Server::OUT() {
 	Request		*REQ = curClient->REQ;
 	Response	*RES = curClient->RES;
 
-	if (REQ->RequestTimedOut || REQ->BadRequest || REQ->MethodNotAllowed || REQ->PayloadTooLarge || REQ->MovedPermanently) {
-		if (REQ->RequestTimedOut) {
-			STATUS(408);
-		} else if (REQ->BadRequest) {
-			STATUS(400);
-		} else if (REQ->MethodNotAllowed) {
-			STATUS(405);
-		} else if (REQ->PayloadTooLarge) {
-			STATUS(413);
-		} else if (REQ->MovedPermanently) {
+	switch (REQ->rError) {
+		case (NONE):
+			break;
+		case (RequestTimedOut):
+			return (STATUS(408));
+		case (BadRequest):
+			return (STATUS(400));
+		case (MethodNotAllowed):
+			return (STATUS(405));
+		case (PayloadTooLarge):
+			return (STATUS(413));
+		case (MovedPermanently):
 			RES->headers.path = curRoute.redirect;
 			RES->addHeader("Location", RES->headers.path);
-			STATUS(301);	
-		}
-		return (SEND());
+			return (STATUS(301));
+		case (InternalServerError):
+			return (STATUS(500));
 	}
 
 	if (curConnec->cgi_state == DONE) {
+		LOG("DONE", "DONE");
 		std::string &cgiOutput = RES->payload;
 		size_t headerEnd = cgiOutput.find("\r\n\r\n");
 		if (headerEnd == std::string::npos)
@@ -103,7 +102,7 @@ void Server::OUT() {
 		} else {
 			RES->statusCode = 200;
 		}
-		return (SEND());
+		return;
 	}
 
 	std::string PATH = getPath();

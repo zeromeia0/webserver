@@ -96,8 +96,4 @@ feature during evaluation are provided under `templates/conf/` and `var/`.
 
 ### AI usage
 
-AI assistance was used during this project for: drafting/organizing the initial task
-breakdown (see `todo.MD`), and as a sounding board while debugging the configuration parser
-and CGI environment-variable handling. All generated suggestions were reviewed, tested against
-real browsers/`curl`/NGINX comparisons, and understood before being integrated — nothing was
-merged without being able to explain how it works.
+AI assistance was limited to a learning assistant. AI did not code anything, it helped us moving forward when we were blocked but we are usually starting every AI chat with the following prompt: "Don't code anything, never! You're my learning assistant I want you to help me understand concepts without giving me the answer instantly." AI was useful for the redaction of this doc, organization, and debugging sessions.

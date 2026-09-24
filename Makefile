@@ -36,7 +36,7 @@ SRC_PARSE = \
 
 SRC_UTILS = \
 	src/utils/exec.cpp \
-	src/utils/map.cpp \
+	src/utils/maps.cpp \
 	src/utils/parse.cpp \
 	src/utils/utils.cpp
 
