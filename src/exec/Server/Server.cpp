@@ -2,7 +2,6 @@
 
 Server::Server() {
 	LOG("DEBUG", __FUNCTION__);
-	serverConfigs = NULL;
 	curIdx = 0;
 	curConnec = NULL;
 	curClient = NULL;
@@ -10,26 +9,28 @@ Server::Server() {
 	curContentLen = 0;
 }
 
-Server::Server( char *confFileName ) {
+Server::Server(char *confFileName) {
 	LOG("DEBUG", __FUNCTION__);
 	serverConfigs = parseConfigs(confFileName);
-	if (serverConfigs->clientMaxBodySize < 0)
-		serverConfigs->clientMaxBodySize = DEF_MAX_BODY;
-	for (size_t i = 0; i < serverConfigs->router.size(); i++) {
-		if (serverConfigs->router[i].clientMaxBodySize < 0) {
-			serverConfigs->router[i].clientMaxBodySize = serverConfigs->clientMaxBodySize;
+    for (size_t s = 0; s < serverConfigs.size(); s++) {
+		sConfigs *cfg = serverConfigs[s];
+		if (cfg->clientMaxBodySize < 0)
+				cfg->clientMaxBodySize = DEF_MAX_BODY;
+		for (size_t i = 0; i < cfg->router.size(); i++) {
+			if (cfg->router[i].clientMaxBodySize < 0)
+				cfg->router[i].clientMaxBodySize = cfg->clientMaxBodySize;
 		}
+		if (DEBUG)
+			debugConfigs(cfg);
 	}
-	if (DEBUG)
-		debugVector<std::string>(serverConfigs->confFile);
 }
 
-Server::Server( const Server &other ) {
+Server::Server(const Server &other) {
 	LOG("DEBUG", __FUNCTION__);
 	*this = other;
 }
 
-Server &Server::operator=( const Server &other ) {
+Server &Server::operator=(const Server &other) {
 	LOG("DEBUG", __FUNCTION__);
 	if (this != &other) {
 		this->serverConfigs = other.serverConfigs;

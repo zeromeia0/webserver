@@ -4,8 +4,8 @@ void Server::STATUS( int status_code ) {
 	LOG("DEBUG", __FUNCTION__ << " " << status_code);
 	curClient->RES->statusCode = status_code;
 	std::string content;
-	if (serverConfigs->errorPages.find(status_code) != serverConfigs->errorPages.end()) {
-		curClient->RES->headers.path = serverConfigs->errorPages[status_code];
+	if (curConnec->conf->errorPages.find(status_code) != curConnec->conf->errorPages.end()) {
+		curClient->RES->headers.path = curConnec->conf->errorPages[status_code];
 		content = readFileContent(curClient->RES->headers.path);
 	} else {
 		content = intToChar(status_code) + " " + getStatusMsg(status_code);

@@ -12,7 +12,6 @@
 // 							PARSE
 // ############################################################
 
-sConfigs					*parseConfigs(char *fileName);
 std::vector<std::string>	tokenize(const std::string& file);
 std::vector<std::string>	tokenizeHttpRequest(const std::string& request);
 void						validateSyntax(const std::vector<std::string> &tokens);

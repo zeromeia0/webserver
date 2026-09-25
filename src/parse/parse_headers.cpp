@@ -25,9 +25,10 @@ sHeaders *parseHeaders( std::string str ) {
 			std::pair<std::string, std::string> tmp;
 			tmp.first = *it;
 			it++;
-			if (!(*it == ":"))
-				break;
+			if (it == tokens.end())	{delete headers; return (NULL);}
+			if (!(*it == ":"))		{delete headers; return (NULL);}
 			it++;
+			if (it == tokens.end())	{delete headers; return (NULL);}
 			while (1) {
 				if (*it == ":" || tmp.second.empty() || tmp.second[tmp.second.size() - 1] == ':')
 					tmp.second += *it;

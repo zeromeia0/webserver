@@ -79,7 +79,7 @@ def test_request(t):
 
 def test_siege():
 	result = subprocess.run(
-		["siege", "-c", "20", "-r", "5", BASE_URL + "/"],
+		["siege", "-c", "20", "-r", "50", BASE_URL + "/"],
 		capture_output=True, text=True
 	)
 	assert 0 == json.loads(result.stdout)["failed_transactions"]

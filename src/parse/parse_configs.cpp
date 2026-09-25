@@ -1,36 +1,5 @@
 #include "_parse.hpp"
 
-static void saveConfigs(sConfigs *server) {
-	std::string filename = "./var/data/configs.json";
-	std::remove(filename.c_str());
-	std::string content;
-	content.append("{");
-	content.append("\"host\": \"" + server->host + "\"");
-	content.append(", \"server name\": \"" + server->serverName + "\"");
-	content.append(", \"client max body size\": \"" + intToChar(server->clientMaxBodySize) + "\"");
-	content.append(", \"ports\": " + vectorToListString<int>(server->listenPorts));
-	content.append(", \"routes\": ");
-	content.append("[");
-	for (size_t i = 0; i < server->router.size(); i++) {
-		content.append("{");
-		content.append("\"path\": \"" + server->router[i].path + "\"");
-		content.append(", \"root\": \"" + server->router[i].root + "\"");
-		content.append(", \"index\": \"" + server->router[i].index + "\"");
-		content.append(", \"uploadStore\": \"" + server->router[i].uploadStore + "\"");
-		content.append(", \"redirect\": \"" + server->router[i].redirect + "\"");
-		content.append(", \"autoindex\": \"" + intToChar(server->router[i].autoindex) + "\"");
-		content.append(", \"uploadEnabled\": \"" + (server->router[i].uploadEnabled ? std::string("TRUE") : std::string("FALSE")) + "\"");
-		content.append(", \"methods\": " + vectorToListString<std::string>(server->router[i].methods));
-		content.append(", \"cgi\": " + mapToJsonString<std::string, std::string>(server->router[i].cgi));
-		content.append("}");
-		if (i + 1 != server->router.size())
-			content.append(", ");
-	}
-	content.append("]");
-	content.append("}");
-	writeFileContent(filename, content);
-}
-
 static void confAssignValue(sConfigs *server, int &currentRouteIdx, const std::vector<std::string> &tokens, size_t i)
 {
 	if (tokens[i] == "listen")
@@ -83,8 +52,7 @@ static void confAssignValue(sConfigs *server, int &currentRouteIdx, const std::v
 	}
 }
 
-static std::string validateFile(char *fileName)
-{
+static std::string validateFile(char *fileName) {
 	int fd = open(fileName, O_RDONLY);
 	if (fd < 0)
 		THROW("Config file can not be opened");
@@ -97,14 +65,21 @@ static std::string validateFile(char *fileName)
 	return (fileContent);
 }
 
-sConfigs *parseConfigs(char *fileName) {
-	sConfigs *CONF = new sConfigs;
+std::vector<sConfigs*> parseConfigs(char *fileName) {
+	std::vector<sConfigs*> CONFS;
 	std::string file = validateFile(fileName);
-	CONF->confFile = tokenize(file);
-	validateSyntax(CONF->confFile);
+	std::vector<std::string> tokens = tokenize(file);
+	validateSyntax(tokens);
 	int currentRouteIdx = -1;
-	for (size_t i = 0; i < CONF->confFile.size(); i++)
-		confAssignValue(CONF, currentRouteIdx, CONF->confFile, i);
-	saveConfigs(CONF);
-	return (CONF);
+	for (size_t i = 0; i < tokens.size(); i++) {
+		if (tokens[i] == "server") {
+			CONFS.push_back(new sConfigs);
+			currentRouteIdx = -1;
+			continue;
+		}
+		if (CONFS.empty())
+			continue;
+		confAssignValue(CONFS.back(), currentRouteIdx, tokens, i);
+	}
+	return (CONFS);
 }

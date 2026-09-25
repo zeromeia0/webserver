@@ -2,8 +2,7 @@
 
 void debugConfigs(sConfigs *configs) {
 	std::cerr << "========== PRINTING SERVER CONFIG VALUES ==========" << std::endl;
-	for (size_t i = 0; i < configs->listenPorts.size(); i++)
-		std::cerr << "[Listen]: " << configs->listenPorts[i] << std::endl;
+	// std::cerr << "[Listen]: " << configs->listenPorts << std::endl;
 	std::cerr << "[Server name]: " << configs->serverName << std::endl;
 	std::cerr << "[Host]: " << configs->host << std::endl;
 	std::cerr << "[Client Max Body Size]: " << configs->clientMaxBodySize << std::endl;

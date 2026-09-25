@@ -71,11 +71,8 @@ std::map<std::string, std::string> Server::handleEnvp() {
 	if (!contentLength.empty())
 		inputs["CONTENT_LENGTH"]	= contentLength;
 
-	std::string host = REQ->getHeader("host");
-	std::string sep = ":";
-	size_t sep_pos = host.find(sep);
-	inputs["SERVER_NAME"]			= (sep_pos == std::string::npos) ? host : host.substr(0, sep_pos);
-	inputs["SERVER_PORT"]			= (sep_pos == std::string::npos) ? "" : host.substr(sep_pos + sep.size());
+	inputs["SERVER_NAME"]			= curConnec->conf->serverName;
+	inputs["SERVER_PORT"]			= intToChar(curConnec->port);
 
 	for (std::map<std::string, std::string>::iterator it = REQ->headers.headers.begin(); it != REQ->headers.headers.end(); ++it) {
 		std::string name = "HTTP_" + it->first;
@@ -148,10 +145,10 @@ int Server::startCgi() {
 	close(pipe_out[1]);
 	cgiPids.push_back(pid);
 
-	Connection *cin = new Connection(pipe_in[1], CGI_IN, curConnec);
+	Connection *cin = new Connection(-1, pipe_in[1], CGI_IN, curConnec);
 	newConns.push_back(cin);
 
-	Connection *cout = new Connection(pipe_out[0], CGI_OUT, curConnec);
+	Connection *cout = new Connection(-1, pipe_out[0], CGI_OUT, curConnec);
 	newConns.push_back(cout);
 
 	return (1);
@@ -164,7 +161,8 @@ bool Server::createNewClient() {
 		return (false);
 	fcntl(clientFd, F_SETFL, O_NONBLOCK);
 	fcntl(clientFd, F_SETFD, FD_CLOEXEC);
-	Connection *newClient = new Connection(clientFd, CLIENT, NULL);
+	Connection *newClient = new Connection(curConnec->port, clientFd, CLIENT, NULL);
+	newClient->conf = curConnec->conf;
 	newClient->client->REQ = new Request;
 	newClient->client->RES = new Response;
 	curPollFd = newClient->pollFd;
@@ -293,6 +291,7 @@ void Server::LOOP() {
 			curPollFd		= curConnec->pollFd;
 			curFd			= curPollFd.fd;
 			curContentLen	= curConnec->contentLen;
+			curRoute = curConnec->parent ? curConnec->parent->route : curConnec->route;
 
 			int connStatus = connectionCheck();
 			if (connStatus < 0) {
@@ -300,15 +299,12 @@ void Server::LOOP() {
 					curConnec->pollFd.events = 0;
 					curConnec->parent->pollFd.events = 0;
 					curConnec->parent->cgi_state = DONE;
-					closeConnection();
-				} else if (curConnec->type == CLIENT) {
+					closeConnection(); continue;
+			} else if (curConnec->type == CLIENT) {
 					curConnec->pollFd.events = POLLOUT;
 					curConnec->cgi_state = DEFAULT;
 					curClient->RES->payload.clear();
-					if (sendDataToClient() == 0)
-						closeConnection();
 				}
-				continue;
 			}
 
 			char buff[BUFF_SIZE];
@@ -336,9 +332,8 @@ void Server::LOOP() {
 							closeConnection();
 							break;
 						}
-						buff[nbytes] = '\0';
 						if (curClient->state == READING_HEADERS) {
-							curConnec->buffer.append(buff);
+							curConnec->buffer.append(buff, nbytes);
 							size_t headersEof = curConnec->buffer.find("\r\n\r\n");
 							if (headersEof != std::string::npos) {
 								if(!handleHeaders(curConnec->buffer.substr(0, headersEof), curConnec)) {
@@ -358,7 +353,8 @@ void Server::LOOP() {
 								curClient->RES->headers.version = curClient->REQ->headers.version;
 								curClient->RES->headers.path = curClient->REQ->headers.path;
 								curMethod = curClient->REQ->headers.method;
-								curRoute = findRoute(curConnec->client->REQ->headers.path, serverConfigs->router);
+								curConnec->route = findRoute(curConnec->client->REQ->headers.path, curConnec->conf->router);
+								curRoute = curConnec->route;
 								if (curMethod == GET) {
 									curClient->state = COMPLETED;
 									curConnec->pollFd.events = POLLOUT;
@@ -428,7 +424,7 @@ void Server::LOOP() {
 						}
 						int nbytes = writeToPipe(curFd, payload, remaining);
 						if (nbytes < 0) {
-							curConnec->client->REQ->rError = BadRequest;
+							curConnec->parent->client->REQ->rError = BadRequest;
 							curConnec->parent->cgi_state = DONE;
 							curConnec->parent->pollFd.events = POLLOUT;
 							closeConnection();
@@ -444,7 +440,7 @@ void Server::LOOP() {
 						curConnec->updateLastActive();
 						int nbytes = readFromPipe(curConnec->pollFd.fd, &curConnec->parent->client->RES->payload);
 						if (nbytes < 0) {
-							curConnec->client->REQ->rError = BadRequest;
+							curConnec->parent->client->REQ->rError = BadRequest;
 							curConnec->parent->cgi_state = DONE;
 							curConnec->parent->pollFd.events = POLLOUT;
 							closeConnection();

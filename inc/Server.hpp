@@ -18,7 +18,7 @@ extern bool G_RUNNING;
 
 class Server {
 public:
-	sConfigs					*serverConfigs;
+	std::vector<sConfigs*>		serverConfigs;
 	std::vector<Connection*>	serverConnections;
 	std::vector<pid_t>			cgiPids;
 	std::vector<Connection*>	newConns;

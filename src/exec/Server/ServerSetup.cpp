@@ -23,8 +23,9 @@ void Server::bindSocket( int port ) {
 	service.sin_family = SIN_FAMILY;
 	service.sin_addr.s_addr = SIN_ADDR;
 	service.sin_port = htons(port);
-	if(bind(curConnec->pollFd.fd, (sockaddr *)&service, sizeof(sockaddr)) < 0)
+	if(bind(curConnec->pollFd.fd, (sockaddr *)&service, sizeof(sockaddr)) < 0) {
 		THROW("Binding socket")
+	}
 }
 
 void Server::listenSocket() {
@@ -35,7 +36,8 @@ void Server::listenSocket() {
 
 void Server::END() {
 	LOG("DEBUG", __FUNCTION__);
-	delete serverConfigs;
+	for (size_t i = 0; i < serverConfigs.size(); i++)
+		delete serverConfigs[i];
 	for (std::vector<Connection*>::iterator it = serverConnections.begin(); it != serverConnections.end(); ++it) {
 		close((*it)->pollFd.fd);
 		delete (*it);
@@ -45,15 +47,20 @@ void Server::END() {
 void Server::START() {
 	LOG("DEBUG", __FUNCTION__);
 	curIdx = 0;
-	for (std::vector<int>::iterator port = serverConfigs->listenPorts.begin(); port != serverConfigs->listenPorts.end(); ++port) {
-		Connection *conn = new Connection;
-		curConnec = conn;
-		setupServer();
-		setOptions();
-		bindSocket(*port);
-		listenSocket();
-		serverConnections.push_back(conn);
-		curIdx++;
+	for (size_t s = 0; s < serverConfigs.size(); s++) {
+        sConfigs *cfg = serverConfigs[s];
+		for (std::vector<int>::iterator port = cfg->listenPorts.begin(); port != cfg->listenPorts.end(); ++port) {
+			Connection *conn = new Connection;
+			conn->conf = cfg;
+			conn->port = *port;
+			serverConnections.push_back(conn);
+			curConnec = conn;
+			setupServer();
+			setOptions();
+			bindSocket(*port);
+			listenSocket();
+			curIdx++;
+		}
 	}
 	LOOP();
 	END();

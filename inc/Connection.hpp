@@ -13,6 +13,9 @@ private:
 	Connection &operator=( const Connection &other);
 	void init();
 public:
+	unsigned int		port;
+	sConfigs			*conf;
+	sRoute				route;
 	CONNECTION_TYPE		type;
 	pollfd				pollFd;
 	time_t				lastActive;
@@ -25,7 +28,7 @@ public:
 	std::string			buffer;
 
 	Connection();
-	Connection( int fd, CONNECTION_TYPE newType, Connection *newParent );
+	Connection( unsigned int nPort, int fd, CONNECTION_TYPE newType, Connection *newParent );
 	~Connection();
 
 	void				updateLastActive();

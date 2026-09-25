@@ -1,6 +1,8 @@
 #include "Connection.hpp"
 
 void Connection::init() {
+	port = 0;
+	conf = NULL;
 	pollFd.fd = -1;
 	pollFd.events = 0;
 	pollFd.revents = 0;
@@ -18,10 +20,11 @@ Connection::Connection() {
 	type = SERVER;
 };
 
-Connection::Connection( int fd, CONNECTION_TYPE newType, Connection *newParent ) {
+Connection::Connection( unsigned int nPort, int fd, CONNECTION_TYPE newType, Connection *newParent ) {
 	init();
 	type = newType;
 	pollFd.fd = fd;
+	port = nPort;
 
 	switch (type) {
 		case SERVER:
