@@ -24,6 +24,9 @@ Key features:
   autoindex, upload directory, CGI mapping
 - Custom default error pages, used when none are configured
 
+Here is how the server works:
+![alt text](image.png)
+
 ## Instructions
 
 ### Compilation

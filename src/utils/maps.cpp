@@ -28,8 +28,11 @@ sStatusCode MAP_status_code[] = {
 	{ 405, "Method Not Allowed" },
 	{ 408, "Request Timeout" },
 	{ 413, "Payload Too Large" },
+	{ 431, "Request Header Fields Too Large" },
 	{ 500, "Internal Server Error" },
 	{ 504, "Gateway Timeout" },
+	{ 501, "Not Implemented" },
+	{ 502, "Bad Gateway" },
 };
 
 sMethod MAP_method[] = {

@@ -2,8 +2,13 @@
 
 static void confAssignValue(sConfigs *server, int &currentRouteIdx, const std::vector<std::string> &tokens, size_t i)
 {
-	if (tokens[i] == "listen")
-		server->listenPorts.push_back(atoi(tokens[i + 1].c_str()));
+	if (tokens[i] == "listen") {
+		std::string v = tokens[i + 1];
+		size_t c = v.find(':');
+		std::string host = (c == std::string::npos) ? "" : v.substr(0, c);
+		std::string port = (c == std::string::npos) ? v : v.substr(c + 1);
+		server->listens.push_back(std::make_pair(host, atoi(port.c_str())));
+	}
 	else if (tokens[i] == "host")
 		server->host = tokens[i + 1];
 	else if (tokens[i] == "server_name")

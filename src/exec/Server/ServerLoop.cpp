@@ -8,6 +8,7 @@ void Server::addConnection() {
 void Server::closeConnection() {
 	LOG("DEBUG", __FUNCTION__ << " " << curFd);
 	if (curConnec->type == CLIENT) {
+		killCgi(curConnec->cgi_pid);
 		for (size_t i = 0; i < serverConnections.size(); i++) {
 			if (serverConnections[i]->parent == curConnec) {
 				close(serverConnections[i]->pollFd.fd);
@@ -43,9 +44,9 @@ void Server::POLL() {
 	for (std::vector<Connection*>::iterator it = serverConnections.begin(); it != serverConnections.end(); ++it) {
 		tmp.push_back((*it)->pollFd);
 	}
-	poll(tmp.data(), tmp.size(), 1000);
+	int ready = poll(&tmp[0], tmp.size(), 1000);
 	for (size_t i = 0; i < serverConnections.size(); i++)
-		serverConnections[i]->pollFd.revents = tmp[i].revents;
+		serverConnections[i]->pollFd.revents = (ready > 0) ? tmp[i].revents : 0;
 }
 
 bool Server::isCgi() {
@@ -55,7 +56,7 @@ bool Server::isCgi() {
 	return ((curRoute.cgi.find(fileExtension) != curRoute.cgi.end()));
 }
 
-std::map<std::string, std::string> Server::handleEnvp() {
+std::map<std::string, std::string> Server::handleEnvp(const std::string &scriptFile) {
 	Request *REQ = curConnec->client->REQ;
 	std::map<std::string, std::string> inputs;
 
@@ -73,6 +74,11 @@ std::map<std::string, std::string> Server::handleEnvp() {
 
 	inputs["SERVER_NAME"]			= curConnec->conf->serverName;
 	inputs["SERVER_PORT"]			= intToChar(curConnec->port);
+	inputs["GATEWAY_INTERFACE"]		= "CGI/1.1";
+	inputs["SERVER_SOFTWARE"]		= "webserv/1.0";
+	inputs["REDIRECT_STATUS"]		= "200";
+	inputs["SCRIPT_FILENAME"]		= scriptFile;
+
 
 	for (std::map<std::string, std::string>::iterator it = REQ->headers.headers.begin(); it != REQ->headers.headers.end(); ++it) {
 		std::string name = "HTTP_" + it->first;
@@ -91,20 +97,37 @@ std::map<std::string, std::string> Server::handleEnvp() {
 	return (inputs);
 }
 
+static std::string relativeToDir( const std::string &path, const std::string &dir ) {
+	if (path.empty() || path[0] == '/')
+		return (path);
+	std::string up;
+	std::stringstream ss(dir);
+	std::string seg;
+	while (std::getline(ss, seg, '/'))
+		if (!seg.empty() && seg != ".")
+			up += "../";
+	return (up + path);
+}
+
 int Server::startCgi() {
 	LOG("DEBUG", __FUNCTION__);
 
 	std::string PATH = getPath();
-	std::string fileExtension = getFileExtension(PATH);
-	std::map<std::string, std::string>::iterator it = curRoute.cgi.find(fileExtension);
-	std::string cgiPath = it->second;
+	if (access(PATH.c_str(), F_OK) != 0)
+		return (curClient->REQ->rError = NotFound, -1);
+	if (access(PATH.c_str(), R_OK) != 0)
+		return (curClient->REQ->rError = Forbidden, -1);
+	std::string cgiPath = curRoute.cgi.find(getFileExtension(PATH))->second;
 	
 	int pipe_in[2], pipe_out[2];
-
 	if (pipe(pipe_in) < 0)
 		return (curClient->REQ->rError = InternalServerError, -1);
-	if (pipe(pipe_out) < 0)
+	if (pipe(pipe_out) < 0) {
+		close(pipe_in[0]); close(pipe_in[1]);
 		return (curClient->REQ->rError = InternalServerError, -1);
+	}
+	fcntl(pipe_in[1], F_SETFD, FD_CLOEXEC);
+	fcntl(pipe_out[0], F_SETFD, FD_CLOEXEC);
 
 	pid_t pid = fork();
 	if (pid < 0) {
@@ -116,18 +139,19 @@ int Server::startCgi() {
 	if (pid == 0) {
 		dup2(pipe_in[0], STDIN_FILENO);
 		dup2(pipe_out[1], STDOUT_FILENO);
+		close(pipe_in[0]); close(pipe_in[1]);
+		close(pipe_out[0]); close(pipe_out[1]);
 
-		close(pipe_in[0]);
-		close(pipe_in[1]);
-		close(pipe_out[0]);
-		close(pipe_out[1]);
+		size_t slash = PATH.find_last_of('/');
+		std::string dir = PATH.substr(0, slash);
+		std::string file = PATH.substr(slash + 1);
+		std::string interp = relativeToDir(cgiPath, dir);
 
-		char *args[] = {
-			(char *)cgiPath.c_str(),
-			(char *)PATH.c_str(),
-			NULL
-		};
-		std::map<std::string, std::string> mapEnvp = handleEnvp();
+		if (chdir(dir.c_str()) < 0)
+			_exit(1);
+
+		char *args[] = { (char *)interp.c_str(), (char *)file.c_str(), NULL };
+		std::map<std::string, std::string> mapEnvp = handleEnvp(file);
 		std::vector<std::string> env_strs;
 		for (std::map<std::string, std::string>::iterator it = mapEnvp.begin(); it != mapEnvp.end(); ++it)
 			env_strs.push_back(it->first + "=" + it->second);
@@ -137,13 +161,13 @@ int Server::startCgi() {
 			envp[i] = (char *)env_strs[i].c_str();
 		envp[env_strs.size()] = NULL;
 
-		execve(cgiPath.c_str(), args, envp);
+		execve(interp.c_str(), args, envp);
 		_exit(1);
 	}
-
 	close(pipe_in[0]);
 	close(pipe_out[1]);
 	cgiPids.push_back(pid);
+	curConnec->cgi_pid = pid;
 
 	Connection *cin = new Connection(-1, pipe_in[1], CGI_IN, curConnec);
 	newConns.push_back(cin);
@@ -179,11 +203,13 @@ int Server::sendDataToClient() {
 		OUT();
 		SEND();
 		curClient->RES->body = curClient->RES->stringify();
+		if (DEBUG)
+			debugRe(*curClient->RES);
+		else
+			LOG("🔴 RES", curClient->RES->statusCode << " size: " << curClient->RES->payload.size() << "\n");
 	}
 	size_t sizeBody = curClient->RES->body.size();
 	int nbytes = send(curFd, curClient->RES->body.c_str(), sizeBody, 0);
-	if (DEBUG)
-		debugRe(*curClient->RES);
 	if (nbytes <= 0)
 		return (0);
 	if ((size_t)nbytes == sizeBody)
@@ -245,26 +271,61 @@ int Server::connectionCheck() {
 	}
 
 	time_t now = time(NULL);
-	if ((now - curConnec->lastActive) > TIMEOUT)
+	bool waitingOnCgi = (curConnec->type == CLIENT && curConnec->cgi_state == ONGOING);
+	if (!waitingOnCgi && (now - curConnec->lastActive) > TIMEOUT)
 		return (REQ->rError = RequestTimedOut, -1);
-
 	if (CLI->state == READING_HEADERS)
 		return (1);
-
-	if (!valueInContainer<std::string>(getMethodTxt(REQ->headers.method), curRoute.methods))
-		return (REQ->rError = MethodNotAllowed, -2);
 	if (REQ->payload.size() > (size_t)curRoute.clientMaxBodySize)
-		return (REQ->rError =PayloadTooLarge, -3 );
-	if (!curRoute.redirect.empty())
-		return (REQ->rError = MovedPermanently, -4);
-	if (REQ->rError == BadRequest)
-		return (-5);
+		return (REQ->rError = PayloadTooLarge, -3);
 	return (1);
 }
 
-void Server::removeZombiesCgi() {
-	// LOG("DEBUG", __FUNCTION__);
+RUNTIME_ERROR Server::validateRequest() {
+	LOG("DEBUG", __FUNCTION__);
+	Request *REQ = curClient->REQ;
+	if (REQ->headers.method == UNKNOWN)
+		return (NotImplemented);
+	if (!valueInContainer<std::string>(getMethodTxt(REQ->headers.method), curRoute.methods))
+		return (MethodNotAllowed);
+	if (!curRoute.redirect.empty())
+		return (MovedPermanently);
+	std::string cl = REQ->getHeader("content-length");
+	if (!cl.empty() && strtoul(cl.c_str(), NULL, 10) > (size_t)curRoute.clientMaxBodySize)
+		return (PayloadTooLarge);
+	return (NONE);
+  }
 
+void Server::finishRequest() {
+	LOG("DEBUG", __FUNCTION__);
+	Request *REQ = curClient->REQ;
+	curClient->state = COMPLETED;
+	curConnec->pollFd.events = POLLOUT;
+	if (REQ->rError == NONE && REQ->payload.size() > (size_t)curRoute.clientMaxBodySize)
+		REQ->rError = PayloadTooLarge;
+	if (REQ->rError != NONE || !isCgi())
+		return;
+	std::string uri = REQ->headers.raw;
+	std::string file_ext = getFileExtension(uri);
+	size_t ext_pos = uri.find(file_ext);
+	REQ->headers.script = uri.substr(0, ext_pos + file_ext.size());
+	REQ->headers.info = uri.substr(REQ->headers.script.size());
+	if (REQ->headers.info.empty())
+		REQ->headers.info = REQ->headers.script;
+	if (startCgi() > 0) {
+		curConnec->cgi_state = ONGOING;
+		curConnec->pollFd.events = 0;
+	}
+}
+
+void Server::killCgi( pid_t pid ) {
+	LOG("DEBUG", __FUNCTION__);
+	if (pid > 0 && std::find(cgiPids.begin(), cgiPids.end(), pid) != cgiPids.end())
+		kill(pid, SIGKILL);
+}
+
+void Server::removeZombiesCgi() {
+	LOG("DEBUG", __FUNCTION__);
 	for (size_t i = 0; i < cgiPids.size(); ) {
 		int status;
 		pid_t r = waitpid(cgiPids[i], &status, WNOHANG);
@@ -296,11 +357,15 @@ void Server::LOOP() {
 			int connStatus = connectionCheck();
 			if (connStatus < 0) {
 				if (curConnec->type == CGI_IN || curConnec->type == CGI_OUT) {
-					curConnec->pollFd.events = 0;
-					curConnec->parent->pollFd.events = 0;
-					curConnec->parent->cgi_state = DONE;
+					Connection *cli = curConnec->parent;
+					killCgi(cli->cgi_pid);
+					cli->client->REQ->rError = GatewayTimeout;
+					cli->cgi_state = DONE;
+					cli->pollFd.events = POLLOUT;
+					cli->lastActive = time(NULL);
 					closeConnection(); continue;
-			} else if (curConnec->type == CLIENT) {
+				} else if (curConnec->type == CLIENT) {
+					killCgi(curConnec->cgi_pid);
 					curConnec->pollFd.events = POLLOUT;
 					curConnec->cgi_state = DEFAULT;
 					curClient->RES->payload.clear();
@@ -321,14 +386,7 @@ void Server::LOOP() {
 					if (curPollFd.revents & POLLIN) {
 						curConnec->updateLastActive();
 						int nbytes = recv(curFd, buff, BUFF_SIZE, 0);
-						if (nbytes < 0) {
-							curConnec->client->REQ->rError = BadRequest;
-							if (curConnec->cgi_state == ONGOING)
-								curConnec->cgi_state = DONE;
-							curConnec->pollFd.events = POLLOUT;
-							break;
-						}
-						if (nbytes == 0) {
+						if (nbytes <= 0) {
 							closeConnection();
 							break;
 						}
@@ -345,6 +403,8 @@ void Server::LOOP() {
 								}
 								if (DEBUG)
 									debugRe(*curClient->REQ);
+								else
+									LOG("🟢 REQ", getMethodTxt(curClient->REQ->headers.method) << " " << curClient->REQ->headers.path);
 								curConnec->buffer = curConnec->buffer.substr(headersEof + 4);
 								nbytes = 0;
 								buff[0] = '\0';
@@ -355,29 +415,19 @@ void Server::LOOP() {
 								curMethod = curClient->REQ->headers.method;
 								curConnec->route = findRoute(curConnec->client->REQ->headers.path, curConnec->conf->router);
 								curRoute = curConnec->route;
-								if (curMethod == GET) {
-									curClient->state = COMPLETED;
-									curConnec->pollFd.events = POLLOUT;
+								RUNTIME_ERROR err = validateRequest();
+								if (err != NONE) {
+									curClient->REQ->rError = err;
+									finishRequest();
+									break;
 								}
 								curClient->state = READING_PAYLOAD;
 								if (curClient->REQ->getHeader("transfer-encoding") == "chunked")
 									curConnec->transfer_type = CHUNKED;
-								if (isCgi()) {
-									std::string uri = curClient->REQ->headers.raw;
-									std::string file_ext = getFileExtension(uri);
-									size_t ext_pos = uri.find(file_ext);
-									curClient->REQ->headers.script = uri.substr(0, ext_pos + file_ext.size());
-									curClient->REQ->headers.info = uri.substr(curClient->REQ->headers.script.size());
-									if (curClient->REQ->headers.info.empty())
-										curClient->REQ->headers.info = curClient->REQ->headers.script;
-									if (startCgi())
-										curConnec->cgi_state = ONGOING;
-								}
 								curConnec->contentLen = strtoul(curClient->REQ->getHeader("content-length").c_str(), NULL, 10);
 								curContentLen = curConnec->contentLen;
 								if (!curContentLen && curConnec->transfer_type == CONTENT) {
-									curClient->state = COMPLETED;
-									curConnec->pollFd.events = POLLOUT;
+									finishRequest();
 									break;
 								}
 							}
@@ -396,19 +446,14 @@ void Server::LOOP() {
 								new_payload = parseChunkedBody(&new_bytes, &curConnec->buffer, &status);
 							curClient->REQ->payload.append(new_payload);
 							switch (status) {
-								case 0:
-									curClient->state = COMPLETED;
-									curConnec->pollFd.events = POLLOUT;
-									break;
-								case 1:
-									break;
+								case 0:		finishRequest(); break;
+								case -1:	curClient->REQ->rError = BadRequest; finishRequest(); break;
+								case 1:		break;
 							}
 						}
 					} else if (curConnec->pollFd.revents & POLLOUT) {
-						if (curConnec->cgi_state == ONGOING) {
-							curConnec->updateLastActive();
+						if (curConnec->cgi_state == ONGOING)
 							break;
-						}
 						if (sendDataToClient() == 0)
 							closeConnection();
 					}
@@ -418,13 +463,12 @@ void Server::LOOP() {
 						const char *payload = curConnec->parent->client->REQ->payload.data() + curConnec->parent->cgi_offset;
 						size_t remaining = curConnec->parent->client->REQ->payload.size() - curConnec->parent->cgi_offset;
 						if (!remaining) {
-							if (curConnec->parent->client->state == COMPLETED)
-								closeConnection();
+							closeConnection();
 							break;
 						}
 						int nbytes = writeToPipe(curFd, payload, remaining);
 						if (nbytes < 0) {
-							curConnec->parent->client->REQ->rError = BadRequest;
+							curConnec->parent->client->REQ->rError = BadGateway;
 							curConnec->parent->cgi_state = DONE;
 							curConnec->parent->pollFd.events = POLLOUT;
 							closeConnection();
@@ -440,7 +484,7 @@ void Server::LOOP() {
 						curConnec->updateLastActive();
 						int nbytes = readFromPipe(curConnec->pollFd.fd, &curConnec->parent->client->RES->payload);
 						if (nbytes < 0) {
-							curConnec->parent->client->REQ->rError = BadRequest;
+							curConnec->parent->client->REQ->rError = BadGateway;
 							curConnec->parent->cgi_state = DONE;
 							curConnec->parent->pollFd.events = POLLOUT;
 							closeConnection();

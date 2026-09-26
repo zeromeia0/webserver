@@ -9,6 +9,7 @@ void Connection::init() {
 	lastActive = time(NULL);
 	client = NULL;
 	parent = NULL;
+	cgi_pid = -1;
 	cgi_state = DEFAULT;
 	cgi_offset = 0;
 	transfer_type = CONTENT;

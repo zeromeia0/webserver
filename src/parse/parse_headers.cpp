@@ -7,11 +7,7 @@ sHeaders *parseHeaders( std::string str ) {
 	for (std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); it++) {
 		if (i == 0) {
 			RE_METHOD *method = getMethodCode(*it);
-			if (!method) {
-				delete headers;
-				return (NULL);
-			}
-			headers->method = *method;
+			headers->method = method ? *method : UNKNOWN;
 		} else if (i == 1) {
 			sFormUrlEncoded form = parseFormUrlEncoded(*it);
 			headers->raw = form.raw;

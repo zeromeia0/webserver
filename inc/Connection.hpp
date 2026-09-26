@@ -21,6 +21,7 @@ public:
 	time_t				lastActive;
 	Client				*client;
 	Connection			*parent;
+	pid_t				cgi_pid;
 	CGI_STATE			cgi_state;
 	int					cgi_offset;
 	TRANSFER_TYPE		transfer_type;

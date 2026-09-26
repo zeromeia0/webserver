@@ -30,6 +30,7 @@ int main(int argc, char **argv) {
 		S.START();
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
+		return (1);
 	}
 
 	return (0);

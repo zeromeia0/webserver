@@ -10,6 +10,6 @@
 
 sHeaders			    *parseHeaders(std::string str);
 std::vector<sConfigs*>  parseConfigs(char *fileName);
-std::string			    parseFormData(std::string payload, std::string contentType);
+std::vector<sFormPart>  parseFormData( const std::string &payload, const std::string &contentType );
 sFormUrlEncoded		    parseFormUrlEncoded(std::string url);
 std::string			    parseChunkedBody( std::string *newBytes, std::string *previousBytes, int *status );

@@ -47,4 +47,10 @@ enum RUNTIME_ERROR {
 	PayloadTooLarge,
 	MovedPermanently,
 	InternalServerError,
+	NotImplemented,
+	NotFound,
+	Forbidden,
+	BadGateway,
+	GatewayTimeout,
+	HeaderTooLarge,
 };

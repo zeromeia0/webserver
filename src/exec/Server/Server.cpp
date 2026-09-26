@@ -48,4 +48,18 @@ Server &Server::operator=(const Server &other) {
 
 Server::~Server() {
 	LOG("DEBUG", __FUNCTION__);
+	for (size_t i = 0; i < cgiPids.size(); i++) {
+		kill(cgiPids[i], SIGKILL);
+		waitpid(cgiPids[i], NULL, 0);
+	}
+	for (size_t i = 0; i < serverConnections.size(); i++) {
+		close(serverConnections[i]->pollFd.fd);
+		delete serverConnections[i];
+	}
+	for (size_t i = 0; i < newConns.size(); i++) {
+		close(newConns[i]->pollFd.fd);
+		delete newConns[i];
+    }
+	for (size_t i = 0; i < serverConfigs.size(); i++)
+		delete serverConfigs[i];
 }

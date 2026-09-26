@@ -17,16 +17,21 @@ void Server::setOptions() {
 		THROW("Setting options");
 }
 
-void Server::bindSocket( int port ) {
+void Server::bindSocket( const std::string &host, int port ) {
 	LOG("DEBUG", __FUNCTION__ << " " << port);
-	sockaddr_in service;
-	service.sin_family = SIN_FAMILY;
-	service.sin_addr.s_addr = SIN_ADDR;
-	service.sin_port = htons(port);
-	if(bind(curConnec->pollFd.fd, (sockaddr *)&service, sizeof(sockaddr)) < 0) {
-		THROW("Binding socket")
-	}
-}
+	addrinfo hints = addrinfo();
+	addrinfo *res;
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_PASSIVE;
+	int err = getaddrinfo(host.empty() ? NULL : host.c_str(), intToChar(port).c_str(), &hints, &res);
+	if (err != 0)
+		THROW("getaddrinfo: " + std::string(gai_strerror(err)));
+	int r = bind(curConnec->pollFd.fd, res->ai_addr, res->ai_addrlen);
+	freeaddrinfo(res);
+	if (r < 0)
+		THROW("Binding socket " + host + ":" + intToChar(port));
+  }
 
 void Server::listenSocket() {
 	LOG("DEBUG", __FUNCTION__);
@@ -34,34 +39,24 @@ void Server::listenSocket() {
 		THROW("Listening socket");
 }
 
-void Server::END() {
-	LOG("DEBUG", __FUNCTION__);
-	for (size_t i = 0; i < serverConfigs.size(); i++)
-		delete serverConfigs[i];
-	for (std::vector<Connection*>::iterator it = serverConnections.begin(); it != serverConnections.end(); ++it) {
-		close((*it)->pollFd.fd);
-		delete (*it);
-	}
-}
-
 void Server::START() {
 	LOG("DEBUG", __FUNCTION__);
 	curIdx = 0;
 	for (size_t s = 0; s < serverConfigs.size(); s++) {
         sConfigs *cfg = serverConfigs[s];
-		for (std::vector<int>::iterator port = cfg->listenPorts.begin(); port != cfg->listenPorts.end(); ++port) {
+		for (size_t l = 0; l < cfg->listens.size(); l++) {
 			Connection *conn = new Connection;
 			conn->conf = cfg;
-			conn->port = *port;
+			conn->port = cfg->listens[l].second;
 			serverConnections.push_back(conn);
 			curConnec = conn;
 			setupServer();
 			setOptions();
-			bindSocket(*port);
+			std::string host = cfg->listens[l].first.empty() ? cfg->host : cfg->listens[l].first;
+			bindSocket(host, conn->port);
 			listenSocket();
 			curIdx++;
 		}
 	}
 	LOOP();
-	END();
 }

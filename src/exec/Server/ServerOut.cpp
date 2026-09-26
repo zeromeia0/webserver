@@ -3,6 +3,8 @@
 void Server::STATUS( int status_code ) {
 	LOG("DEBUG", __FUNCTION__ << " " << status_code);
 	curClient->RES->statusCode = status_code;
+	if (status_code == 204)
+		return;
 	std::string content;
 	if (curConnec->conf->errorPages.find(status_code) != curConnec->conf->errorPages.end()) {
 		curClient->RES->headers.path = curConnec->conf->errorPages[status_code];
@@ -11,7 +13,7 @@ void Server::STATUS( int status_code ) {
 		content = intToChar(status_code) + " " + getStatusMsg(status_code);
 		curClient->RES->addHeader("Content-Type", "text/plain");
 	}
-	curClient->RES->addPayload(content);
+	curClient->RES->payload = content;
 };
 
 void Server::SEND() {
@@ -21,17 +23,26 @@ void Server::SEND() {
 		if (mime) {
 			curClient->RES->addHeader("Content-Type", *mime);
 		}
-		curClient->RES->addHeader("Content-Length", intToChar(curClient->RES->payload.size()));
+
 	}
 
 	if (curClient->RES->headers.method == HEAD)
 		curClient->RES->payload.clear();
 
+	if (curClient->RES->statusCode != 204)
+		curClient->RES->addHeader("Content-Length", intToChar(curClient->RES->payload.size()));
 	curClient->RES->addHeader("Connection", "close");
 
 	// curClient->REQ->saveLog();
 	// curClient->RES->saveLog();
 
+}
+
+static std::string safeName( std::string name ) {
+	size_t s = name.find_last_of("/\\");
+	if (s != std::string::npos)
+		name = name.substr(s + 1);
+	return ((name == "." || name == "..") ? "" : name);
 }
 
 std::string Server::getPath() {
@@ -60,48 +71,71 @@ void Server::OUT() {
 			return (STATUS(408));
 		case (BadRequest):
 			return (STATUS(400));
-		case (MethodNotAllowed):
+		case (MethodNotAllowed): {
+			std::string allow;
+			for (size_t i = 0; i < curRoute.methods.size(); i++)
+				allow += (i ? ", " : "") + curRoute.methods[i];
+			RES->addHeader("Allow", allow);
 			return (STATUS(405));
+		}
 		case (PayloadTooLarge):
 			return (STATUS(413));
 		case (MovedPermanently):
 			RES->headers.path = curRoute.redirect;
 			RES->addHeader("Location", RES->headers.path);
 			return (STATUS(301));
+		case (NotFound):
+			return (STATUS(404));
+		case (Forbidden):
+			return (STATUS(403));
+		case (HeaderTooLarge):
+			return (STATUS(431));
 		case (InternalServerError):
 			return (STATUS(500));
+		case (NotImplemented):
+			return (STATUS(501));
+		case (BadGateway):
+			return (STATUS(502));
+		case (GatewayTimeout):
+			return (STATUS(504));
 	}
 
 	if (curConnec->cgi_state == DONE) {
-		LOG("DONE", "DONE");
-		std::string &cgiOutput = RES->payload;
-		size_t headerEnd = cgiOutput.find("\r\n\r\n");
-		if (headerEnd == std::string::npos)
-			headerEnd = cgiOutput.find("\n\n");
-		if (headerEnd != std::string::npos) {
-			std::string cgiHeaders = cgiOutput.substr(0, headerEnd);
-			size_t sep = (cgiOutput[headerEnd] == '\r') ? 4 : 2;
-			cgiOutput = cgiOutput.substr(headerEnd + sep);
-			// parse Status line from CGI headers
-			size_t statusPos = cgiHeaders.find("Status:");
-			if (statusPos != std::string::npos) {
-				RES->statusCode = strtoul(cgiHeaders.substr(statusPos + 8).c_str(), NULL, 10);
-			} else {
-				RES->statusCode = 200;
-			}
-			// parse Content-Type from CGI headers
-			size_t ctPos = cgiHeaders.find("Content-Type:");
-			if (ctPos != std::string::npos) {
-				size_t ctEnd = cgiHeaders.find("\n", ctPos);
-				std::string ct = cgiHeaders.substr(ctPos + 14, ctEnd - ctPos - 14);
-				// trim trailing \r if present
-				if (!ct.empty() && ct[ct.size() - 1] == '\r')
-					ct = ct.substr(0, ct.size() - 1);
-				RES->addHeader("Content-Type", ct);
-			}
-		} else {
-			RES->statusCode = 200;
+		std::string &out = RES->payload;
+		size_t end = out.find("\r\n\r\n");
+		size_t sep = 4;
+		if (end == std::string::npos) {
+				end = out.find("\n\n");
+				sep = 2;
 		}
+		if (end == std::string::npos) {
+				out.clear();
+				return (STATUS(502));
+		}
+		std::istringstream hs(out.substr(0, end));
+		out = out.substr(end + sep);
+		RES->statusCode = 200;
+		std::string line;
+		while (std::getline(hs, line)) {
+			if (!line.empty() && line[line.size() - 1] == '\r')
+				line.erase(line.size() - 1);
+			size_t c = line.find(':');
+			if (c == std::string::npos)
+				continue;
+			std::string key = line.substr(0, c);
+			std::string val = line.substr(c + 1);
+			val.erase(0, val.find_first_not_of(' '));
+			std::string low = key;
+			std::transform(low.begin(), low.end(), low.begin(), toLower);
+			if (low == "status")
+					RES->statusCode = atoi(val.c_str());
+			else if (low == "content-type")
+					RES->addHeader("Content-Type", val);
+			else
+					RES->addHeader(key, val);
+		}
+		if (RES->getHeader("Content-Type").empty())
+			RES->addHeader("Content-Type", "text/html");
 		return;
 	}
 
@@ -109,56 +143,52 @@ void Server::OUT() {
 	switch (curMethod) {
 		case HEAD:
 		case GET: {
-			RES->headers.path = PATH;	
-			DIR *dir = opendir(PATH.c_str());
-			int _errno = errno;
-			if (dir && !(_errno == EACCES)) {
-				closedir(dir);
-				if (!curRoute.index.empty()) {
-					std::string indexPath = PATH + curRoute.index;
-					if (access(indexPath.c_str(), F_OK) == 0) {
-						RES->headers.path = indexPath;
-						RES->statusCode = 200;
-						RES->addPayload(readFileContent(indexPath));
-					} else if (curRoute.autoindex) {
-						RES->addPayload(autoindex(PATH, curClient->REQ->headers.path));
-						RES->addHeader("Content-Type", "text/html");
-						RES->headers.path = PATH;
-						RES->statusCode = 200;
-					} else {
-						RES->headers.path = PATH;
-						STATUS(404);
-					}
-				} else if (curRoute.autoindex && !(_errno == EACCES)) {
+			struct stat st;
+			RES->headers.path = PATH;
+			if (stat(PATH.c_str(), &st) != 0)
+				return (STATUS(404));
+			if (S_ISDIR(st.st_mode)) {
+				std::string indexPath = PATH + curRoute.index;
+				if (!curRoute.index.empty() && access(indexPath.c_str(), F_OK) == 0) {
+					if (access(indexPath.c_str(), R_OK) != 0)
+						return (STATUS(403));
+					RES->headers.path = indexPath;
+					RES->addPayload(readFileContent(indexPath));
+				} else if (curRoute.autoindex) {
 					RES->addPayload(autoindex(PATH, curClient->REQ->headers.path));
 					RES->addHeader("Content-Type", "text/html");
-					RES->headers.path = PATH;
-					RES->statusCode = 200;
-				} else {
-					RES->headers.path = PATH;
-					STATUS(403);
-				}
+				} else
+					return (STATUS(403));
 			} else {
-				RES->headers.path = PATH;
-				if (!(access(RES->headers.path.c_str(), F_OK) == 0)) {
-					STATUS(404);
-				} else if (!(access(RES->headers.path.c_str(), R_OK) == 0)) {
-					STATUS(403);
-				} else {
-					RES->addPayload(readFileContent(RES->headers.path));
-					RES->statusCode = 200;
-				}
+				if (access(PATH.c_str(), R_OK) != 0)
+					return (STATUS(403));
+				RES->addPayload(readFileContent(PATH));
 			}
+			RES->statusCode = 200;
 			break;
 		}
 		case POST: {
-			RES->headers.path = PATH;
-			std::string payload = parseFormData(REQ->payload, REQ->headers.get("content-type"));
-			if (!payload.empty())
-				writeFileContent(RES->headers.path, payload) ? STATUS(201) : STATUS(404);
-			else
-				STATUS(200);
-			break;
+			if (!curRoute.uploadEnabled)
+				return (STATUS(403));
+			std::string dir = curRoute.root + curRoute.uploadStore;
+			std::string ct = REQ->headers.get("content-type");
+			if (ct.find("multipart/form-data") != std::string::npos) {
+				std::vector<sFormPart> parts = parseFormData(REQ->payload, ct);
+				int saved = 0;
+				for (size_t i = 0; i < parts.size(); i++) {
+					std::string name = safeName(parts[i].filename);
+					if (name.empty())
+						continue;
+					if (!writeFileContent(dir + "/" + name, parts[i].content))
+						return (STATUS(500));
+					saved++;
+				}
+				return (saved ? STATUS(201) : STATUS(400));
+			}
+			std::string name = (REQ->headers.path == curRoute.path ? "" : safeName(REQ->headers.path));
+			if (name.empty())
+				return (STATUS(400));
+			return (writeFileContent(dir + "/" + name, REQ->payload) ? STATUS(201) : STATUS(500));
 		}
 		case DELETE: {
 			if (access(PATH.c_str(), F_OK) != 0)

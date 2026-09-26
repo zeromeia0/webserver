@@ -1,5 +1,7 @@
 import os, json
 
+print("Content-Type: text/html\r\n\r\n", end="")
+
 # ########################
 # FUNCTIONS
 # ########################

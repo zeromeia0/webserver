@@ -1,6 +1,6 @@
 import json, os, time
 
-with open("var/data/logs.json", "r") as f:
+with open("../data/logs.json", "r") as f:
 	data = f.read()
 
 jsondata = json.loads(data)
@@ -10,5 +10,5 @@ jsondata["entries"].append(BODY)
 sorted(jsondata["entries"], key=lambda item: item["timestamp"], reverse=True)
 jsondata["entries"] = jsondata["entries"][:100]
 
-with open("var/data/logs.json", "w") as f:
+with open("../data/logs.json", "w") as f:
 	f.write(json.dumps(jsondata))

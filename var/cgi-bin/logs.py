@@ -1,6 +1,8 @@
 import os, json, ast, html, sys
 from urllib.parse import unquote
 
+print("Content-Type: text/html\r\n\r\n", end="")
+
 # ########################
 # FUNCTIONS
 # ########################
@@ -9,7 +11,7 @@ from urllib.parse import unquote
 # LOGIC
 # ########################
 
-with open("var/data/logs.json") as f:
+with open("../data/logs.json") as f:
 	data = f.read()
 jsondata = json.loads(data)
 entries = jsondata["entries"]

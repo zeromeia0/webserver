@@ -1,5 +1,7 @@
 import json, html
 
+print("Content-Type: text/html\r\n\r\n", end="")
+
 # ########################
 # FUNCTIONS
 # ########################
@@ -9,7 +11,7 @@ import json, html
 # LOGIC
 # ########################
 
-with open("var/data/configs.json") as f:
+with open("../data/configs.json") as f:
 	data = f.read()
 jsondata = json.loads(data)
 

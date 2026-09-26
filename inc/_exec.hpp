@@ -8,7 +8,7 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <cerrno>
+#include <sys/stat.h>
 #include <climits>
 #include <dirent.h>
 

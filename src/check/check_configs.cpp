@@ -269,10 +269,14 @@ static void checkValues(const std::vector<std::string> &tokens)
 		if (tokens[i] == "listen")
 		{
 			hasListen = true;
-			if (!isNumber(tokens[i + 1]))
-				THROW("Invalid listen port: " + tokens[i + 1]);
-			int port = std::atoi(tokens[i + 1].c_str());
-			if (port < 1 || port > 65535)
+			std::string v = tokens[i + 1];
+			size_t c = v.find(':');
+			std::string host = (c == std::string::npos) ? "" : v.substr(0, c);
+			std::string port = (c == std::string::npos) ? v : v.substr(c + 1);
+			if (!isNumber(port))
+				THROW("Invalid listen port: " + port);
+			int portInt = atoi(port.c_str());
+			if (portInt < 1 || portInt > 65535)
 				THROW("Listen port out of range");
 		}
 		else if (tokens[i] == "client_max_body_size")

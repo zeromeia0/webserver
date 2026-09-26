@@ -13,6 +13,7 @@
 #include <map>
 #include <cstdlib>
 #include <climits>
+#include <netdb.h>
 
 extern bool G_RUNNING;
 
@@ -44,7 +45,7 @@ public:
 
 	void								setupServer();
 	void								setOptions();
-	void								bindSocket( int port );
+	void								bindSocket( const std::string &host, int port );
 	void								listenSocket();
 	void								removeZombiesCgi();
 	void								addConnection();
@@ -52,10 +53,13 @@ public:
 	std::string							getPath();
 	bool								isCgi();
 	int									startCgi();
-	std::map<std::string, std::string>	handleEnvp();
+	std::map<std::string, std::string>	handleEnvp( const std::string &scriptFile );
 	bool								createNewClient();
 	int									sendDataToClient();
 	int									connectionCheck();
+	RUNTIME_ERROR						validateRequest();
+	void								finishRequest();
+	void								killCgi( pid_t pid );
 
 	void								START();
 	void								LOOP();
@@ -63,6 +67,5 @@ public:
 	void								OUT();
 	void								STATUS( int status_code );
 	void								SEND();
-	void								END();
 
 };

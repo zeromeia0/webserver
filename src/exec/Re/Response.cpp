@@ -21,15 +21,8 @@ Response::~Response() {
 };
 
 std::string Response::stringify() {
-	std::string body;
-	body =
-		this->headers.version + " "
-		+ intToChar(this->statusCode) + " "
-		+ getStatusMsg(this->statusCode) + " "
-		+ "\r\n";
+	std::string body = "HTTP/1.1 " + intToChar(statusCode) + " " + getStatusMsg(statusCode) + "\r\n";
 	for (std::map<std::string, std::string>::iterator it = this->headers.headers.begin(); it != this->headers.headers.end(); ++it)
 		body = body + it->first + ": " + it->second + "\r\n";
-	body = body + "\r\n";
-	body = body + this->payload;
-	return (body);
+	return (body + "\r\n" + payload);
 };	

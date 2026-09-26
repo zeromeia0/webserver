@@ -5,6 +5,7 @@ function sleep(ms) {
 }
 
 async function run() {
+  process.stdout.write("Content-Type: text/plain\r\n\r\n")
   const QUERY_STRING = process.env.QUERY_STRING
   console.log(QUERY_STRING ? "" : "Please update QUERY_STRING")
   splits = QUERY_STRING.split("&")

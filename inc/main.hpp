@@ -27,14 +27,11 @@
 #define TIMEOUT			30
 #define DEF_MAX_BODY	100000000
 
-#define DEBUG			1
-#if DEBUG
-#define LOG(categ, msg) do {\
-	std::cerr << "[" << categ << "] " << msg << std::endl;\
-} while(0)
-#else
-#define LOG(categ, msg) do {} while(0)
-#endif
+#define DEBUG			0
+#define LOG(categ, msg) {\
+	if (std::string(categ) != "DEBUG")\
+		std::cerr << "[" << categ << "] " << msg << std::endl;\
+}
 
 #define THROW(msg) throw std::runtime_error("Error: " + std::string(msg));
 
