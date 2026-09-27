@@ -113,7 +113,7 @@ void Server::OUT() {
 				return (STATUS(502));
 		}
 		std::istringstream hs(out.substr(0, end));
-		out = out.substr(end + sep);
+		out.erase(0, end + sep);
 		RES->statusCode = 200;
 		std::string line;
 		while (std::getline(hs, line)) {
@@ -157,7 +157,9 @@ void Server::OUT() {
 				} else if (curRoute.autoindex) {
 					RES->addPayload(autoindex(PATH, curClient->REQ->headers.path));
 					RES->addHeader("Content-Type", "text/html");
-				} else
+				} else if (!curRoute.index.empty())
+					return (STATUS(404));
+				else
 					return (STATUS(403));
 			} else {
 				if (access(PATH.c_str(), R_OK) != 0)
@@ -169,7 +171,7 @@ void Server::OUT() {
 		}
 		case POST: {
 			if (!curRoute.uploadEnabled)
-				return (STATUS(403));
+					return (STATUS(403));
 			std::string dir = curRoute.root + curRoute.uploadStore;
 			std::string ct = REQ->headers.get("content-type");
 			if (ct.find("multipart/form-data") != std::string::npos) {
@@ -185,10 +187,11 @@ void Server::OUT() {
 				}
 				return (saved ? STATUS(201) : STATUS(400));
 			}
-			std::string name = (REQ->headers.path == curRoute.path ? "" : safeName(REQ->headers.path));
-			if (name.empty())
+			std::string target = curRoute.uploadStore.empty() ? PATH : dir + "/" + safeName(REQ->headers.path);
+			struct stat st;
+			if (stat(target.c_str(), &st) == 0 && S_ISDIR(st.st_mode))
 				return (STATUS(400));
-			return (writeFileContent(dir + "/" + name, REQ->payload) ? STATUS(201) : STATUS(500));
+			return (writeFileContent(target, REQ->payload) ? STATUS(201) : STATUS(500));
 		}
 		case DELETE: {
 			if (access(PATH.c_str(), F_OK) != 0)

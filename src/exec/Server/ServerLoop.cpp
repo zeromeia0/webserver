@@ -113,9 +113,7 @@ int Server::startCgi() {
 	LOG("DEBUG", __FUNCTION__);
 
 	std::string PATH = getPath();
-	if (access(PATH.c_str(), F_OK) != 0)
-		return (curClient->REQ->rError = NotFound, -1);
-	if (access(PATH.c_str(), R_OK) != 0)
+	if (access(PATH.c_str(), F_OK) == 0 && access(PATH.c_str(), R_OK) != 0)
 		return (curClient->REQ->rError = Forbidden, -1);
 	std::string cgiPath = curRoute.cgi.find(getFileExtension(PATH))->second;
 	
@@ -207,14 +205,15 @@ int Server::sendDataToClient() {
 			debugRe(*curClient->RES);
 		else
 			LOG("🔴 RES", curClient->RES->statusCode << " size: " << curClient->RES->payload.size() << "\n");
+		std::string().swap(curClient->RES->payload);
 	}
-	size_t sizeBody = curClient->RES->body.size();
-	int nbytes = send(curFd, curClient->RES->body.c_str(), sizeBody, 0);
+	Response *RES = curClient->RES;
+	int nbytes = send(curFd, RES->body.data() + RES->sent, RES->body.size() - RES->sent, 0);
 	if (nbytes <= 0)
-		return (0);
-	if ((size_t)nbytes == sizeBody)
-		return (0);
-	curClient->RES->body = curClient->RES->body.substr(nbytes);
+			return (0);
+	RES->sent += nbytes;
+	if (RES->sent == RES->body.size())
+			return (0);
 	return (1);
 }
 
@@ -463,6 +462,7 @@ void Server::LOOP() {
 						const char *payload = curConnec->parent->client->REQ->payload.data() + curConnec->parent->cgi_offset;
 						size_t remaining = curConnec->parent->client->REQ->payload.size() - curConnec->parent->cgi_offset;
 						if (!remaining) {
+							std::string().swap(curConnec->parent->client->REQ->payload);
 							closeConnection();
 							break;
 						}

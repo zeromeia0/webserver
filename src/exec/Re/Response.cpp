@@ -2,6 +2,7 @@
 
 Response::Response() : Re(RES) {
 	statusCode = 0;
+	sent = 0;
 };
 
 Response::Response( const Response &other ) : Re(other) {
@@ -16,9 +17,7 @@ Response &Response::operator=( const Response &other ) {
 	return (*this);
 };
 
-Response::~Response() {
-
-};
+Response::~Response() {};
 
 std::string Response::stringify() {
 	std::string body = "HTTP/1.1 " + intToChar(statusCode) + " " + getStatusMsg(statusCode) + "\r\n";

@@ -10,6 +10,7 @@ class Response : public Re {
 public:
 	std::string		body;
 	int				statusCode;
+	size_t			sent;
 
 	Response();
 	Response( const Response &other );
