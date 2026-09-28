@@ -155,12 +155,6 @@ We used AI (Claude) as an assistant, not as the author of the project. The archi
 ## TO DELETE WHEN DONE
 - can i send the tester?
 - solve the regular file reading stalling the server
-- test nc with different wrongly formatted body:
-	- HTTP/1..1
-	- HTTP/1.1 without host header
-	- HTTP/1.0 without host header -> good
-	- no content length but finished paylaod
-	- etc...
 - dupliacted headers received (upper and lower case?)
 - if i send two files in one cboundary it works? Different boundary delimiter?
 - is POST with upload enabled and folder saolved?
