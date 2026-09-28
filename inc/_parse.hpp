@@ -2,9 +2,11 @@
 
 #include "main.hpp"
 #include UTILS_HPP
+#include CHECK_HPP
 #include MAP_HPP
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include <cstdlib>
 #include <algorithm>
 

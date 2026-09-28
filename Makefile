@@ -60,27 +60,27 @@ all: $(NAME)
 
 $(NAME): $(OBJ)
 	@$(CXX) $(CXXFLAGS) $(OBJ) -o $(NAME)
-	@echo "\n"
-	@echo "${RED}	█████████████████████████████████████████${RESET}"
-	@echo "${GREEN}	█   █ █████ ████   ████ █████ ████  █   █${RESET}"
-	@echo "${GREEN}	█   █ █     █   █ █     █     █   █ █   █${RESET}"
-	@echo "${GREEN}	█ █ █ ████  ████   ███  ████  ████  █   █${RESET}"
-	@echo "${GREEN}	██ ██ █     █   █     █ █     █  █   █ █ ${RESET}"
-	@echo "${GREEN}	█   █ █████ ████  ████  █████ █   █   █  ${RESET}"
-	@echo "${RED}	█████████████████████████████████████████${RESET}"
-	@echo "\n"
+	@printf "\n\n"
+	@printf "${RED}	█████████████████████████████████████████${RESET}\n"
+	@printf "${GREEN}	█   █ █████ ████   ████ █████ ████  █   █${RESET}\n"
+	@printf "${GREEN}	█   █ █     █   █ █     █     █   █ █   █${RESET}\n"
+	@printf "${GREEN}	█ █ █ ████  ████   ███  ████  ████  █   █${RESET}\n"
+	@printf "${GREEN}	██ ██ █     █   █     █ █     █  █   █ █ ${RESET}\n"
+	@printf "${GREEN}	█   █ █████ ████  ████  █████ █   █   █  ${RESET}\n"
+	@printf "${RED}	█████████████████████████████████████████${RESET}\n"
+	@printf "\n\n"
 
 $(OBJ_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
-	@echo -e "$(GREEN)Compiling $<$(RESET)"
+	@printf "$(GREEN)Compiling $<$(RESET)\n"
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	@echo -e "$(YELLOW)Cleaning...$(RESET)"
+	@printf "$(YELLOW)Cleaning...$(RESET)\n"
 	@rm -rf $(OBJ_DIR)
 
 fclean: clean
-	@echo -e "$(YELLOW)Removing [$(NAME)]$(RESET)"
+	@printf "$(YELLOW)Removing [$(NAME)]$(RESET)\n"
 	@rm -f $(NAME)
 
 val: re
@@ -88,4 +88,4 @@ val: re
 
 re: fclean all
 
-.PHONY: all clean fclean re[vvazzs@viniarch webserver]$
+.PHONY: all clean fclean re val

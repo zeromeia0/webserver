@@ -18,6 +18,9 @@ sRoute findRoute(const std::string &uri, const std::vector<sRoute> &router) {
 std::string autoindex( std::string path, std::string base_path ) {
 	LOG("DEBUG", __FUNCTION__);
 
+	std::string base = base_path;
+	if (base.empty() || base[base.size() - 1] != '/')
+		base += "/";
 	std::string output;
 	output += "<h2>" + base_path + "</h2>\n";
 	DIR* dir = opendir(path.c_str());
@@ -26,8 +29,10 @@ std::string autoindex( std::string path, std::string base_path ) {
 		return (output);
 	}
 	struct dirent* entry;
-	while ((entry = readdir(dir)) != NULL)
-		output += "<div><a href=" + base_path + "/" + entry->d_name + " >" + entry->d_name + "<a></div>\n";
+	while ((entry = readdir(dir)) != NULL) {
+		std::string name = entry->d_name;
+		output += "<div><a href=\"" + base + name + "\">" + name + "</a></div>\n";
+	}
 	closedir(dir);
 	return (output);
 }

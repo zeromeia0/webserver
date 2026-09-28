@@ -86,7 +86,9 @@ static void checkUnknownDirectives(const std::vector<std::string>& tokens)
 {
 	for (size_t i = 0; i < tokens.size(); )
 	{
-		if (tokens[i] == "{" || tokens[i] == "}" || tokens[i] == ";")
+		if (tokens[i] == ";")
+			THROW("Unexpected ;");
+		if (tokens[i] == "{" || tokens[i] == "}")
 		{
 			++i;
 			continue;
@@ -171,11 +173,15 @@ static void checkDuplicates(const std::vector<std::string>& tokens)
 				tokens[i] == "upload_store" ||
 				tokens[i] == "redirect" ||
 				tokens[i] == "alias" ||
-				tokens[i] == "client_max_body_size")
-			{
+				tokens[i] == "client_max_body_size") {
 				if (locationDirectives.count(tokens[i]))
 					THROW("Duplicate directive in location: " + tokens[i]);
 				locationDirectives.insert(tokens[i]);
+			} else if (tokens[i] == "cgi") {
+				std::string key = "cgi " + tokens[i + 1];
+				if (locationDirectives.count(key))
+					THROW("Duplicate CGI extension: " + tokens[i + 1]);
+				locationDirectives.insert(key);
 			}
 		}
 	}
@@ -275,6 +281,8 @@ static void checkValues(const std::vector<std::string> &tokens)
 			std::string port = (c == std::string::npos) ? v : v.substr(c + 1);
 			if (!isNumber(port))
 				THROW("Invalid listen port: " + port);
+			if (port.size() > 5 || port[0] == '0')
+				THROW("Invalid listen port: " + port);
 			int portInt = atoi(port.c_str());
 			if (portInt < 1 || portInt > 65535)
 				THROW("Listen port out of range");
@@ -283,9 +291,15 @@ static void checkValues(const std::vector<std::string> &tokens)
 		{
 			if (!isNumber(tokens[i + 1]))
 				THROW("Invalid client_max_body_size");
+			if (tokens[i + 1].size() > 1 && tokens[i + 1][0] == '0')
+				THROW("Invalid client_max_body_size");
+			if (tokens[i + 1].size() > 10 || (tokens[i + 1].size() == 10 && tokens[i + 1] > "2147483647"))
+				THROW("client_max_body_size too large");
 		}
 		else if (tokens[i] == "error_page")
 		{
+			if (tokens[i + 1].size() != 3 || tokens[i + 1][0] == '0')
+				THROW("Invalid error code");
 			if (!isNumber(tokens[i + 1]))
 				THROW("Invalid error code");
 			int code = std::atoi(tokens[i + 1].c_str());
@@ -304,11 +318,14 @@ static void checkValues(const std::vector<std::string> &tokens)
 		}
 		else if (tokens[i] == "allowed_methods")
 		{
+			std::set<std::string> seen;
 			size_t j = i + 1;
 			while (j < tokens.size() && tokens[j] != ";")
 			{
 				if (!isMethod(tokens[j]))
 					THROW("Invalid HTTP method: " + tokens[j]);
+				if (!seen.insert(tokens[j]).second)
+					THROW("Duplicated methods: " + tokens[j]);
 				j++;
 			}
 		}
@@ -325,10 +342,49 @@ static void checkValues(const std::vector<std::string> &tokens)
 				THROW("Invalid CGI declaration");
 			if (tokens[i + 1][0] != '.')
 				THROW("CGI extension must start with '.'");
+			if (tokens[i + 1].size() < 2)
+				THROW("Invalid CGI extension: " + tokens[i + 1]);
 		}
 	}
 	if (!hasListen)
 		THROW("Missing listen directive");
+}
+
+static bool isDir(const std::string &path) {
+	struct stat st;
+	return (stat(path.c_str(), &st) == 0 && S_ISDIR(st.st_mode));
+}
+
+static bool isFile(const std::string &path) {
+	struct stat st;
+	return (stat(path.c_str(), &st) == 0 && S_ISREG(st.st_mode));
+}
+
+void validateConfigs(const std::vector<sConfigs*> &confs) {
+	for (size_t s = 0; s < confs.size(); s++) {
+		const sConfigs *c = confs[s];
+		if (c->listens.empty())
+			THROW("Server block without listen directive");
+		if (c->router.empty())
+			THROW("Server block without location");
+		for (std::map<int, std::string>::const_iterator it = c->errorPages.begin(); it != c->errorPages.end(); ++it)
+			if (!isFile(it->second))
+				THROW("Error page is not a readable file: " + it->second);
+		for (size_t r = 0; r < c->router.size(); r++) {
+			const sRoute &rt = c->router[r];
+			if (!rt.root.empty() && !rt.alias.empty())
+				THROW("root and alias are exclusive in location: " + rt.path);
+			if (rt.root.empty() && rt.alias.empty() && rt.redirect.empty())
+				THROW("Location needs root, alias or redirect: " + rt.path);
+			if (!rt.root.empty() && !isDir(rt.root))
+				THROW("root is not a directory: " + rt.root);
+			if (!rt.uploadStore.empty() && !isDir(rt.root + rt.uploadStore))
+				THROW("upload_store is not a directory: " + rt.root + rt.uploadStore);
+			for (std::map<std::string, std::string>::const_iterator it = rt.cgi.begin(); it != rt.cgi.end(); ++it)
+				if (!isFile(it->second) || access(it->second.c_str(), X_OK) != 0)
+					THROW("CGI interpreter not executable: " + it->second);
+		}
+	}
 }
 
 void validateSyntax(const std::vector<std::string> &tokens)
@@ -338,9 +394,9 @@ void validateSyntax(const std::vector<std::string> &tokens)
 	checkBraces(tokens);
 	checkUnknownDirectives(tokens);
 	checkServerBlock(tokens);
-	checkDuplicates(tokens);
 	checkSemicolons(tokens);
 	checkDirectiveContext(tokens);
 	checkDirectiveArguments(tokens);
+	checkDuplicates(tokens);
 	checkValues(tokens);
 }

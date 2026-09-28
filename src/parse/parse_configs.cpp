@@ -58,15 +58,37 @@ static void confAssignValue(sConfigs *server, int &currentRouteIdx, const std::v
 }
 
 static std::string validateFile(char *fileName) {
+	std::string ext = ".conf";
+	std::string path = std::string(fileName);
+	size_t slash = path.rfind('/');
+	std::string name = (slash == std::string::npos) ? path : path.substr(slash + 1);
+	size_t pos = name.rfind(ext);
+	if (pos == std::string::npos)			THROW("Bad extension");
+	if (pos == 0)							THROW("Bad extension");
+	if ((pos + ext.size()) != name.size())	THROW("Bad extension");
+	struct stat st;
+	if (stat(fileName, &st) < 0)
+		THROW("Config file can not be opened");
+	if (!S_ISREG(st.st_mode))
+		THROW("Config file is not a regular file");
+	if (st.st_size > MAX_CONF_SIZE)
+		THROW("Config file too large");
 	int fd = open(fileName, O_RDONLY);
 	if (fd < 0)
 		THROW("Config file can not be opened");
 	char buffer[2048];
 	std::string fileContent;
 	int bytes;
-	while ((bytes = read(fd, buffer, sizeof(buffer))) > 0)
+	while ((bytes = read(fd, buffer, sizeof(buffer))) > 0) {
 		fileContent.append(buffer, bytes);
+		if (fileContent.size() > MAX_CONF_SIZE)
+			break;
+	}
 	close(fd);
+	if (bytes < 0)
+		THROW("Config file can not be read");
+	if (fileContent.size() > MAX_CONF_SIZE)
+		THROW("Config file too large");
 	return (fileContent);
 }
 
@@ -85,6 +107,13 @@ std::vector<sConfigs*> parseConfigs(char *fileName) {
 		if (CONFS.empty())
 			continue;
 		confAssignValue(CONFS.back(), currentRouteIdx, tokens, i);
+	}
+	try {
+		validateConfigs(CONFS);
+	} catch (...) {
+		for (size_t i = 0; i < CONFS.size(); i++)
+			delete CONFS[i];
+		throw;
 	}
 	return (CONFS);
 }

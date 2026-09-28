@@ -7,8 +7,7 @@ int checkHeaders(sHeaders *headers) {
 		return (delete headers, 0);
 	if (headers->version != "HTTP/1.1" && headers->version != "HTTP/1.0")
 		return (delete headers, 0);
-	std::map<std::string, std::string>::iterator it = headers->headers.find("host");
-	if (it == headers->headers.end())
+	if (headers->version == "HTTP/1.1" && headers->headers.find("host") == headers->headers.end())
 		return (delete headers, 0);
 	return (1);
 }

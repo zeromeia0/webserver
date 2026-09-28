@@ -21,11 +21,12 @@
 #include <string>
 
 #define SIN_FAMILY		AF_INET
-#define SIN_ADDR		INADDR_ANY
 #define BUFF_SIZE		65536
 #define CONN_REQS_Q		1024
 #define TIMEOUT			30
 #define DEF_MAX_BODY	100000000
+#define MAX_CONF_SIZE	1048576
+#define MAX_HEADER_SIZE	16384
 
 #define DEBUG			0
 #define LOG(categ, msg) {\

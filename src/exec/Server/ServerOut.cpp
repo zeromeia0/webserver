@@ -26,11 +26,12 @@ void Server::SEND() {
 
 	}
 
+	if (curClient->RES->statusCode != 204)
+		curClient->RES->addHeader("Content-Length", intToChar(curClient->RES->payload.size()));
+
 	if (curClient->RES->headers.method == HEAD)
 		curClient->RES->payload.clear();
 
-	if (curClient->RES->statusCode != 204)
-		curClient->RES->addHeader("Content-Length", intToChar(curClient->RES->payload.size()));
 	curClient->RES->addHeader("Connection", "close");
 
 	// curClient->REQ->saveLog();
@@ -148,7 +149,10 @@ void Server::OUT() {
 			if (stat(PATH.c_str(), &st) != 0)
 				return (STATUS(404));
 			if (S_ISDIR(st.st_mode)) {
-				std::string indexPath = PATH + curRoute.index;
+				std::string indexPath = PATH;
+				if (indexPath.empty() || indexPath[indexPath.size() - 1] != '/')
+					indexPath += "/";
+				indexPath += (!curRoute.index.empty() && curRoute.index[0] == '/') ? curRoute.index.substr(1) : curRoute.index;
 				if (!curRoute.index.empty() && access(indexPath.c_str(), F_OK) == 0) {
 					if (access(indexPath.c_str(), R_OK) != 0)
 						return (STATUS(403));

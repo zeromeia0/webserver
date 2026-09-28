@@ -25,7 +25,7 @@ Key features:
 - Custom default error pages, used when none are configured
 
 Here is how the server works:
-![alt text](image.png)
+![alt text](assets/image.png)
 
 ## Instructions
 

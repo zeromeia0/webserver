@@ -67,17 +67,14 @@ std::map<std::string, std::string> Server::handleEnvp(const std::string &scriptF
 	inputs["PATH_INFO"]				= REQ->headers.info;
 	inputs["CONTENT_TYPE"]			= REQ->getHeader("content-type");
 	inputs["SERVER_PROTOCOL"]		= REQ->headers.version;
-
-	std::string contentLength = REQ->headers.get("content-length");
-	if (!contentLength.empty())
-		inputs["CONTENT_LENGTH"]	= contentLength;
-
 	inputs["SERVER_NAME"]			= curConnec->conf->serverName;
 	inputs["SERVER_PORT"]			= intToChar(curConnec->port);
 	inputs["GATEWAY_INTERFACE"]		= "CGI/1.1";
 	inputs["SERVER_SOFTWARE"]		= "webserv/1.0";
 	inputs["REDIRECT_STATUS"]		= "200";
 	inputs["SCRIPT_FILENAME"]		= scriptFile;
+	if (!REQ->payload.empty() || !REQ->headers.get("content-length").empty())
+		inputs["CONTENT_LENGTH"]	= intToChar(REQ->payload.size());
 
 
 	for (std::map<std::string, std::string>::iterator it = REQ->headers.headers.begin(); it != REQ->headers.headers.end(); ++it) {
@@ -113,7 +110,10 @@ int Server::startCgi() {
 	LOG("DEBUG", __FUNCTION__);
 
 	std::string PATH = getPath();
-	if (access(PATH.c_str(), F_OK) == 0 && access(PATH.c_str(), R_OK) != 0)
+	struct stat st;
+	if (stat(PATH.c_str(), &st) != 0)
+		return (curClient->REQ->rError = NotFound, -1);
+	if (!S_ISREG(st.st_mode) || access(PATH.c_str(), R_OK) != 0)
 		return (curClient->REQ->rError = Forbidden, -1);
 	std::string cgiPath = curRoute.cgi.find(getFileExtension(PATH))->second;
 	
@@ -353,6 +353,7 @@ void Server::LOOP() {
 			curContentLen	= curConnec->contentLen;
 			curRoute = curConnec->parent ? curConnec->parent->route : curConnec->route;
 
+			try {
 			int connStatus = connectionCheck();
 			if (connStatus < 0) {
 				if (curConnec->type == CGI_IN || curConnec->type == CGI_OUT) {
@@ -392,6 +393,11 @@ void Server::LOOP() {
 						if (curClient->state == READING_HEADERS) {
 							curConnec->buffer.append(buff, nbytes);
 							size_t headersEof = curConnec->buffer.find("\r\n\r\n");
+							if (headersEof == std::string::npos && curConnec->buffer.size() > MAX_HEADER_SIZE) {
+								curClient->REQ->rError = HeaderTooLarge;
+								curConnec->pollFd.events = POLLOUT;
+								break;
+							}
 							if (headersEof != std::string::npos) {
 								if(!handleHeaders(curConnec->buffer.substr(0, headersEof), curConnec)) {
 									curConnec->client->REQ->rError = BadRequest;
@@ -498,6 +504,11 @@ void Server::LOOP() {
 
 					}
 					break;
+			}
+			} catch (std::exception &e) {
+				LOG("ERROR", e.what());
+				if (curConnec->type == CLIENT)
+					closeConnection();
 			}
 		}
 		for (size_t i = 0; i < newConns.size(); i++)

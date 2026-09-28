@@ -4,20 +4,23 @@ static std::string handleChunk(std::string *bytes) {
 	size_t startPos = bytes->find("\r\n");
 	if (startPos == std::string::npos)
 		return ("");
-	size_t endPos = bytes->find("\r\n", startPos + 2);
-	if (endPos == std::string::npos)
-		return ("");
 	std::string hexStr = bytes->substr(0, startPos);
+	size_t ext = hexStr.find(';');
+	if (ext != std::string::npos)
+		hexStr = hexStr.substr(0, ext);
 	char *end;
 	long chunkSize = strtol(hexStr.c_str(), &end, 16);
 	if (end == hexStr.c_str() || *end != '\0' || chunkSize < 0)
-		THROW("Invalid chunk size: \"" + std::string(end) + "\"");
-	if ((long)(endPos - startPos - 2) < chunkSize)
-		THROW("Incomplete chunk data");
+		THROW("Invalid chunk size: \"" + hexStr + "\"");
+	size_t dataStart = startPos + 2;
+	if (bytes->size() - dataStart < (size_t)chunkSize + 2)
+		return ("");
+	if (bytes->compare(dataStart + chunkSize, 2, "\r\n") != 0)
+		THROW("Missing CRLF after chunk data");
 	if (chunkSize == 0)
 		return ("\1");
-	std::string newPayload = bytes->substr(startPos + 2, chunkSize);
-	*bytes = bytes->substr(startPos + 2 + chunkSize + 2);
+	std::string newPayload = bytes->substr(dataStart, chunkSize);
+	*bytes = bytes->substr(dataStart + chunkSize + 2);
 	return (newPayload);
 }
 
