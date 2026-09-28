@@ -391,7 +391,8 @@ void Server::LOOP() {
 						if (curClient->state == READING_HEADERS) {
 							curConnec->buffer.append(buff, nbytes);
 							size_t headersEof = curConnec->buffer.find("\r\n\r\n");
-							if (headersEof == std::string::npos && curConnec->buffer.size() > MAX_HEADER_SIZE) {
+							size_t headersLen = (headersEof == std::string::npos) ? curConnec->buffer.size() : headersEof;
+							if (headersLen > MAX_HEADER_SIZE) {
 								curClient->REQ->rError = HeaderTooLarge;
 								curConnec->pollFd.events = POLLOUT;
 								break;

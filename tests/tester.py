@@ -263,6 +263,58 @@ def run_configs(t):
 def test_configs(t):
 	run_configs(t)
 
+_ncs = [
+	# ---- request line / protocol ----
+	{'req': 'GET / HTTP/1.0\r\n\r\n', 'exp': ['HTTP/1.1 200 OK']},
+	{'req': 'GET / HTTP/1.1\r\n\r\n', 'exp': ['400 Bad Request']},
+	{'req': 'GET / HTTP/2.0\r\nHost: x\r\n\r\n', 'exp': ['400 Bad Request']},
+	{'req': 'GET /\r\nHost: x\r\n\r\n', 'exp': ['400 Bad Request']},
+	{'req': 'GARBAGE\r\n\r\n', 'exp': ['400 Bad Request']},
+	{'req': '\r\n\r\n', 'exp': ['400 Bad Request']},
+	{'req': 'GET / HTTP/1.1\r\nHost x\r\n\r\n', 'exp': ['400 Bad Request']},
+	{'req': 'FOO / HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['501 Not Implemented']},
+	{'req': 'get / HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['501 Not Implemented']},
+	{'req': 'GET / HTTP/1.1\r\nHost: x\r\nX: ' + 'a' * 20000 + '\r\n\r\n', 'exp': ['431 Request Header Fields Too Large']},
+	# ---- static files / routing ----
+	{'req': 'GET /nope.html HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['404 Not Found']},
+	{'req': 'GET /../../etc/passwd HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['400 Bad Request'], 'not': ['root:']},
+	{'req': 'GET /old-page.html HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['301 Moved Permanently', 'Location: /new-page.html']},
+	{'req': 'GET /autoindexon/ HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['200 OK', '<h2>/autoindexon/</h2>']},
+	{'req': 'GET /autoindexoff/ HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['403 Forbidden']},
+	{'req': 'HEAD / HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['200 OK', 'Content-Length: 1649'], 'not': ['<html']},
+	{'req': 'DELETE / HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['405 Method Not Allowed', 'Allow: GET, HEAD']},
+	# ---- upload -> get -> delete (order matters) ----
+	{'req': 'POST /uploads/nc_test.txt HTTP/1.1\r\nHost: x\r\nContent-Length: 5\r\n\r\nhello', 'exp': ['201 Created']},
+	{'req': 'GET /uploads/nc_test.txt HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['200 OK', 'hello']},
+	{'req': 'DELETE /uploads/nc_test.txt HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['204 No Content']},
+	{'req': 'DELETE /uploads/nc_test.txt HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['404 Not Found']},
+	{'req': 'POST /uploads/nc_chunk.txt HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nhello\r\n6\r\n world\r\n0\r\n\r\n', 'exp': ['201 Created']},
+	{'req': 'GET /uploads/nc_chunk.txt HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['200 OK', 'hello world']},
+	{'req': 'DELETE /uploads/nc_chunk.txt HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['204 No Content']},
+	{'req': 'POST /uploads/nc_bad.txt HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\nzz\r\nhello\r\n0\r\n\r\n', 'exp': ['400 Bad Request']},
+	{'req': 'POST /uploads/nc_big.txt HTTP/1.1\r\nHost: x\r\nContent-Length: 999999999\r\n\r\n', 'exp': ['413 Payload Too Large']},
+	# ---- CGI ----
+	{'req': 'GET /cgi-bin/test_cgi.py HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['200 OK']},
+	{'req': 'POST /cgi-bin/test_cgi.py HTTP/1.1\r\nHost: x\r\nContent-Length: 8\r\n\r\nname=bob', 'exp': ['200 OK', 'name=bob']},
+	{'req': 'POST /cgi-bin/test_cgi.py HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\n8\r\nname=bob\r\n0\r\n\r\n', 'exp': ['200 OK', 'name=bob']},
+	{'req': 'GET /cgi-bin/nope.py HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['502 Bad Gateway']},
+	{'req': 'DELETE /cgi-bin/test_cgi.py HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['405 Method Not Allowed']},
+]
+
+def run_nc(t):
+	result = subprocess.run(
+		["nc", "-q", "1", "localhost", "8089"],
+		input=t["req"], capture_output=True, text=True, timeout=10
+	)
+	for e in t["exp"]:
+		assert e in result.stdout, result.stdout[:300]
+	for n in t.get("not", []):
+		assert n not in result.stdout, result.stdout[:300]
+
+@pytest.mark.parametrize("t", _ncs, ids=lambda t: repr(t["req"][:60]))
+def test_nc(t):
+	run_nc(t)
+
 def test_siege():
 	result = subprocess.run(
 		["siege", "-c", "20", "-r", "50", BASE_URL + "/"],
