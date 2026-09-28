@@ -273,6 +273,7 @@ def test_siege():
 def test_42():
 	result = subprocess.run(
 		["./tests/42tester/tester", "http://localhost:8888"],
-		capture_output=True, text=True
+		stdin=subprocess.DEVNULL, capture_output=True, text=True
 	)
-	assert "ERROR ON LAST TEST" not in result.stdout
+	assert "FATAL ERROR" not in result.stdout, result.stdout[-2000:]
+	assert "Test multiple workers(20) doing multiple times(5): Post on /directory/youpi.bla" in result.stdout, "tester did not finish"

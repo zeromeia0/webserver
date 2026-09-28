@@ -2,11 +2,11 @@
 #include SERVER_HPP
 #include <csignal>
 
-bool G_RUNNING = true;
+volatile sig_atomic_t G_RUNNING = 1;
 
 void signalHandler(int sigCode) {
-	std::cerr << "SIGNAL: " << sigCode << std::endl;
-	G_RUNNING = false;
+	(void)sigCode;
+	G_RUNNING = 0;
 }
 
 int main(int argc, char **argv) {

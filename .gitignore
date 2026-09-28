@@ -1,13 +1,11 @@
 *.o
 a.out
-cgi_tester
-tester
 .DS_Store
 ./obj/*
 ./obj
 webserv
 .venv
-.claude
+.claude 
 .vscode
 .pytest*
 forbidden.py

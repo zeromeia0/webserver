@@ -15,7 +15,7 @@
 #include <climits>
 #include <netdb.h>
 
-extern bool G_RUNNING;
+extern volatile sig_atomic_t G_RUNNING;
 
 class Server {
 public:

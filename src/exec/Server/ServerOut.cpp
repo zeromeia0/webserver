@@ -106,12 +106,12 @@ void Server::OUT() {
 		size_t end = out.find("\r\n\r\n");
 		size_t sep = 4;
 		if (end == std::string::npos) {
-				end = out.find("\n\n");
-				sep = 2;
+			end = out.find("\n\n");
+			sep = 2;
 		}
 		if (end == std::string::npos) {
-				out.clear();
-				return (STATUS(502));
+			out.clear();
+			return (STATUS(502));
 		}
 		std::istringstream hs(out.substr(0, end));
 		out.erase(0, end + sep);
@@ -129,11 +129,13 @@ void Server::OUT() {
 			std::string low = key;
 			std::transform(low.begin(), low.end(), low.begin(), toLower);
 			if (low == "status")
-					RES->statusCode = atoi(val.c_str());
+				RES->statusCode = atoi(val.c_str());
+			else if (low == "content-length")
+				continue;
 			else if (low == "content-type")
-					RES->addHeader("Content-Type", val);
+				RES->addHeader("Content-Type", val);
 			else
-					RES->addHeader(key, val);
+				RES->addHeader(key, val);
 		}
 		if (RES->getHeader("Content-Type").empty())
 			RES->addHeader("Content-Type", "text/html");
