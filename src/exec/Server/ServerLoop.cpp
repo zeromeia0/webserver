@@ -111,9 +111,7 @@ int Server::startCgi() {
 
 	std::string PATH = getPath();
 	struct stat st;
-	if (stat(PATH.c_str(), &st) != 0)
-		return (curClient->REQ->rError = NotFound, -1);
-	if (!S_ISREG(st.st_mode) || access(PATH.c_str(), R_OK) != 0)
+	if (stat(PATH.c_str(), &st) == 0 && (!S_ISREG(st.st_mode) || access(PATH.c_str(), R_OK) != 0))
 		return (curClient->REQ->rError = Forbidden, -1);
 	std::string cgiPath = curRoute.cgi.find(getFileExtension(PATH))->second;
 	
