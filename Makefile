@@ -86,15 +86,21 @@ fclean: clean
 	@rm -f $(NAME)
 
 val: re
-	@valgrind --leak-check=full ./$(NAME)
+	@valgrind --leak-check=full --track-fds=yes --track-origins=yes --trace-children=yes ./$(NAME)
 
 re: fclean all
 
-test:
-	@make re
+test: re
 	@gnome-terminal -e "./webserv"
 	@gnome-terminal -e "./webserv ./tests/42/youpi.conf"
 	@pytest -vv -s ./tests/tester.py
+	@rm -rf ./var/www/post_body
 
-.PHONY: all clean fclean re val test
+testval: re
+	@gnome-terminal -e "valgrind --leak-check=full --track-fds=yes --track-origins=yes --trace-children=yes ./webserv"
+	@gnome-terminal -e "valgrind --leak-check=full --track-fds=yes --track-origins=yes --trace-children=yes ./webserv ./tests/42/youpi.conf"
+	@pytest -vv -s ./tests/tester.py
+	@rm -rf ./var/www/post_body
+
+.PHONY: all clean fclean re val test testval
 -include $(DEP)
