@@ -10,7 +10,7 @@ webserv
 .pytest*
 forbidden.py
 obj/
-__*
+__pycache__
 *.md
 !README.md
 !.gitkeep
