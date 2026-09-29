@@ -1,10 +1,25 @@
 <script>
-	const url = "/cgi-bin/test_cgi.py"
-	async function cgi_tester() {
+	async function cgiTester() {
 		const input = document.getElementById("input").value;
-		const response = await fetch(url, {
+		const response = await fetch("/cgi-bin/test_cgi.py", {
 			method: "POST",
 			body: input,
+		})
+		const output = await response.text();
+		console.log(output);
+		document.getElementById("output").innerHTML = output;
+	}
+	async function gatewayTimeout() {
+		const response = await fetch("/cgi-bin/gateway_timeout.py", {
+			method: "POST",
+		})
+		const output = await response.text();
+		console.log(output);
+		document.getElementById("output").innerHTML = output;
+	}
+	async function cgiBugInFunction() {
+		const response = await fetch("/cgi-bin/cgi_bug.py", {
+			method: "POST",
 		})
 		const output = await response.text();
 		console.log(output);
@@ -13,5 +28,8 @@
 </script>
 
 <input id="input"></input>
-<button onclick="cgi_tester()">TEST</button>
+<button onclick="cgiTester()">TEST</button>
+<button onclick="gatewayTimeout()">TEST GATEWAY TIMEOUT</button>
+<button onclick="cgiBugInFunction()">TEST CGI ERROR</button>
+
 <div style="padding: 10px" id="output"></div>
