@@ -90,17 +90,23 @@ val: re
 
 re: fclean all
 
-test: re
+download_tester:
+	@curl https://cdn.intra.42.fr/document/document/55494/tester		-o ./tests/42/tester
+	@curl https://cdn.intra.42.fr/document/document/55496/cgi_tester	-o ./tests/42/cgi_tester
+
+test: download_tester re
 	@gnome-terminal -e "./webserv"
 	@gnome-terminal -e "./webserv ./tests/42/youpi.conf"
 	@pytest -vv -s ./tests/tester.py
 	@rm -rf ./var/www/post_body
+	@rm -rf ./tests/42/tester ./tests/42/cgi_tester
 
-testval: re
+testval: download_tester re
 	@gnome-terminal -e "valgrind --leak-check=full --track-fds=yes --track-origins=yes --trace-children=yes ./webserv"
 	@gnome-terminal -e "valgrind --leak-check=full --track-fds=yes --track-origins=yes --trace-children=yes ./webserv ./tests/42/youpi.conf"
 	@pytest -vv -s ./tests/tester.py
 	@rm -rf ./var/www/post_body
+	@rm -rf ./tests/42/tester ./tests/42/cgi_tester
 
-.PHONY: all clean fclean re val test testval
+.PHONY: all clean fclean re val test testval download_tester
 -include $(DEP)

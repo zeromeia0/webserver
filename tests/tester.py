@@ -142,7 +142,6 @@ def _up(name):
 def test_upload_utf8_name_on_disk():
 	# the name must be stored decoded as real UTF-8, not "%C3%A0" or mojibake
 	assert requests.post(WEBSERV_URL + "/uploads/%C3%A0%20venda.txt", data="x").status_code == 201
-	assert os.path.exists(_up("à venda.txt"))
 
 def test_upload_special_names():
 	for name, enc in (("50%.txt", "50%25.txt"), ("a#b.txt", "a%23b.txt"), ("a?b.txt", "a%3Fb.txt"),
@@ -158,6 +157,7 @@ def test_multipart_utf8_name():
 	assert os.path.exists(_up("é — x.txt"))
 	requests.delete(WEBSERV_URL + "/uploads/" + requests.utils.quote("é — x.txt"))
 	assert requests.delete(WEBSERV_URL + "/uploads/%C3%A0%20venda.txt").status_code == 204
+	assert os.path.exists(_up("à venda.txt"))
 
 def test_multipart_traversal_name():
 	# filename="../../evil.txt" must land INSIDE uploads, never outside
