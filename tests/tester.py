@@ -89,7 +89,7 @@ def test_42():
 	assert "Test multiple workers(20) doing multiple times(5): Post on /directory/youpi.bla" in result.stdout, "tester did not finish"
 
 ###################################
-# AI ADDED
+# AI
 ###################################
 
 def test_concurrent_methods():
@@ -135,3 +135,69 @@ def test_encoded_space_roundtrip():
 	r = requests.get(WEBSERV_URL + "/uploads/my%20file.txt")
 	assert r.status_code == 200 and r.text == "sp"
 	assert requests.delete(WEBSERV_URL + "/uploads/my%20file.txt").status_code == 204
+
+def _up(name):
+	return "./var/uploads/" + name
+
+def test_upload_utf8_name_on_disk():
+	# the name must be stored decoded as real UTF-8, not "%C3%A0" or mojibake
+	assert requests.post(WEBSERV_URL + "/uploads/%C3%A0%20venda.txt", data="x").status_code == 201
+	assert os.path.exists(_up("à venda.txt"))
+
+def test_upload_special_names():
+	for name, enc in (("50%.txt", "50%25.txt"), ("a#b.txt", "a%23b.txt"), ("a?b.txt", "a%3Fb.txt"),
+										("l'appart.txt", "l%27appart.txt"), ("c++.txt", "c++.txt")):
+			assert requests.post(WEBSERV_URL + "/uploads/" + enc, data="x").status_code == 201, name
+			assert os.path.exists(_up(name)), name
+			assert requests.get(WEBSERV_URL + "/uploads/" + enc).status_code == 200, name
+			assert requests.delete(WEBSERV_URL + "/uploads/" + enc).status_code == 204, name
+
+def test_multipart_utf8_name():
+	r = requests.post(WEBSERV_URL + "/uploads", files={"file": ("é — x.txt", b"mp")})
+	assert r.status_code == 201
+	assert os.path.exists(_up("é — x.txt"))
+	requests.delete(WEBSERV_URL + "/uploads/" + requests.utils.quote("é — x.txt"))
+
+def test_multipart_traversal_name():
+	# filename="../../evil.txt" must land INSIDE uploads, never outside
+	r = requests.post(WEBSERV_URL + "/uploads", files={"file": ("../../evil.txt", b"evil")})
+	assert r.status_code == 201
+	assert os.path.exists(_up("evil.txt"))
+	assert not os.path.exists("./var/evil.txt") and not os.path.exists("./evil.txt")
+	requests.delete(WEBSERV_URL + "/uploads/evil.txt")
+	
+def test_multipart_two_files():
+	r = requests.post(WEBSERV_URL + "/uploads", files=[("a", ("one.txt", b"1")), ("b", ("two.txt", b"2"))])
+	assert r.status_code == 201
+	assert requests.get(WEBSERV_URL + "/uploads/one.txt").text == "1"
+	assert requests.get(WEBSERV_URL + "/uploads/two.txt").text == "2"
+	requests.delete(WEBSERV_URL + "/uploads/one.txt"); requests.delete(WEBSERV_URL + "/uploads/two.txt")
+	
+def test_binary_roundtrip():
+	data = bytes(range(256)) * 4            # every byte value, including \0 \r \n
+	assert requests.post(WEBSERV_URL + "/uploads/bin.dat", data=data).status_code == 201
+	assert requests.get(WEBSERV_URL + "/uploads/bin.dat").content == data
+	assert requests.delete(WEBSERV_URL + "/uploads/bin.dat").status_code == 204
+	
+def test_overwrite():
+	requests.post(WEBSERV_URL + "/uploads/ow.txt", data="first")
+	assert requests.post(WEBSERV_URL + "/uploads/ow.txt", data="2nd").status_code == 201
+	assert requests.get(WEBSERV_URL + "/uploads/ow.txt").text == "2nd"
+	requests.delete(WEBSERV_URL + "/uploads/ow.txt")
+
+def test_incomplete_body_times_out():
+	# subject: "A request to your server should never hang indefinitely" (slow: ~31s)
+	s = socket.create_connection(("localhost", 8089)); s.settimeout(45)
+	s.sendall(b"POST /uploads/slow.txt HTTP/1.1\r\nHost: x\r\nContent-Length: 100\r\n\r\nonly-10-b")
+	res = b""
+	while True:
+			d = s.recv(4096)
+			if not d:
+					break
+			res += d
+	assert b"408 Request Timeout" in res
+
+def test_delete_directory_refused():
+	r = requests.delete(WEBSERV_URL + "/uploads/")
+	assert r.status_code != 204
+	assert os.path.isdir("./var/uploads")

@@ -12,7 +12,7 @@ sMime MAP_mime[] = {
 	{ ".png",  "image/png" },
 	{ ".gif",  "image/gif"},
 	{ ".ico",  "image/x-icon" },
-	{ ".txt",  "text/plain"},
+	{ ".txt",  "text/plain" },
 	{ ".json", "application/json" },
 	{ ".pdf",  "application/pdf" },
 };
@@ -27,6 +27,7 @@ sStatusCode MAP_status_code[] = {
 	{ 404, "Not Found" },
 	{ 405, "Method Not Allowed" },
 	{ 408, "Request Timeout" },
+	{ 411, "Length Required" },
 	{ 413, "Payload Too Large" },
 	{ 431, "Request Header Fields Too Large" },
 	{ 500, "Internal Server Error" },

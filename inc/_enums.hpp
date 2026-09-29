@@ -53,4 +53,5 @@ enum RUNTIME_ERROR {
 	BadGateway,
 	GatewayTimeout,
 	HeaderTooLarge,
+	LengthRequired,
 };

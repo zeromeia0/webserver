@@ -57,4 +57,25 @@ _ncs = [
 	{'req': 'GET /cgi-bin/test_cgi.py HTTP/1.1\r\nHost: x\r\nX-Sp: a  b\r\n\r\n', 'exp': ['HTTP_X_SP </b>= a  b <p>']},
 	{'req': 'GET / HTTP/1.1\r\nHost : x\r\n\r\n', 'exp': ['400 Bad Request']},
 	{'req': 'GET / HTTP/1.1 extra\r\nHost: x\r\n\r\n', 'exp': ['400 Bad Request']},
+	# ---- POST: UTF-8 / special names (URL-encoded like a browser sends them) ----
+	{'req': 'POST /uploads/%C3%A0%20venda%20%E2%80%94.txt HTTP/1.1\r\nHost: x\r\nContent-Length: 3\r\n\r\nutf', 'exp': ['201 Created']},
+	{'req': 'GET /uploads/%C3%A0%20venda%20%E2%80%94.txt HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['200 OK', 'utf']},
+	{'req': 'DELETE /uploads/%C3%A0%20venda%20%E2%80%94.txt HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['204 No Content']},
+	# ---- POST: security / framing ----
+	{'req': 'POST /uploads/..%2F..%2Fescape.txt HTTP/1.1\r\nHost: x\r\nContent-Length: 1\r\n\r\nx', 'exp': ['400 Bad Request']},
+	{'req': 'POST /uploads/both.txt HTTP/1.1\r\nHost: x\r\nContent-Length: 3\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nhello\r\n0\r\n\r\n', 'exp': ['201 Created']},
+	{'req': 'GET /uploads/both.txt HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['200 OK', 'hello']},
+	{'req': 'DELETE /uploads/both.txt HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['204 No Content']},
+	{'req': 'POST /uploads/empty.txt HTTP/1.1\r\nHost: x\r\nContent-Length: 0\r\n\r\n', 'exp': ['201 Created']},
+	{'req': 'DELETE /uploads/empty.txt HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['204 No Content']},
+	{'req': 'POST /uploads HTTP/1.1\r\nHost: x\r\nContent-Type: multipart/form-data\r\nContent-Length: 4\r\n\r\nabcd', 'exp': ['400 Bad Request']},
+	{'req': 'POST /cgi-bin/x.txt HTTP/1.1\r\nHost: x\r\nContent-Length: 1\r\n\r\nx', 'exp': ['403 Forbidden']},
+	# ---- body framing / status accuracy (FAIL today) ----
+	{'req': 'POST /uploads/short.txt HTTP/1.1\r\nHost: x\r\nContent-Length: 3\r\n\r\nhello', 'exp': ['201 Created']},
+	{'req': 'GET /uploads/short.txt HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['200 OK', 'hel'], 'not': ['hello']},
+	{'req': 'DELETE /uploads/short.txt HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['204 No Content']},
+	{'req': 'POST /uploads/g.txt HTTP/1.1\r\nHost: x\r\nContent-Length: abc\r\n\r\nxyz', 'exp': ['400 Bad Request']},
+	{'req': 'POST /uploads/g.txt HTTP/1.1\r\nHost: x\r\nContent-Length: -1\r\n\r\nxyz', 'exp': ['400 Bad Request']},
+	{'req': 'POST /uploads/g.txt HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: gzip\r\n\r\nxyz', 'exp': ['501 Not Implemented']},
+	{'req': 'POST /uploads/nolen.txt HTTP/1.1\r\nHost: x\r\n\r\nbody', 'exp': ['411 Length Required']},
 ]

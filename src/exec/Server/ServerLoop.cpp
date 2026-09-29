@@ -288,7 +288,14 @@ RUNTIME_ERROR Server::validateRequest() {
 	if (!curRoute.redirect.empty())
 		return (MovedPermanently);
 	std::string cl = REQ->getHeader("content-length");
-	if (!cl.empty() && strtoul(cl.c_str(), NULL, 10) > (size_t)curRoute.clientMaxBodySize)
+	std::string te = REQ->getHeader("transfer-encoding");
+	if (!te.empty() && te != "chunked")
+		return (NotImplemented);
+	if (!cl.empty() && cl.find_first_not_of("0123456789") != std::string::npos)
+		return (BadRequest);
+	if (REQ->headers.method == POST && cl.empty() && te.empty())
+		return (LengthRequired);
+	if (!cl.empty() && (cl.size() > 18 || strtoul(cl.c_str(), NULL, 10) > (size_t)curRoute.clientMaxBodySize))
 		return (PayloadTooLarge);
 	return (NONE);
 }
@@ -445,7 +452,10 @@ void Server::LOOP() {
 							if (curConnec->transfer_type == CONTENT) {
 								new_payload = curConnec->buffer + std::string(buff, nbytes);
 								curConnec->buffer.clear();
-								if (curClient->REQ->payload.size() + new_payload.size() < curContentLen)
+								size_t missing = curContentLen - curClient->REQ->payload.size();
+								if (new_payload.size() > missing)
+									new_payload.erase(missing);
+								if (new_payload.size() < missing)
 									status = 1;
 							} else if (curConnec->transfer_type == CHUNKED)
 								new_payload = parseChunkedBody(&new_bytes, &curConnec->buffer, &status, (size_t)curRoute.clientMaxBodySize - curClient->REQ->payload.size());

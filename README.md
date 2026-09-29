@@ -224,18 +224,3 @@ Ensure there are no memory leaks (Monitor the process memory usage; it should no
 Check that there are no hanging connections.
 You should be able to use siege indefinitely without having to restart the server (take a look at siege with -b flag).
 When conducting load tests using the siege command, be careful, it depends on your OS. it is crucial to limit the number of connections per second by specifying options such as -c (number of clients), -d (maximum wait time before a client reconnects), and -r (number of attempts). The choice of these parameters is at the evaluator's discretion. However, it is imperative to reach an agreement with the person being evaluated to ensure a fair and transparent assessment of the web server's performance.
-
-## Useful commands for the defense
-
-# telnet / nc: a request by hand (nc -C sends \r\n)
-nc -C localhost 8089          # then type: GET / HTTP/1.1  ↵  Host: x  ↵  ↵
-
-# Compare with nginx (Docker)
-docker run --rm -p 8080:80 nginx
-curl -v http://localhost:8080/ ; curl -v http://localhost:8089/
-
-# Body too large
-curl -X POST -H "Content-Type: plain/text" --data "BODY IS HERE" http://localhost:8089/uploads/x
-
-# Hanging connections after siege (should be ~0)
-ss -tanp | grep ":8089 " | grep -v LISTEN | wc -l

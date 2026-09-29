@@ -89,6 +89,8 @@ void Server::OUT() {
 			return (STATUS(404));
 		case (Forbidden):
 			return (STATUS(403));
+		case (LengthRequired):
+				return (STATUS(411));
 		case (HeaderTooLarge):
 			return (STATUS(431));
 		case (InternalServerError):
@@ -200,8 +202,11 @@ void Server::OUT() {
 			return (writeFileContent(target, REQ->payload) ? STATUS(201) : STATUS(500));
 		}
 		case DELETE: {
-			if (access(PATH.c_str(), F_OK) != 0)
+			struct stat st;
+			if (stat(PATH.c_str(), &st) != 0)
 				STATUS(404);
+			else if (S_ISDIR(st.st_mode))
+				STATUS(403);
 			else if (std::remove(PATH.c_str()) != 0)
 				STATUS(403);
 			else
