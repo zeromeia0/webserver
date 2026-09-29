@@ -25,9 +25,9 @@ Key features:
 - Custom default error pages, used when none are configured
 
 Here is how the server works:
-![alt text](assets/image.png)
+![alt text](assets/serverSetup.png)
 
-The full journey `GET /index.html HTTP/1.1` 
+## The full journey `GET /index.html HTTP/1.1` 
 0. On the browser side, before your code runs:
 - localhost → 127.0.0.1 (via /etc/hosts);
 - the TCP handshake is completed by the kernel, which puts the connection in the listening socket's
@@ -69,9 +69,11 @@ and isCgi()? No, .html isn't a CGI extension.
 erase from the vector, curIdx--.
 
 6. After
-- The browser displays the HTML, then sends new requests for the CSS and images. Because of
-Connection: close, each one goes over a new TCP connection, so back to step 1.
+- The browser displays the HTML, then sends new requests for the CSS and images. Because of Connection: close, each one goes over a new TCP connection, so back to step 1.
 - The listening socket, meanwhile, never stopped being watched.
+
+![alt text](assets/requestJourney.png)
+
 
 ## Instructions
 
@@ -95,7 +97,7 @@ Requires a C++98-compatible compiler (`c++`). No external dependencies.
 Example, using one of the provided templates:
 
 ```sh
-./webserv templates/conf/server.conf
+./webserv server.conf
 ```
 
 Then point a browser or `curl`/`telnet` at the configured host/port(s), e.g.:

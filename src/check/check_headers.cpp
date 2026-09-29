@@ -3,6 +3,8 @@
 int checkHeaders(sHeaders *headers) {
 	if (!headers)
 		return (0);
+	if (headers->path.find('\0') != std::string::npos)
+		return (delete headers, 0);
 	if (headers->path.size() >= 3 && (headers->path.find("/../") != std::string::npos || headers->path.substr(0, 3) == "../" || headers->path.substr(headers->path.size() - 3) == "/.."))
 		return (delete headers, 0);
 	if (headers->version != "HTTP/1.1" && headers->version != "HTTP/1.0")

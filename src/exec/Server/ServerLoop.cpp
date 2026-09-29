@@ -291,7 +291,7 @@ RUNTIME_ERROR Server::validateRequest() {
 	if (!cl.empty() && strtoul(cl.c_str(), NULL, 10) > (size_t)curRoute.clientMaxBodySize)
 		return (PayloadTooLarge);
 	return (NONE);
-  }
+}
 
 void Server::finishRequest() {
 	LOG("DEBUG", __FUNCTION__);
@@ -303,8 +303,9 @@ void Server::finishRequest() {
 	if (REQ->rError != NONE || !isCgi())
 		return;
 	std::string uri = REQ->headers.raw;
+	uri = uri.substr(0, uri.find('?'));
 	std::string file_ext = getFileExtension(uri);
-	size_t ext_pos = uri.find(file_ext);
+	size_t ext_pos = uri.rfind(file_ext);
 	REQ->headers.script = uri.substr(0, ext_pos + file_ext.size());
 	REQ->headers.info = uri.substr(REQ->headers.script.size());
 	if (REQ->headers.info.empty())
@@ -447,11 +448,12 @@ void Server::LOOP() {
 								if (curClient->REQ->payload.size() + new_payload.size() < curContentLen)
 									status = 1;
 							} else if (curConnec->transfer_type == CHUNKED)
-								new_payload = parseChunkedBody(&new_bytes, &curConnec->buffer, &status);
+								new_payload = parseChunkedBody(&new_bytes, &curConnec->buffer, &status, (size_t)curRoute.clientMaxBodySize - curClient->REQ->payload.size());
 							curClient->REQ->payload.append(new_payload);
 							switch (status) {
 								case 0:		finishRequest(); break;
 								case -1:	curClient->REQ->rError = BadRequest; finishRequest(); break;
+								case -2:	curClient->REQ->rError = PayloadTooLarge; finishRequest(); break;
 								case 1:		break;
 							}
 						}

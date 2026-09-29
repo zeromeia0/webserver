@@ -1,0 +1,60 @@
+_ncs = [
+	# ---- request line / protocol ----
+	{'req': 'GET / HTTP/1.0\r\n\r\n', 'exp': ['HTTP/1.1 200 OK']},
+	{'req': 'GET / HTTP/1.1\r\n\r\n', 'exp': ['400 Bad Request']},
+	{'req': 'GET / HTTP/2.0\r\nHost: x\r\n\r\n', 'exp': ['400 Bad Request']},
+	{'req': 'GET /\r\nHost: x\r\n\r\n', 'exp': ['400 Bad Request']},
+	{'req': 'GARBAGE\r\n\r\n', 'exp': ['400 Bad Request']},
+	{'req': '\r\n\r\n', 'exp': ['400 Bad Request']},
+	{'req': 'GET / HTTP/1.1\r\nHost x\r\n\r\n', 'exp': ['400 Bad Request']},
+	{'req': 'FOO / HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['501 Not Implemented']},
+	{'req': 'get / HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['501 Not Implemented']},
+	{'req': 'GET / HTTP/1.1\r\nHost: x\r\nX: ' + 'a' * 20000 + '\r\n\r\n', 'exp': ['431 Request Header Fields Too Large']},
+	# ---- static files / routing ----
+	{'req': 'GET /nope.html HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['404 Not Found']},
+	{'req': 'GET /../../etc/passwd HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['400 Bad Request'], 'not': ['root:']},
+	{'req': 'GET /old-page.html HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['301 Moved Permanently', 'Location: /new-page.html']},
+	{'req': 'GET /autoindexon/ HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['200 OK', '<h2>/autoindexon/</h2>']},
+	{'req': 'GET /autoindexoff/ HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['403 Forbidden']},
+	{'req': 'HEAD / HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['200 OK', 'Content-Length: 1649'], 'not': ['<html']},
+	{'req': 'DELETE / HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['405 Method Not Allowed', 'Allow: GET, HEAD']},
+	# ---- upload -> get -> delete (order matters) ----
+	{'req': 'POST /uploads/nc_test.txt HTTP/1.1\r\nHost: x\r\nContent-Length: 5\r\n\r\nhello', 'exp': ['201 Created']},
+	{'req': 'GET /uploads/nc_test.txt HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['200 OK', 'hello']},
+	{'req': 'DELETE /uploads/nc_test.txt HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['204 No Content']},
+	{'req': 'DELETE /uploads/nc_test.txt HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['404 Not Found']},
+	{'req': 'POST /uploads/nc_chunk.txt HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nhello\r\n6\r\n world\r\n0\r\n\r\n', 'exp': ['201 Created']},
+	{'req': 'GET /uploads/nc_chunk.txt HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['200 OK', 'hello world']},
+	{'req': 'DELETE /uploads/nc_chunk.txt HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['204 No Content']},
+	{'req': 'POST /uploads/nc_bad.txt HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\nzz\r\nhello\r\n0\r\n\r\n', 'exp': ['400 Bad Request']},
+	{'req': 'POST /uploads/nc_big.txt HTTP/1.1\r\nHost: x\r\nContent-Length: 999999999\r\n\r\n', 'exp': ['413 Payload Too Large']},
+	# ---- CGI ----
+	{'req': 'GET /cgi-bin/test_cgi.py HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['200 OK']},
+	{'req': 'POST /cgi-bin/test_cgi.py HTTP/1.1\r\nHost: x\r\nContent-Length: 8\r\n\r\nname=bob', 'exp': ['200 OK', 'name=bob']},
+	{'req': 'POST /cgi-bin/test_cgi.py HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\n8\r\nname=bob\r\n0\r\n\r\n', 'exp': ['200 OK', 'name=bob']},
+	{'req': 'GET /cgi-bin/nope.py HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['502 Bad Gateway']},
+	{'req': 'DELETE /cgi-bin/test_cgi.py HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['405 Method Not Allowed']},
+	# ---- URL decoding (#2) ----
+	{'req': 'GET /index%2Ehtml HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['200 OK']},
+	{'req': 'GET /%zz HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['404 Not Found']},
+	{'req': 'GET /index.html%00.py HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['400 Bad Request']},
+	{'req': 'GET /%2e%2e/%2e%2e/etc/passwd HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['400 Bad Request'], 'not': ['root:']},
+	# '+' stays literal in a path (order matters)
+	{'req': 'POST /uploads/c++.txt HTTP/1.1\r\nHost: x\r\nContent-Length: 4\r\n\r\nplus', 'exp': ['201 Created']},
+	{'req': 'GET /uploads/c++.txt?v=1 HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['200 OK', 'plus']},
+	{'req': 'DELETE /uploads/c++.txt HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['204 No Content']},
+	# ---- CGI env (#3) ----
+	{'req': 'GET /cgi-bin/test_cgi.py?v=1.5 HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['200 OK', 'SCRIPT_NAME </b>= /cgi-bin/test_cgi.py <p>', 'QUERY_STRING </b>= v=1.5 <p>']},
+	# ---- chunked body (#4) ----
+	{'req': 'POST /cgi-bin/test_cgi.py HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\nFFFFFFFF\r\n', 'exp': ['413 Payload Too Large']},
+	{'req': 'POST /cgi-bin/test_cgi.py HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\n' + '0' * 2000, 'exp': ['400 Bad Request']},
+	{'req': 'POST /cgi-bin/test_cgi.py HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\n1\r\n\x01\r\n5\r\nhello\r\n0\r\n\r\n', 'exp': ['200 OK', 'CONTENT_LENGTH </b>= 6 <p>', 'hello']},
+	{'req': 'POST /cgi-bin/test_cgi.py HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\n5;ext=1\r\nhello\r\n0\r\n\r\n', 'exp': ['200 OK', 'hello']},
+	# ---- header parsing (#5) ----
+	{'req': 'GET /cgi-bin/test_cgi.py?t=10:30 HTTP/1.1\r\nHost: x\r\n\r\n', 'exp': ['200 OK', 'QUERY_STRING </b>= t=10:30 <p>']},
+	{'req': 'GET / HTTP/1.1\r\nX-Empty:\r\nHost: x\r\n\r\n', 'exp': ['200 OK']},
+	{'req': 'GET /cgi-bin/test_cgi.py HTTP/1.1\r\nHost: x\r\nX-Note: a: b\r\n\r\n', 'exp': ['HTTP_X_NOTE </b>= a: b <p>']},
+	{'req': 'GET /cgi-bin/test_cgi.py HTTP/1.1\r\nHost: x\r\nX-Sp: a  b\r\n\r\n', 'exp': ['HTTP_X_SP </b>= a  b <p>']},
+	{'req': 'GET / HTTP/1.1\r\nHost : x\r\n\r\n', 'exp': ['400 Bad Request']},
+	{'req': 'GET / HTTP/1.1 extra\r\nHost: x\r\n\r\n', 'exp': ['400 Bad Request']},
+]

@@ -1,7 +1,6 @@
 #include "Server.hpp"
 
-Server::Server() {
-	LOG("DEBUG", __FUNCTION__);
+void Server::init() {
 	curIdx = 0;
 	curConnec = NULL;
 	curClient = NULL;
@@ -9,8 +8,14 @@ Server::Server() {
 	curContentLen = 0;
 }
 
+Server::Server() {
+	LOG("DEBUG", __FUNCTION__);
+	init();
+}
+
 Server::Server(char *confFileName) {
 	LOG("DEBUG", __FUNCTION__);
+	init();
 	serverConfigs = parseConfigs(confFileName);
     for (size_t s = 0; s < serverConfigs.size(); s++) {
 		sConfigs *cfg = serverConfigs[s];

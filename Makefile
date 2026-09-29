@@ -1,5 +1,6 @@
 CXX				= c++
 CXXFLAGS		= -Wall -Wextra -Werror -std=c++98 -I inc
+DEPFLAGS		= -MMD -MP
 
 NAME			= webserv
 OBJ_DIR			= obj
@@ -49,6 +50,7 @@ SRC = \
 	$(SRC_UTILS)
 
 OBJ = $(SRC:%.cpp=$(OBJ_DIR)/%.o)
+DEP = $(OBJ:.o=.d)
 
 # --> ANSI COLOR <--
 RED		= \e[31m
@@ -73,7 +75,7 @@ $(NAME): $(OBJ)
 $(OBJ_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	@printf "$(GREEN)Compiling $<$(RESET)\n"
-	@$(CXX) $(CXXFLAGS) -c $< -o $@
+	@$(CXX) $(CXXFLAGS) $(DEPFLAGS) -c $< -o $@
 
 clean:
 	@printf "$(YELLOW)Cleaning...$(RESET)\n"
@@ -89,3 +91,4 @@ val: re
 re: fclean all
 
 .PHONY: all clean fclean re val
+-include $(DEP)

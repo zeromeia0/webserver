@@ -40,14 +40,14 @@ bool writeFileContent( std::string filename, std::string content ) {
 std::string decodeUrl(std::string url) {
 	std::string new_str;
 	for (size_t i = 0; i < url.size(); i++) {
-		if (url[i] == '%' && i + 2 < url.size()) {
+		if (url[i] == '%' && i + 2 < url.size()
+			&& std::isxdigit(static_cast<unsigned char>(url[i + 1]))
+			&& std::isxdigit(static_cast<unsigned char>(url[i + 2]))) {
 			std::istringstream iss(url.substr(i + 1, 2));
 			int c;
 			iss >> std::hex >> c;
 			new_str += static_cast<char>(c);
 			i += 2;
-		} else if (url[i] == '+') {
-			new_str += ' ';
 		} else {
 			new_str += url[i];
 		}

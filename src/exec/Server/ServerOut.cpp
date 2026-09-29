@@ -143,7 +143,7 @@ void Server::OUT() {
 	}
 
 	std::string PATH = getPath();
-	switch (curMethod) {
+	switch (REQ->headers.method) {
 		case HEAD:
 		case GET: {
 			struct stat st;

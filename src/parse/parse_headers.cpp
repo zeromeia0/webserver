@@ -1,43 +1,48 @@
 #include "_parse.hpp"
 
+static std::string trimSpaces( const std::string &s ) {
+	size_t start = s.find_first_not_of(" \t");
+	if (start == std::string::npos)
+		return ("");
+	size_t end = s.find_last_not_of(" \t");
+	return (s.substr(start, end - start + 1));
+}
+
 sHeaders *parseHeaders( std::string str ) {
-	std::vector<std::string> tokens = tokenizeHttpRequest(str);
+	std::istringstream ss(str);
+	std::string line;
+	if (!std::getline(ss, line))
+		return (NULL);
+	if (!line.empty() && line[line.size() - 1] == '\r')
+		line.erase(line.size() - 1);
+
+	std::istringstream requestLine(line);
+	std::string method, target, version, extra;
+	if (!(requestLine >> method >> target >> version) || (requestLine >> extra))
+		return (NULL);
+
 	sHeaders *headers = new sHeaders;
-	int i = 0;
-	for (std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); it++) {
-		if (i == 0) {
-			RE_METHOD *method = getMethodCode(*it);
-			headers->method = method ? *method : UNKNOWN;
-		} else if (i == 1) {
-			sFormUrlEncoded form = parseFormUrlEncoded(*it);
-			headers->raw = form.raw;
-			headers->path = form.path;
-			headers->query_str = form.query_str;
-		} else if (i == 2) {
-			headers->version = *it;
-		} else if (*it == "\\r\\n") {
-			;
-		} else {
-			std::pair<std::string, std::string> tmp;
-			tmp.first = *it;
-			it++;
-			if (it == tokens.end())	{delete headers; return (NULL);}
-			if (!(*it == ":"))		{delete headers; return (NULL);}
-			it++;
-			if (it == tokens.end())	{delete headers; return (NULL);}
-			while (1) {
-				if (*it == ":" || tmp.second.empty() || tmp.second[tmp.second.size() - 1] == ':')
-					tmp.second += *it;
-				else
-					tmp.second += " " + *it;
-				if (it + 1 == tokens.end() || *(it + 1) == "\\r\\n")
-					break;
-				it++; i++;
-			}
-			std::transform(tmp.first.begin(), tmp.first.end(), tmp.first.begin(), tolower);
-			headers->headers.insert(tmp);
-		}
-		i++;
+	RE_METHOD *code = getMethodCode(method);
+	headers->method = code ? *code : UNKNOWN;
+	sFormUrlEncoded form = parseFormUrlEncoded(target);
+	headers->raw = form.raw;
+	headers->path = form.path;
+	headers->query_str = form.query_str;
+	headers->version = version;
+
+	while (std::getline(ss, line)) {
+		if (!line.empty() && line[line.size() - 1] == '\r')
+			line.erase(line.size() - 1);
+		if (line.empty())
+			continue;
+		size_t colon = line.find(':');
+		if (colon == std::string::npos || colon == 0)
+			{delete headers; return (NULL);}
+		std::string key = line.substr(0, colon);
+		if (key.find_first_of(" \t") != std::string::npos)
+			{delete headers; return (NULL);}
+		std::transform(key.begin(), key.end(), key.begin(), tolower);
+		headers->headers.insert(std::make_pair(key, trimSpaces(line.substr(colon + 1))));
 	}
 	return (headers);
 };

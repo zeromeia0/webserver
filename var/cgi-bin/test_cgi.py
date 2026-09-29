@@ -1,8 +1,10 @@
 
-import sys
+import sys, os
 
 print("Content-Type: text/plain\r\n\r\n", end="")
 
-data = sys.stdin.read()
+for k in os.environ:
+    print("<p><b>", k, "</b>=", os.environ.get(k, ""), "<p>")
 
+data = sys.stdin.read()
 print(f"{data}", end="")

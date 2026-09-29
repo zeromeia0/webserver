@@ -18,6 +18,9 @@
 extern volatile sig_atomic_t G_RUNNING;
 
 class Server {
+private:
+	Server( const Server &other );
+	Server &operator=( const Server &other );
 public:
 	std::vector<sConfigs*>		serverConfigs;
 	std::vector<Connection*>	serverConnections;
@@ -39,10 +42,9 @@ public:
 
 	Server();
 	Server( char *configsFilename );
-	Server( const Server &other );
-	Server &operator=( const Server &other );
 	~Server();
 
+	void								init();
 	void								setupServer();
 	void								setOptions();
 	void								bindSocket( const std::string &host, int port );
