@@ -104,7 +104,7 @@ test: download_tester re
 
 testval: download_tester re
 	@gnome-terminal -e "valgrind --leak-check=full --track-fds=yes --track-origins=yes --trace-children=yes ./webserv"
-	@gnome-terminal -e "valgrind --leak-check=full --track-fds=yes --track-origins=yes --trace-children=yes ./webserv ./tests/42/youpi.conf"
+	@gnome-terminal -e "valgrind --trace-children-skip='*cgi_tester' --leak-check=full --track-fds=yes --track-origins=yes --trace-children=yes ./webserv ./tests/42/youpi.conf"
 	@pytest -vv -s ./tests/tester.py
 	@rm -rf ./var/www/post_body
 	@rm -rf ./tests/42/tester ./tests/42/cgi_tester
