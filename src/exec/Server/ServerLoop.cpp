@@ -1,10 +1,5 @@
 #include "Server.hpp"
 
-void Server::addConnection() {
-	LOG("DEBUG", __FUNCTION__);
-
-}
-
 void Server::closeConnection() {
 	LOG("DEBUG", __FUNCTION__ << " " << curFd);
 	if (curConnec->type == CLIENT) {
@@ -345,10 +340,16 @@ void Server::LOOP() {
 	LOG("DEBUG", __FUNCTION__);
 
 	while (G_RUNNING) {
+		try {
 		curConnections = serverConnections.size();
 
 		POLL();
 		removeZombiesCgi();
+		} catch (std::exception &e) {
+			LOG("ERROR", e.what());
+			continue;
+		}
+
 
 		for (curIdx = 0; curIdx < serverConnections.size(); curIdx++) {
 
@@ -424,7 +425,6 @@ void Server::LOOP() {
 								curClient->RES->headers.method = curClient->REQ->headers.method;
 								curClient->RES->headers.version = curClient->REQ->headers.version;
 								curClient->RES->headers.path = curClient->REQ->headers.path;
-								curMethod = curClient->REQ->headers.method;
 								curConnec->route = findRoute(curConnec->client->REQ->headers.path, curConnec->conf->router);
 								curRoute = curConnec->route;
 								RUNTIME_ERROR err = validateRequest();
@@ -522,8 +522,13 @@ void Server::LOOP() {
 					closeConnection();
 			}
 		}
-		for (size_t i = 0; i < newConns.size(); i++)
-			serverConnections.push_back(newConns[i]);
-		newConns.clear();
+		try {
+		while (!newConns.empty()) {
+			serverConnections.push_back(newConns.back());
+			newConns.pop_back();
+		}
+		} catch (std::exception &e) {
+			LOG("ERROR", e.what());
+		}
 	}
 }

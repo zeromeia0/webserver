@@ -42,24 +42,6 @@ void Re::addPayload( const std::string newContent ) {
 	this->payload.append(newContent);
 };
 
-void Re::saveLog() {
-	// char *bin = (char *)"/usr/bin/python3";
-	// char *file = (char *)"./var/cgi-bin/add_log.py";
-	std::map<std::string, std::string> map;
-	map.insert(std::pair<std::string, std::string>("method", getMethodTxt(this->headers.method)));
-	map.insert(std::pair<std::string, std::string>("path", this->headers.path));
-	map.insert(std::pair<std::string, std::string>("type", (type == RES ? "RES" : "REQ")));
-	if (type == RES)
-		map.insert(std::pair<std::string, std::string>("status", intToChar(static_cast<Response*>(this)->statusCode)));
-	else
-		map.insert(std::pair<std::string, std::string>("status", ""));
-	std::map<std::string, std::string> inputs;
-	inputs.insert(std::pair<std::string, std::string>("BODY", mapToJsonString<std::string, std::string>(map)));
-	std::string payload = "";
-	// std::string *output = cgi(bin, file, inputs, payload);
-	// delete output;
-};
-
 void Re::printRe() {
 	std::cerr << getMethodTxt(headers.method) << " ";
 	std::cerr << headers.version << " ";

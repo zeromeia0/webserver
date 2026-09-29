@@ -30,27 +30,6 @@ Server::Server(char *confFileName) {
 	}
 }
 
-Server::Server(const Server &other) {
-	LOG("DEBUG", __FUNCTION__);
-	*this = other;
-}
-
-Server &Server::operator=(const Server &other) {
-	LOG("DEBUG", __FUNCTION__);
-	if (this != &other) {
-		this->serverConfigs = other.serverConfigs;
-		this->serverConnections = other.serverConnections;
-		this->curIdx = other.curIdx;
-		this->curConnec = other.curConnec;
-		this->curClient = other.curClient;
-		this->curFd = other.curFd;
-		this->curContentLen = other.curContentLen;
-		this->curRoute = other.curRoute;
-		this->curMethod = other.curMethod;
-	}
-	return (*this);
-}
-
 Server::~Server() {
 	LOG("DEBUG", __FUNCTION__);
 	for (size_t i = 0; i < cgiPids.size(); i++) {

@@ -94,48 +94,98 @@ Requires a C++98-compatible compiler (`c++`). No external dependencies.
 ./webserv [configuration file]
 ```
 
-Example, using one of the provided templates:
+Without an argument, the server uses the default configuration file `./server.conf`
+(run it from the repository root, since the paths inside it are relative):
 
 ```sh
-./webserv server.conf
+./webserv                 # same as ./webserv ./server.conf
 ```
 
 Then point a browser or `curl`/`telnet` at the configured host/port(s), e.g.:
 
 ```sh
-curl http://localhost:8089/
+curl http://localhost:8089/   # demo website
+curl http://localhost:8091/   # second website on another port
 ```
 
 ### Configuration file
 
 The configuration file uses an NGINX-inspired `server { ... }` block syntax. Each `server`
-block defines one or more `listen` ports and a set of `location` blocks. Example:
+block defines one or more `listen` ports (`port` or `interface:port`) and a set of `location`
+blocks. Excerpt of the provided `server.conf`:
 
 ```
 server {
 	listen 8089;
-	client_max_body_size 1024;
+	listen 8090;
+	server_name localhost;
+	client_max_body_size 10000000;
+
+	error_page 404 ./var/errors/404.html;
 
 	location / {
+		allowed_methods GET HEAD;
 		root ./var/www;
 		index /index.html;
-		allowed_methods GET POST;
+		autoindex off;
 	}
 
-	location /upload {
-		root ./var/www;
+	location /uploads {
+		allowed_methods GET POST DELETE HEAD;
+		root ./var;
 		upload_store /uploads;
+		upload_enabled on;
+		autoindex on;
 	}
 
-	location /delete {
-		root ./var/www/uploads;
-		allowed_methods DELETE;
+	location /old-page.html {
+		allowed_methods GET;
+		redirect /new-page.html;
+	}
+
+	location /cgi-bin {
+		allowed_methods GET POST;
+		root ./var;
+		cgi .py /usr/bin/python3;
+		cgi .js /usr/bin/node;
 	}
 }
 ```
 
-Sample configuration files and their matching static/CGI/upload content used to exercise every
-feature during evaluation are provided under `templates/conf/` and `var/`.
+| Directive | Context | Meaning |
+|---|---|---|
+| `listen` | server | port or `interface:port` to listen on (can be repeated) |
+| `server_name`, `host` | server | name / default interface of the server |
+| `client_max_body_size` | server, location | maximum request body size in bytes (413 above it) |
+| `error_page` | server | custom page for a status code (built-in default page otherwise) |
+| `allowed_methods` | location | accepted methods (`GET`, `POST`, `DELETE`, `HEAD`), 405 otherwise |
+| `root` / `alias` | location | directory where the requested files are searched |
+| `index` | location | default file when a directory is requested |
+| `autoindex` | location | `on` / `off`: directory listing |
+| `redirect` | location | 301 redirection to the given URL |
+| `upload_enabled`, `upload_store` | location | allow uploads and choose where they are stored |
+| `cgi` | location | `cgi <extension> <interpreter>`: run matching files as CGI |
+
+The configuration is validated at startup (syntax, values, existing directories, executable
+CGI interpreters); any error stops the server with an explicit message.
+
+The provided `server.conf` and the content of `var/` (static site, error pages, CGI scripts,
+upload directory) demonstrate every feature during the evaluation.
+
+### Testing
+
+The test suite is written in Python (`pytest`, `requests`) and uses `nc` and `siege`:
+
+```sh
+make test      # downloads the 42 tester, rebuilds, starts both servers and runs tests/tester.py
+make testval   # same, with both servers running under valgrind
+```
+
+- `tests/tester.py`: HTTP requests, raw requests with `nc`, ~120 invalid configuration files
+  (`tests/configs/`), a `siege` stress test and the 42 tester.
+- `tests/42/youpi.conf` is the configuration for the 42 tester (port 8888). It needs
+  `tests/42/cgi_tester`, which is not stored in the repository: run `make download_tester`
+  before `./webserv tests/42/youpi.conf`.
 
 ## Resources
 
@@ -148,7 +198,7 @@ feature during evaluation are provided under `templates/conf/` and `var/`.
 ### AI usage
 
 We used AI (Claude) as an assistant, not as the author of the project. The architecture and the core of every feature (the `poll()` loop, request parsing, CGI handling, the configuration parser) were designed and written by us. AI came in afterwards, mainly for:
-- **Edge-case testing.** We built the structure of the config tests (`tests/configsFiles/`, `tests/tester.py`) and asked AI: *"based on my current structure, add hardcore tests"*. It generated about 120 malformed or unusual configuration files, after the 6th we already created.
+- **Edge-case testing.** We built the structure of the config tests (`tests/configs/`, `tests/tester.py`) and asked AI: *"based on my current structure, add hardcore tests"*. It generated about 120 malformed or unusual configuration files, after the 6th we already created.
 - **Review against the subject.** AI reviewed the codebase and helped us reproduce bugs with `curl`, `nc`, and `siege`.
 - **Fixes.** For each bug, we first worked out the cause together. For some fixes AI proposed the code, which we reviewed, integrated ourselves and tested again.
 - **Documentation and debugging.** Structuring and wording this README, and helping during debugging sessions when we were stuck. It also helped us debug a potential `atoi` undefined behavior, chunked bodies containing `\r\n`, HTTP/1.0 requests without a `Host` header.

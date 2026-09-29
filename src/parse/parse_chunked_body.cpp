@@ -52,36 +52,3 @@ std::string parseChunkedBody(std::string *newBytes, std::string *previousBytes, 
 	*previousBytes = bytes;
 	return (*status = 1, payload);
 }
-
-// int main() {
-// 	std::string remaining = "wevfew7\r\nbon";
-// 	std::string payload;
-// 	std::string bytes;
-// 	int status;
-
-// 	bytes = "jour\r\n6\r\n hello\r\n1\r\n1\r\n5";
-// 	payload += handleChunkedBody(&bytes, &remaining, &status);
-// 	// std::cerr << "Status = " << status << std::endl;
-// 	// std::cerr << "Payload = \"" << payload << "\"" << std::endl;
-// 	// std::cerr << "Remaining = \"" << remaining << "\"" << std::endl;
-
-// 	bytes = "\r\nhello\r\n6\r\n hello\r\n1";
-// 	payload += handleChunkedBody(&bytes, &remaining, &status);
-// 	// std::cerr << "Status = " << status << std::endl;
-// 	// std::cerr << "Payload = \"" << payload << "\"" << std::endl;
-// 	// std::cerr << "Remaining = \"" << remaining << "\"" << std::endl;
-
-// 	bytes = "\r\n1\r\n0\r\n\r\ndf234fr234";
-// 	payload += handleChunkedBody(&bytes, &remaining, &status);
-// 	std::cerr << "Status = " << status << std::endl;
-// 	std::cerr << "Payload = \"" << payload << "\"" << std::endl;
-// 	std::cerr << "Remaining = \"" << remaining << "\"" << std::endl;
-
-// 	if (payload == "bonjour hello1hello hello1") {
-// 		std::cerr << "✅ OK" << std::endl;
-// 	} else {
-// 		std::cerr << "❌ KO" << std::endl;
-// 	}
-
-// 	return (0);
-// }

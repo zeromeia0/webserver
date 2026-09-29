@@ -22,7 +22,6 @@ public:
 	std::string		getHeader( std::string strKey );
 	void			addHeader( std::string strKey, std::string strValue );
 	void			addPayload( const std::string newContent );
-	void			saveLog();
 	void			printRe();
 };
 

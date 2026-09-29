@@ -14,7 +14,6 @@
 // ############################################################
 
 std::vector<std::string>	tokenize(const std::string& file);
-std::vector<std::string>	tokenizeHttpRequest(const std::string& request);
 void						validateSyntax(const std::vector<std::string> &tokens);
 
 template					<typename T>
@@ -53,17 +52,4 @@ bool						valueInContainer(std::string value, std::vector<T> container) {
 		}
 	}
 	return (false);
-}
-
-template					<typename T, typename U>
-std::string					mapToJsonString(std::map<T, U> map) {
-	std::string ret;
-	ret.append("{");
-	for (typename std::map<T, U>::iterator it = map.begin(); it != map.end(); ++it) {
-		if (it != map.begin())
-			ret.append(", ");
-		ret.append("\"" + it->first + "\": \"" + it->second + "\"");
-	}
-	ret.append("}");
-	return (ret);
 }

@@ -38,7 +38,6 @@ public:
 	int							curFd;
 	size_t						curContentLen;
 	sRoute						curRoute;
-	RE_METHOD					curMethod;
 
 	Server();
 	Server( char *configsFilename );
@@ -50,7 +49,6 @@ public:
 	void								bindSocket( const std::string &host, int port );
 	void								listenSocket();
 	void								removeZombiesCgi();
-	void								addConnection();
 	void								closeConnection();
 	std::string							getPath();
 	bool								isCgi();

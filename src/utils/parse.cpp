@@ -1,47 +1,5 @@
 #include "_parse.hpp"
 
-std::vector<std::string> tokenizeHttpRequest(const std::string& request)
-{
-	std::vector<std::string> tokens;
-	std::string current;
-	for (size_t i = 0; i < request.size(); ++i)
-	{
-		char c = request[i];
-		if (c == '\r' && i + 1 < request.size() && request[i + 1] == '\n')
-		{
-			if (!current.empty())
-			{
-				tokens.push_back(current);
-				current.clear();
-			}
-			tokens.push_back("\\r\\n");
-			++i;
-		}
-		else if (std::isspace(static_cast<unsigned char>(c)))
-		{
-			if (!current.empty())
-			{
-				tokens.push_back(current);
-				current.clear();
-			}
-		}
-		else if (c == ':')
-		{
-			if (!current.empty())
-			{
-				tokens.push_back(current);
-				current.clear();
-			}
-			tokens.push_back(":");
-		}
-		else
-			current += c;
-	}
-	if (!current.empty())
-		tokens.push_back(current);
-	return (tokens);
-}
-
 std::vector<std::string> tokenize(const std::string& file)
 {
 	std::vector<std::string> tokens;
@@ -74,17 +32,3 @@ std::vector<std::string> tokenize(const std::string& file)
 		tokens.push_back(current);
 	return (tokens);
 }
-
-// void httpRequest::httpRequestDebbuger(httpRequest::request *req, int clientFd)
-// {
-//	 LOG("RECEIVE", "Waiting for request...");
-//		 char buffer[4096];
-//		 int bytes = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
-//		 buffer[bytes] = '\0';
-//		 std::cerr << "==== REQUEST ====\n" << buffer << "=================" << std::endl;
-//	 req->tokens = tokenizeHttpRequest(static_cast<char*>(buffer));
-//	 // std::cerr << "===== TOKENIZED REQUEST FROM BROWSER =====" << std::endl;
-//	 // for (std::vector<std::string>::iterator i = req->tokens.begin(); i != req->tokens.end(); i++)
-//	 //	 std::cerr << "[" << *i << "]" << std::endl;
-//	 // std::cerr << "===== FINISHED TOKENIZED REQUEST FROM BROSERR ======" << std::endl;
-// }

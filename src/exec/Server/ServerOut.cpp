@@ -33,10 +33,6 @@ void Server::SEND() {
 		curClient->RES->payload.clear();
 
 	curClient->RES->addHeader("Connection", "close");
-
-	// curClient->REQ->saveLog();
-	// curClient->RES->saveLog();
-
 }
 
 static std::string safeName( std::string name ) {
