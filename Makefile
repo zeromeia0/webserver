@@ -93,6 +93,7 @@ re: fclean all
 download_tester:
 	@curl https://cdn.intra.42.fr/document/document/55494/tester		-o ./tests/42/tester
 	@curl https://cdn.intra.42.fr/document/document/55496/cgi_tester	-o ./tests/42/cgi_tester
+	@chmod 777 ./tests/42/tester ./tests/42/cgi_tester
 
 test: download_tester re
 	@gnome-terminal -e "./webserv"
