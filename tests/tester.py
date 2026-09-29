@@ -1,4 +1,4 @@
-import requests, pytest, subprocess, json, os, socket
+import requests, pytest, subprocess, json, os, socket, asyncio
 
 WEBSERV_URL = "http://localhost:8089"
 
@@ -157,6 +157,7 @@ def test_multipart_utf8_name():
 	assert r.status_code == 201
 	assert os.path.exists(_up("é — x.txt"))
 	requests.delete(WEBSERV_URL + "/uploads/" + requests.utils.quote("é — x.txt"))
+	assert requests.delete(WEBSERV_URL + "/uploads/%C3%A0%20venda.txt").status_code == 204
 
 def test_multipart_traversal_name():
 	# filename="../../evil.txt" must land INSIDE uploads, never outside

@@ -90,5 +90,11 @@ val: re
 
 re: fclean all
 
-.PHONY: all clean fclean re val
+test:
+	@make re
+	@gnome-terminal -e "./webserv"
+	@gnome-terminal -e "./webserv ./tests/42/youpi.conf"
+	@pytest -vv -s ./tests/tester.py
+
+.PHONY: all clean fclean re val test
 -include $(DEP)
